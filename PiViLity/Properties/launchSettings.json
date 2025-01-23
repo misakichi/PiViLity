@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "PiViLity": {
+      "commandName": "Project",
+      "hotReloadEnabled": true,
+      "nativeDebugging": false
+    },
+    "PiViLity with Native": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

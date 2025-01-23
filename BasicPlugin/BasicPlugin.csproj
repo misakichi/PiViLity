@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PiViLityCore\PiViLityCore.csproj" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if not exist $(SolutionDir)\PluginOut mkdir $(SolutionDir)\PluginOut&#xD;&#xA;if not exist $(SolutionDir)\PluginOut\$(Configuration)\ mkdir $(SolutionDir)\PluginOut\$(Configuration)\&#xD;&#xA;copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\" />
+  </Target>
+
+</Project>
