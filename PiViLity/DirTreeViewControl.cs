@@ -31,7 +31,7 @@ namespace PiViLity
             treeView.BeforeExpand += TreeView_BeforeExpand;
             treeView.AfterSelect += TreeView_AfterSelect;
 
-            treeView.ImageList = iconStore.smallIconList;
+            treeView.ImageList = iconStore.SmallIconList;
 
             RefreshTree();
         }
@@ -85,7 +85,7 @@ namespace PiViLity
             dirTreeNode.Tag = tn;
             tn.Tag = dirTreeNode;
             tn.Name = dirTreeNode.Name;
-            tn.SelectedImageIndex = tn.ImageIndex = iconStore.GetIconIndex(dirTreeNode.Path);            
+            iconStore.GetIconIndex(dirTreeNode.Path, index => tn.SelectedImageIndex = tn.ImageIndex = index);            
             return tn;
         }
 

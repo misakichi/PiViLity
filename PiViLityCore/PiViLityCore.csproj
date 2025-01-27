@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DirectXTexNet" Version="1.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ShelAPIHelper\ShelAPIHelper.vcxproj" />
   </ItemGroup>
 

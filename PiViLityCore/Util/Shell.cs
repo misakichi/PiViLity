@@ -8,6 +8,11 @@ namespace PiViLityCore.Util
 {
     internal static class Shell
     {
+        /// <summary>
+        /// ドライブの種類を文字列で返します。
+        /// </summary>
+        /// <param name="driveType"></param>
+        /// <returns></returns>
         static public string DriveTypeName(DriveType driveType)
         {
             switch (driveType)

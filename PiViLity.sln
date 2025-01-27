@@ -14,6 +14,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShelAPIHelper", "ShelAPIHel
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicPlugin", "BasicPlugin\BasicPlugin.csproj", "{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BasicImagePluginCLI", "BasicImagePluginCLI\BasicImagePluginCLI.vcxproj", "{CC73438D-0E3F-44A7-BA01-679CB628547E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -46,14 +48,22 @@ Global
 		{5322A171-1323-4357-B9DA-9F52A59343B4}.Release|x64.Build.0 = Release|x64
 		{5322A171-1323-4357-B9DA-9F52A59343B4}.Release|x86.ActiveCfg = Release|Win32
 		{5322A171-1323-4357-B9DA-9F52A59343B4}.Release|x86.Build.0 = Release|Win32
-		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Debug|x64.Build.0 = Debug|Any CPU
+		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Debug|x64.ActiveCfg = Debug|x64
+		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Debug|x64.Build.0 = Debug|x64
 		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Debug|x86.Build.0 = Debug|Any CPU
 		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Release|x64.ActiveCfg = Release|Any CPU
 		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Release|x64.Build.0 = Release|Any CPU
 		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Release|x86.ActiveCfg = Release|Any CPU
 		{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}.Release|x86.Build.0 = Release|Any CPU
+		{CC73438D-0E3F-44A7-BA01-679CB628547E}.Debug|x64.ActiveCfg = Debug|x64
+		{CC73438D-0E3F-44A7-BA01-679CB628547E}.Debug|x64.Build.0 = Debug|x64
+		{CC73438D-0E3F-44A7-BA01-679CB628547E}.Debug|x86.ActiveCfg = Debug|Win32
+		{CC73438D-0E3F-44A7-BA01-679CB628547E}.Debug|x86.Build.0 = Debug|Win32
+		{CC73438D-0E3F-44A7-BA01-679CB628547E}.Release|x64.ActiveCfg = Release|x64
+		{CC73438D-0E3F-44A7-BA01-679CB628547E}.Release|x64.Build.0 = Release|x64
+		{CC73438D-0E3F-44A7-BA01-679CB628547E}.Release|x86.ActiveCfg = Release|Win32
+		{CC73438D-0E3F-44A7-BA01-679CB628547E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

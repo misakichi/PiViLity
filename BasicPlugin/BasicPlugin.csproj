@@ -4,7 +4,12 @@
     <TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DirectXTexNet" Version="1.0.7" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PiViLityCore\PiViLityCore.csproj" />

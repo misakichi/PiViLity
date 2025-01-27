@@ -19,6 +19,7 @@ static wchar_t* GetKnownFolderPath(const GUID& folderId)
 
 using namespace ShelAPIHelper;
 
+
 String^ SpecialFolder::GetMyCompute()
 {
     GUID folderId = { 0x374DE290, 0x123F, 0x4565, { 0xBC, 0x9C, 0x2D, 0x7B, 0xC3, 0xB3, 0xD6, 0xAC } }; // This PC の GUID
@@ -59,6 +60,10 @@ IntPtr FileInfo::GetSmallImageList()
 }
 #endif
 
+/// <summary>
+/// 静的コンストラクタから呼ばれる初期化処理。
+/// システムイメージリストのハンドルを取得しておく。
+/// </summary>
 void FileInfo::StaticConstruct()
 {
     HIMAGELIST hImageList;
@@ -70,6 +75,11 @@ void FileInfo::StaticConstruct()
     systemJumboImageList_ = hImageList;
 }
 
+/// <summary>
+/// ファイルパスからファイルのアイコンインデックスを取得します。
+/// </summary>
+/// <param name="path"></param>
+/// <returns></returns>
 int FileInfo::GetFileIconIndex(String^ path)
 {
     pin_ptr<const wchar_t> wcharPath = PtrToStringChars(path);
@@ -78,25 +88,43 @@ int FileInfo::GetFileIconIndex(String^ path)
     return info.iIcon;
 }
 
+/// <summary>
+/// システムイメージリストのインデックスからアイコン（大）を取得します。
+/// </summary>
+/// <param name="index"></param>
+/// <returns></returns>
 System::Drawing::Icon^ FileInfo::GetFileLargeIconFromIndex(int index)
 {
     auto icon = ImageList_GetIcon(systemLargeImageList_, index, ILD_TRANSPARENT);
     return System::Drawing::Icon::FromHandle(IntPtr(icon));
 }
 
+/// <summary>
+/// システムイメージリストのインデックスからアイコン（小）を取得します。
+/// </summary>
+/// <param name="index"></param>
+/// <returns></returns>
 System::Drawing::Icon^ FileInfo::GetFileSmallIconFromIndex(int index)
 {
     auto icon = ImageList_GetIcon(systemSmallImageList_, index, ILD_TRANSPARENT);
     return System::Drawing::Icon::FromHandle(IntPtr(icon));
 }
 
+/// <summary>
+/// システムイメージリストのインデックスからアイコン（Jumbo）を取得します。
+/// </summary>
+/// <param name="index"></param>
+/// <returns></returns>
 System::Drawing::Icon^ FileInfo::GetFileJumboIconFromIndex(int index)
 {
     auto icon = ImageList_GetIcon(systemJumboImageList_, index, ILD_TRANSPARENT);
     return System::Drawing::Icon::FromHandle(IntPtr(icon));
 }
 
-
+/// <summary>
+/// ファイルパスからファイルのアイコン（大）を取得します。
+/// <param name="path">ファイルパス</param>
+/// <returns></returns>
 System::Drawing::Icon^ FileInfo::GetFileLargeIcon(String^ path)
 {
     pin_ptr<const wchar_t> wcharPath = PtrToStringChars(path);
@@ -106,6 +134,11 @@ System::Drawing::Icon^ FileInfo::GetFileLargeIcon(String^ path)
     return System::Drawing::Icon::FromHandle(IntPtr(info.hIcon));
 }
 
+/// <summary>
+/// ファイルパスからファイルのアイコン（小）を取得します。
+/// </summary>
+/// <param name="path">ファイルパス</param>
+/// <returns></returns>
 System::Drawing::Icon^ FileInfo::GetFileSmallIcon(String^ path)
 {
     pin_ptr<const wchar_t> wcharPath = PtrToStringChars(path);
@@ -115,6 +148,11 @@ System::Drawing::Icon^ FileInfo::GetFileSmallIcon(String^ path)
     return System::Drawing::Icon::FromHandle(IntPtr(info.hIcon));
 }
 
+/// <summary>
+/// ファイルパスからファイルのアイコン（Jumbo）を取得します。
+/// </summary>
+/// <param name="path">ファイルパス</param>
+/// <returns></returns>
 System::Drawing::Icon^ FileInfo::GetFileJumboIcon(String^ path)
 {
     pin_ptr<const wchar_t> wcharPath = PtrToStringChars(path);

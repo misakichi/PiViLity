@@ -8,6 +8,12 @@ namespace PiViLityCore.Util
 {
     static public class String
     {
+        /// <summary>
+        /// ファイルサイズを読みやすい形式で返します。
+        /// </summary>
+        /// <param name="size"></param>
+        /// <param name="dontUseByte"></param>
+        /// <returns></returns>
         public static string GetEasyReadFileSize(long size, bool dontUseByte = true)
         {
             if(size<1024 && !dontUseByte)

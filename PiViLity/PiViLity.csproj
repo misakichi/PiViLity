@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BasicImagePluginCLI\BasicImagePluginCLI.vcxproj" />
     <ProjectReference Include="..\PiViLityCore\PiViLityCore.csproj" />
     <ProjectReference Include="..\ShelAPIHelper\ShelAPIHelper.vcxproj" />
   </ItemGroup>

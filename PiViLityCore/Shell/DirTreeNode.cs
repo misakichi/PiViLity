@@ -54,7 +54,7 @@ namespace PiViLityCore.Shell
 
         public DirTreeNode? Parent { get; private set; } = null;
 
-        public DirTree Tree { get; private set; } = null;
+        public DirTree Tree;
 
         public bool IsCannotAccess = false;
 

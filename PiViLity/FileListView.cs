@@ -20,6 +20,7 @@ namespace PiViLity
             Size = 4,
         }
 
+
         IconStore _iconStore = new(true, true, true);
 
         private DetailSubItem _detailSubItems = DetailSubItem.None;
@@ -69,8 +70,8 @@ namespace PiViLity
         public FileListView()
         {
             DetailSubItems = DetailSubItem.ModifiedDateTime | DetailSubItem.Size | DetailSubItem.Type;
-            LargeImageList = _iconStore.largeIconList;
-            SmallImageList = _iconStore.smallIconList;
+            LargeImageList = _iconStore.LargeIconList;
+            SmallImageList = _iconStore.SmallIconList;
         }
 
         private void RefreshList()
@@ -92,7 +93,10 @@ namespace PiViLity
                             var item = new ListViewItem();
                             item.Text = file.Name;
                             item.Tag = file;
-                            item.ImageIndex = _iconStore.GetIconIndex(file.FullName);
+                            _iconStore.GetIconIndex(file.FullName, index =>
+                            {
+                                item.ImageIndex = index;
+                            });
 
                             if (DetailSubItems.HasFlag(DetailSubItem.ModifiedDateTime))
                             {
@@ -121,11 +125,11 @@ namespace PiViLity
             {
                 if(value==View.Tile)
                 {
-                    LargeImageList = _iconStore.jumboIconList;
+                    LargeImageList = _iconStore.JumboIconList;
                 }
                 else
                 {
-                    LargeImageList = _iconStore.largeIconList;
+                    LargeImageList = _iconStore.LargeIconList;
                 }
                 base.View = value;
             }
