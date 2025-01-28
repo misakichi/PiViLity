@@ -75,7 +75,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -138,16 +141,12 @@ copy $(TargetPath) $(SolutionDir)\PluginOut$(Configuration)\</Command>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ImageReaderJpeg.h" />
+    <ClInclude Include="ImageReaderWIC.h" />
     <ClInclude Include="Plugin.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ImageReaderJpeg.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Drawing.Common">
-      <HintPath>..\..\..\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\PublicAssemblies\System.Drawing.Common.dll</HintPath>
-    </Reference>
+    <ClCompile Include="ImageReaderWIC.cpp" />
+    <ClCompile Include="Plugin.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

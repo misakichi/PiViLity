@@ -102,7 +102,7 @@ namespace PiViLity
                                 readerClass = type,
                                 plugin = information
                             };
-                            foreach (var ext in reader.GetSupportExtensions())
+                            foreach (var ext in reader.GetSupportedExtensions())
                             {
                                 var lowerExt = "." + ext.ToLower();
                                 if (imageReaders_.TryGetValue(lowerExt, out List<ImageReaderInfo>? imageReaderInformationList))

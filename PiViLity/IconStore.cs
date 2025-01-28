@@ -106,8 +106,10 @@ namespace PiViLity
                 postAction = postAction,
                 path = path
             };
-            _registerInfos.Enqueue(info);
-            
+            //_registerInfos.Enqueue(info);
+            RegisterIcon(info);
+
+
         }
         /// <summary>
         /// イメージの登録(サムネイル取得後の処理を指定する)
@@ -205,6 +207,17 @@ namespace PiViLity
             }
             postAction?.Invoke(SmallIconList.Images.Count - 1);
         }
+
+        private bool RegisterIcon(RegisterInfo info)
+        {
+            if (info.registerGeneration != _registerGeneration)
+                return false;
+            PiViLityCore.Global.InvokeMainThread(() =>
+            {
+                RegisterIcon(info.path, info.small, info.large, info.jumbo, info.postAction);
+            });
+            return true;
+        }
         /// <summary>
         /// イメージ登録タイマーイベント
         /// </summary>
@@ -215,9 +228,8 @@ namespace PiViLity
             DateTime startTime = DateTime.Now;
             while (_registerInfos.TryDequeue(out var info)) 
             {
-                if(info.registerGeneration != _registerGeneration)
+                if(!RegisterIcon(info))
                     continue;
-                RegisterIcon(DateTime.Now.ToString(), info.small, info.large, info.jumbo, info.postAction);
 
                 if((DateTime.Now - startTime).TotalMilliseconds > 50)
                 {
@@ -292,8 +304,8 @@ namespace PiViLity
             //ファイルの場合はプラグインからのサムネイルを取得を試みる
             if (isFile)
             {
-                registerTimer.Enabled = true;
                 Task.Run(() => GetThumbnailAsync(path, returnAction));
+                //registerTimer.Enabled = true;
             }
 
         }

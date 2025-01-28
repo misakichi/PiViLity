@@ -12,7 +12,16 @@ namespace PiViLityCore.Plugin
     public enum ThumbnailQualities
     {
         UseThumbnail,
-        ResizeImage,
+        ResizeImage
+    }
+
+    /// <summary>
+    /// サムネイルの種類を指定します。
+    /// </summary>
+    public enum ThumbnailTypes
+    {
+        Centering,      // 中央に表示（はみ出た分は切られます）
+        KeepAspectRatio // アスペクト比を保持して表示（余白が生まれることがあります）
     }
 
     /// <summary>
@@ -24,7 +33,7 @@ namespace PiViLityCore.Plugin
         /// このプラグインがサポートする拡張子を返します。
         /// </summary>
         /// <returns></returns>
-        public List<string> GetSupportExtensions();
+        public List<string> GetSupportedExtensions();
 
         /// <summary>
         /// サムネイルの品質を指定します。
@@ -32,17 +41,42 @@ namespace PiViLityCore.Plugin
         public ThumbnailQualities ThumbnailQuality { get; set; }
 
         /// <summary>
+        /// サムネイルの種類を指定します。
+        /// </summary>
+        public ThumbnailTypes ThumbnailType { get; set; }
+
+        /// <summary>
         /// このプラグインが指定したファイルをサポートするかどうかを返します。
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public bool IsSupport(string filePath);
+        public bool IsSupported();
 
+        /// <summary>
+        /// 画像ファイルのパスを設定します。
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         public bool SetFilePath(string filePath);
 
+        /// <summary>
+        /// 画像イメージを取得します
+        /// </summary>
+        /// <returns></returns>
         public System.Drawing.Image? GetImage();
 
+        /// <summary>
+        /// 画像ファイルのサムネイルを取得します。
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
         public System.Drawing.Image? GetThumbnailImage(Size size);
+
+        /// <summary>
+        /// 画像ファイルのサイズを取得します。
+        /// </summary>
+        /// <returns>サイズ</returns>
+        public Size GetImageSize();
 
     }
 }

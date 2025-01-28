@@ -7,6 +7,7 @@ using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.Media.PlayTo;
 
 namespace PiViLityCore
 {
@@ -14,9 +15,16 @@ namespace PiViLityCore
     {
         static ResourceManager resourceMgr = new ("PiViLityCore.Resources.Resource", Assembly.GetExecutingAssembly());
         static CultureInfo culture = new CultureInfo(CultureInfo.CurrentCulture.Name);
+        private static SynchronizationContext? _syncContext;
+
         static Global()
         {
+            _syncContext =SynchronizationContext.Current;
+        }
 
+        public static void InvokeMainThread(Action action)
+        {
+            _syncContext?.Post((o) => action(), null);
         }
 
         public static void SetResourceLanguage(string language)

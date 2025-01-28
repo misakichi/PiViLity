@@ -7,7 +7,7 @@ namespace BasicImagePluginCLI
     /// <summary>
     /// プラグイン情報
     /// </summary>
-    public ref class Plugin : public IModuleInformation
+    public ref class PluginInformation : public IModuleInformation
     {
 	public:
 		/// <summary>
@@ -15,20 +15,14 @@ namespace BasicImagePluginCLI
 		/// </summary>
 		virtual property String^ Description
 		{
-			virtual String^ get() override
-			{ 
-				return "Default implementation plugin."; 
-			}
+			String^ get();
 		}
 		/// <summary>
 		/// プラグイン名称
 		/// </summary>
 		virtual property String^ Name
 		{
-			String^ get() override
-			{
-				return "";
-			}
+			String^ get();
 		}
     };
 } // namespace BasicImagePluginCLI

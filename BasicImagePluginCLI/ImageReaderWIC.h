@@ -5,23 +5,23 @@ using namespace System::Collections::Generic;
 
 namespace BasicImagePluginCLI
 {
-	public ref class ImageReaderJpeg : public IImageReader
+	public ref class ImageReaderWIC : public PiViLityCore::Plugin::ImageReaderBase
 	{
-	public:
-		virtual List<String^>^ GetSupportExtensions();
+	private:
+		String^ filePath_ = "";
+		//ThumbnailQualities thumbnailQuality_ = ThumbnailQualities::ResizeImage;
 
-		virtual property ThumbnailQualities ThumbnailQuality
-        {
-            ThumbnailQualities get() override { return thumbnailQuality_; }
-            void set(ThumbnailQualities value) override { thumbnailQuality_ = value; }
-        }
+		DirectXTexNet::TexMetadata^ metadata_ = nullptr;
+
+	public:
+		List<String^>^ GetSupportedExtensions() override;
 
 		/// <summary>
 		/// このプラグインが指定したファイルをサポートするかどうかを返します。
 		/// </summary>
 		/// <param name="filePath"></param>
 		/// <returns></returns>
-		bool IsSupport(String^ filePath) override;
+		bool IsSupported() override;
 
 		bool SetFilePath(String^ filePath) override;
 
@@ -29,8 +29,9 @@ namespace BasicImagePluginCLI
 
 		Drawing::Image^ GetThumbnailImage(Drawing::Size size) override;
 
-	private:
-		ThumbnailQualities thumbnailQuality_;
+		System::Drawing::Size GetImageSize() override;
+
+
 	}; // class ImageReaderJpeg
 
 } // namespace BasicImagePluginCLI
