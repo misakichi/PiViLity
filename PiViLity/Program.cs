@@ -11,8 +11,8 @@ namespace PiViLity
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 #pragma warning disable WFO5001 
-            //Application.SetColorMode(SystemColorMode.System);
-            Application.SetColorMode(SystemColorMode.Classic);
+            Application.SetColorMode(SystemColorMode.System);
+            //Application.SetColorMode(SystemColorMode.Classic);
 #pragma warning restore WFO5001
             Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             System.Diagnostics.Debug.Assert(Application.RenderWithVisualStyles);

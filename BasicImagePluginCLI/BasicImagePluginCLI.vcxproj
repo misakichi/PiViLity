@@ -132,7 +132,7 @@ copy $(TargetPath) $(SolutionDir)\PluginOut$(Configuration)\</Command>
     <PostBuildEvent>
       <Command>if not exist $(SolutionDir)\PluginOut mkdir $(SolutionDir)PluginOut
 if not exist $(SolutionDir)\PluginOut\$(Configuration)\ mkdir $(SolutionDir)PluginOut\$(Configuration)\
-copy $(TargetPath) $(SolutionDir)\PluginOut$(Configuration)\</Command>
+copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

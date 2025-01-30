@@ -154,7 +154,7 @@ namespace PiViLity
         public IconStore(bool useLarge = true, bool useSmall = true, bool useJumbo = false,
             Size? largeSize = null, Size? smallSize = null, Size? jumboSize = null)
         {
-            if (!useLarge && !useSmall && !useSmall)
+            if (!useLarge && !useSmall && !useJumbo)
                 throw new ArgumentException("all size unused.");
 
             registerTimer.Tick += RegisterTimer_Tick;
@@ -193,19 +193,23 @@ namespace PiViLity
 
         private void RegisterIcon(string path, Image? small, Image? large, Image? jumbo, Action<int>? postAction)
         {
+            int index = -1;
             if (small != null)
             {
                 SmallIconList.Images.Add(small);
+                index = SmallIconList.Images.Count - 1;
             }
             if (large != null)
             {
                 LargeIconList.Images.Add(large);
+                index = LargeIconList.Images.Count - 1;
             }
             if (jumbo != null)
             {
                 JumboIconList.Images.Add(jumbo);
+                index = JumboIconList.Images.Count - 1;
             }
-            postAction?.Invoke(SmallIconList.Images.Count - 1);
+            postAction?.Invoke(index);
         }
 
         private bool RegisterIcon(RegisterInfo info)
@@ -240,7 +244,7 @@ namespace PiViLity
         }
 
         object _lockObj = new object();
-        private void GetThumbnailAsync(string path, Action<int> postAction)
+        private void GetThumbnailAsync(string path, Action<int> postAction, bool nouseSys)
         {
             if (_abortReadThumbnail)
                 return;
@@ -252,18 +256,23 @@ namespace PiViLity
                 {
                     if (imageReader.SetFilePath(path))
                     {
-                        var small = imageReader.GetThumbnailImage(SmallIconList.ImageSize);
-                        var large = imageReader.GetThumbnailImage(LargeIconList.ImageSize);
-                        var jumbo = imageReader.GetThumbnailImage(JumboIconList.ImageSize);
-                        if (small != null && large != null && jumbo != null)
+                        var small = _useSmall ? imageReader.GetThumbnailImage(SmallIconList.ImageSize) : null;
+                        var large = _useLarge ? imageReader.GetThumbnailImage(LargeIconList.ImageSize) : null;
+                        var jumbo = _useJumbo ? imageReader.GetThumbnailImage(JumboIconList.ImageSize) : null;
+                        if ((small != null)==_useSmall &&
+                            (large != null)==_useLarge && 
+                            (jumbo != null)==_useJumbo)
                         {
                             EnqueueRegisterImage(path, small, large, jumbo, postAction);
                             return;
                         }
                     }
                 }
-                var sysIndex = ShelAPIHelper.FileInfo.GetFileIconIndex(path);
-                EnqueueRegisterImageFromSys(path, sysIndex, postAction);
+                if (!nouseSys)
+                {
+                    var sysIndex = ShelAPIHelper.FileInfo.GetFileIconIndex(path);
+                    EnqueueRegisterImageFromSys(path, sysIndex, postAction);
+                }
 
             }
             catch (Exception ex)
@@ -283,6 +292,42 @@ namespace PiViLity
             if (!isFile && !Directory.Exists(path))
                 return;
 
+            _GetIconIndexSys(path, returnAction);
+
+            //ファイルの場合はプラグインからのサムネイルを取得を試みる
+            if (isFile)
+            {
+                Task.Run(() => GetThumbnailAsync(path, returnAction, false));
+                //registerTimer.Enabled = true;
+            }
+        }
+
+        public void GetIconIndexNoSys(string path, Action<int> returnAction)
+        {
+            var isFile = File.Exists(path);
+            if (!isFile && !Directory.Exists(path))
+                return;
+
+            //ファイルの場合はプラグインからのサムネイルを取得を試みる
+            if (isFile)
+            {
+                Task.Run(() => GetThumbnailAsync(path, returnAction, true));
+                //registerTimer.Enabled = true;
+            }
+        }
+
+        public void GetIconIndexNoThumbnail(string path, Action<int> returnAction)
+        {
+            var isFile = File.Exists(path);
+            if (!isFile && !Directory.Exists(path))
+                return;
+
+            _GetIconIndexSys(path, returnAction);
+        }
+
+
+        void _GetIconIndexSys(string path, Action<int> returnAction)
+        {
             //システムアイコンの取得
             var sysIndex = ShelAPIHelper.FileInfo.GetFileIconIndex(path);
             if (iconIndexToImageIndex.TryGetValue(sysIndex, out int imageIndex))
@@ -291,9 +336,9 @@ namespace PiViLity
             }
             else
             {
-                var small = _useSmall ? ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(sysIndex).ToBitmap() : null;
+                var small = _useSmall ? ShelAPIHelper.FileInfo.GetFileSmallIconFromIndex(sysIndex).ToBitmap() : null;
                 var large = _useLarge ? ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(sysIndex).ToBitmap() : null;
-                var jumbo = _useJumbo ? ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(sysIndex).ToBitmap() : null;
+                var jumbo = _useJumbo ? ShelAPIHelper.FileInfo.GetFileJumboIconFromIndex(sysIndex).ToBitmap() : null;
                 RegisterIcon(path, small, large, jumbo, imageIndex =>
                 {
                     iconIndexToImageIndex[sysIndex] = imageIndex;
@@ -301,14 +346,8 @@ namespace PiViLity
                 });
             }
 
-            //ファイルの場合はプラグインからのサムネイルを取得を試みる
-            if (isFile)
-            {
-                Task.Run(() => GetThumbnailAsync(path, returnAction));
-                //registerTimer.Enabled = true;
-            }
-
         }
+
 
         /// <summary>
         /// アイコン画像クリア

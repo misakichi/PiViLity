@@ -19,9 +19,13 @@ namespace PiViLity
             Type = 2,
             Size = 4,
         }
-
-
+        public class ItemData
+        {
+            public string Path = "";
+            public int LoadTileIconIndex = -1;
+        }
         IconStore _iconStore = new(true, true, true);
+        IconStore _tileIconStore = new(false, false, true);
 
         private DetailSubItem _detailSubItems = DetailSubItem.None;
         
@@ -72,6 +76,8 @@ namespace PiViLity
             DetailSubItems = DetailSubItem.ModifiedDateTime | DetailSubItem.Size | DetailSubItem.Type;
             LargeImageList = _iconStore.LargeIconList;
             SmallImageList = _iconStore.SmallIconList;
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            UpdateStyles();
         }
 
         private void RefreshList()
@@ -85,6 +91,8 @@ namespace PiViLity
                     List<ListViewItem> list = new List<ListViewItem>();
                     Items.Clear();
                     _iconStore.Clear();
+                    _tileIconStore.Clear();
+                    _tileIconStore = new IconStore(false, false, true, null,null,TileSize);
                     var files = dirInfo.EnumerateFiles();
                     foreach (var file in files)
                     {
@@ -92,8 +100,11 @@ namespace PiViLity
                         {
                             var item = new ListViewItem();
                             item.Text = file.Name;
-                            item.Tag = file;
-                            _iconStore.GetIconIndex(file.FullName, index =>
+                            item.Tag = new ItemData() {
+                                Path = file.FullName,
+                                LoadTileIconIndex = -1
+                            };
+                            _iconStore.GetIconIndexNoThumbnail(file.FullName, index =>
                             {
                                 item.ImageIndex = index;
                             });
@@ -126,14 +137,63 @@ namespace PiViLity
                 if(value==View.Tile)
                 {
                     LargeImageList = _iconStore.JumboIconList;
+                    OwnerDraw = true;
                 }
                 else
                 {
                     LargeImageList = _iconStore.LargeIconList;
+                    OwnerDraw = false;
                 }
                 base.View = value;
             }
         }
-}
+
+        protected override void OnDrawItem(DrawListViewItemEventArgs e)
+        {
+            if (View == View.Tile)
+            {
+                bool drawedThumbnail = false;
+                if (e.Item.Tag is ItemData itemData)
+                {
+                    if (itemData.LoadTileIconIndex == -1)
+                    {
+                        itemData.LoadTileIconIndex = -2;
+                        _tileIconStore.GetIconIndexNoSys(itemData.Path, index =>
+                        {
+                            if (index >= 0)
+                            {
+                                itemData.LoadTileIconIndex = index;
+                                Invalidate(e.Item.Bounds);
+                            }
+                        });
+                    }
+                    else if(itemData.LoadTileIconIndex >= 0)
+                    {
+                        drawedThumbnail = true;
+                        using (var image = _tileIconStore.JumboIconList.Images[itemData.LoadTileIconIndex])
+                        {
+                            e.Graphics.SetClip(e.Bounds);
+                            int x = e.Bounds.Left + (e.Bounds.Width - image.Width) / 2;
+                            int y = e.Bounds.Top + (e.Bounds.Height - image.Height) / 2;
+                            e.Graphics.DrawImage(image, x, y, image.Width, image.Height);
+                            e.Graphics.ResetClip();
+                        }
+                    }
+                }
+
+                if (!drawedThumbnail)
+                {
+                    if (e.Item.ImageIndex >= 0 && e.Item.ImageList != null)
+                    {
+                        e.Item.ImageList.Draw(e.Graphics, e.Bounds.Left, e.Bounds.Top, e.Item.ImageIndex);
+                    }
+                }
+            }
+            else
+            {
+                base.OnDrawItem(e);
+            }
+        }
+    }
 
 }

@@ -150,8 +150,15 @@ namespace PiViLityCore.Shell
                         {
                             DriveInfo = drive;
                             Path = drive.Name;
-                            Name = drive.VolumeLabel;
-                            AddUnknownChildren(new DirectoryInfo(path));
+                            try
+                            {
+                                Name = drive.VolumeLabel;
+                                AddUnknownChildren(new DirectoryInfo(path));
+                            }
+                            catch (IOException)
+                            {
+
+                            }
                         }
                     }
                     if(DriveInfo==null)
