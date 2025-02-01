@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace PiViLity
 {
     internal static class Program
@@ -21,13 +23,21 @@ namespace PiViLity
             var appDir = Path.GetDirectoryName(Application.ExecutablePath);
             if (appDir != null)
             {
+                var executingAssembly = Assembly.GetExecutingAssembly();
+                PluginManager.Instance.AnalyzeAssembly(executingAssembly);
                 PluginManager.Instance.LoadPlugins(appDir+"\\Plugins");
+                PluginManager.Instance.LoadSettings(appDir+"\\settings.xml");
             }
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new MainForm());
+
+            if (appDir != null)
+            {
+                PluginManager.Instance.SaveSettings(appDir + "\\settings.xml");
+            }
         }
     }
 }

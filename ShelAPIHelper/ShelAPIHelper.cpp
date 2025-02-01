@@ -84,7 +84,7 @@ int FileInfo::GetFileIconIndex(String^ path)
 {
     pin_ptr<const wchar_t> wcharPath = PtrToStringChars(path);
     SHFILEINFO info = {};
-    SHGetFileInfo(wcharPath, 0, &info, sizeof(info), SHGFI_ICON | SHGFI_SYSICONINDEX);
+    SHGetFileInfo(wcharPath, 0, &info, sizeof(info), SHGFI_SYSICONINDEX);
     return info.iIcon;
 }
 
@@ -96,6 +96,12 @@ int FileInfo::GetFileIconIndex(String^ path)
 System::Drawing::Icon^ FileInfo::GetFileLargeIconFromIndex(int index)
 {
     auto icon = ImageList_GetIcon(systemLargeImageList_, index, ILD_TRANSPARENT);
+    if (icon == nullptr)
+    {
+        auto  err = GetLastError();
+        Diagnostics::Debug::Print("ImageList_GetIcon: " + err);
+        return nullptr;
+    }
     return System::Drawing::Icon::FromHandle(IntPtr(icon));
 }
 
@@ -107,6 +113,12 @@ System::Drawing::Icon^ FileInfo::GetFileLargeIconFromIndex(int index)
 System::Drawing::Icon^ FileInfo::GetFileSmallIconFromIndex(int index)
 {
     auto icon = ImageList_GetIcon(systemSmallImageList_, index, ILD_TRANSPARENT);
+    if (icon == nullptr)
+    {
+        auto  err = GetLastError();
+		Diagnostics::Debug::Print("ImageList_GetIcon: " + err);
+        return nullptr;
+    }
     return System::Drawing::Icon::FromHandle(IntPtr(icon));
 }
 
@@ -118,6 +130,12 @@ System::Drawing::Icon^ FileInfo::GetFileSmallIconFromIndex(int index)
 System::Drawing::Icon^ FileInfo::GetFileJumboIconFromIndex(int index)
 {
     auto icon = ImageList_GetIcon(systemJumboImageList_, index, ILD_TRANSPARENT);
+    if (icon == nullptr)
+    {
+        auto  err = GetLastError();
+        Diagnostics::Debug::Print("ImageList_GetIcon: " + err);
+        return nullptr;
+    }
     return System::Drawing::Icon::FromHandle(IntPtr(icon));
 }
 

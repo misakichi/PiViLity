@@ -84,8 +84,12 @@ namespace PiViLity
                 }
             };
 
-            btnTileView.Checked = true;
             treeAndViewTab.TabIndexChanged += TreeAndViewTab_TabIndexChanged;
+
+            if (treeAndViewTab.CurrentTreeAndView != null)
+                treeAndViewTab.CurrentTreeAndView.View = Setting.AppSettings.Instance.FileView.FileListViewStyle;
+            RefreshViewTypeBtnChecked();
+
 
             //各コントロールのフォントをSystem準拠にする
             PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
@@ -100,6 +104,7 @@ namespace PiViLity
             if (treeAndViewTab.CurrentTreeAndView == null)
                 return;
 
+            Setting.AppSettings.Instance.FileView.FileListViewStyle = treeAndViewTab.CurrentTreeAndView.View;
             btnListView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.List;
             btnSmallIconView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.SmallIcon;
             btnLargeIconView.Checked = treeAndViewTab.CurrentTreeAndView.View== View.LargeIcon;

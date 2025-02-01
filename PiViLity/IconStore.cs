@@ -20,15 +20,12 @@ namespace PiViLity
         public ImageList JumboIconList { get; private set; } = new();
 
         Dictionary<int, int> iconIndexToImageIndex = new();
-        
+        List<IDisposable> _needDestroyIcons = new();
+
         bool _useLarge;
         bool _useSmall;
         bool _useJumbo;
         Image dummyImage = new Bitmap(1, 1);
-
-        bool _abortReadThumbnail = false;
-        List<Task> _readThumbnailTasks = new();
-
 
         /// <summary>
         /// イメージ登録世代
@@ -46,9 +43,9 @@ namespace PiViLity
         class RegisterInfo
         {
             public uint registerGeneration;
-            public Image? small;
-            public Image? large;
-            public Image? jumbo;
+            public object? small;
+            public object? large;
+            public object? jumbo;
             public Action<int>? postAction;
             public string path = "";
         }
@@ -95,7 +92,7 @@ namespace PiViLity
             return newImage;
         }
 
-        void EnqueueRegisterImage(string path, Image? smallImage, Image? largeImage, Image? jumboImage, Action<int>? postAction)
+        void EnqueueRegisterImage(string path, object? smallImage, object? largeImage, object? jumboImage, Action<int>? postAction)
         {
             var info = new RegisterInfo()
             {
@@ -106,7 +103,7 @@ namespace PiViLity
                 postAction = postAction,
                 path = path
             };
-            //_registerInfos.Enqueue(info);
+
             RegisterIcon(info);
 
 
@@ -133,12 +130,9 @@ namespace PiViLity
         /// </summary>
         /// <param name="sysIndex"></param>
         /// <param name="postAction"></param>
-        void EnqueueRegisterImageFromSys(string path, int sysIndex, Action<int>? postAction)
+        void EnqueueRegisterImageFromSys(string path, Action<int>? postAction)
         {
-            var small = _useSmall ? ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(sysIndex).ToBitmap() : null;
-            var large = _useLarge ? ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(sysIndex).ToBitmap() : null;
-            var jumbo = _useJumbo ? ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(sysIndex).ToBitmap() : null;
-            EnqueueRegisterImage(path, small, large, jumbo, postAction);
+            GetIconIndexSysSync(path, postAction);
         }
 
         /// <summary>
@@ -165,52 +159,82 @@ namespace PiViLity
             _useSmall = useSmall;
             _useJumbo = useJumbo;
 
-            if (largeSize != null)
+            try
             {
-                LargeIconList.ImageSize = (Size)largeSize;
+                if (largeSize != null)
+                {
+                    LargeIconList.ImageSize = (Size)largeSize;
+                }
+                else
+                {
+                    using (var icon = ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(0))
+                        LargeIconList.ImageSize = icon?.Size ?? new Size(32, 32);
+                }
+                if (smallSize != null)
+                {
+                    SmallIconList.ImageSize = (Size)smallSize;
+                }
+                else
+                {
+                    using(var icon = ShelAPIHelper.FileInfo.GetFileSmallIconFromIndex(0))
+                        SmallIconList.ImageSize = icon?.Size ?? new Size(16, 16);
+                }
+                if (jumboSize != null)
+                {
+                    JumboIconList.ImageSize = (Size)jumboSize;
+                }
+                else
+                {
+                    using (var icon = ShelAPIHelper.FileInfo.GetFileJumboIconFromIndex(0))
+                        JumboIconList.ImageSize = icon?.Size ?? new Size(32, 32);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                LargeIconList.ImageSize = ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(0).Size;
+                Debug.WriteLine(ex.Message);
             }
-            if (smallSize != null)
-            {
-                SmallIconList.ImageSize = (Size)smallSize;
-            }
-            else
-            {
-                SmallIconList.ImageSize = ShelAPIHelper.FileInfo.GetFileSmallIconFromIndex(0).Size;
-            }
-            if (jumboSize != null)
-            {
-                JumboIconList.ImageSize = (Size)jumboSize;
-            }
-            else
-            {
-                JumboIconList.ImageSize = ShelAPIHelper.FileInfo.GetFileJumboIconFromIndex(0).Size;
-            }
+            Debug.WriteLine("");
         }
 
-        private void RegisterIcon(string path, Image? small, Image? large, Image? jumbo, Action<int>? postAction)
+        private void RegisterIcon(string path, object? small, object? large, object? jumbo, Action<int>? postAction)
         {
+            int RegisterIconOne(ImageList list, object? image)
+            {
+                if(image is IDisposable disposable)
+                {
+                    _needDestroyIcons.Add(disposable);
+                }
+                if (image is Icon icon)
+                {
+                    list.Images.Add(icon);
+                }
+                else if (image is Image img)
+                {
+                    list.Images.Add(img);
+                }
+                else
+                {
+                    throw new ArgumentException("invalid type");
+                }
+                return list.Images.Count - 1;
+            }
+
             int index = -1;
             if (small != null)
             {
-                SmallIconList.Images.Add(small);
-                index = SmallIconList.Images.Count - 1;
+                index = RegisterIconOne(SmallIconList, small);
             }
             if (large != null)
             {
-                LargeIconList.Images.Add(large);
-                index = LargeIconList.Images.Count - 1;
+                index = RegisterIconOne(LargeIconList, large);
             }
             if (jumbo != null)
             {
-                JumboIconList.Images.Add(jumbo);
-                index = JumboIconList.Images.Count - 1;
+                index = RegisterIconOne(JumboIconList, jumbo);
             }
             postAction?.Invoke(index);
         }
+
 
         private bool RegisterIcon(RegisterInfo info)
         {
@@ -218,6 +242,13 @@ namespace PiViLity
                 return false;
             PiViLityCore.Global.InvokeMainThread(() =>
             {
+                if (info.registerGeneration != _registerGeneration)
+                {
+                    (info.small as IDisposable)?.Dispose();
+                    (info.large as IDisposable)?.Dispose();
+                    (info.jumbo as IDisposable)?.Dispose();
+                    return;
+                }
                 RegisterIcon(info.path, info.small, info.large, info.jumbo, info.postAction);
             });
             return true;
@@ -246,9 +277,6 @@ namespace PiViLity
         object _lockObj = new object();
         private void GetThumbnailAsync(string path, Action<int> postAction, bool nouseSys)
         {
-            if (_abortReadThumbnail)
-                return;
-
             try
             {
                 var imageReader = PluginManager.Instance.GetImageReader(path);
@@ -270,8 +298,11 @@ namespace PiViLity
                 }
                 if (!nouseSys)
                 {
-                    var sysIndex = ShelAPIHelper.FileInfo.GetFileIconIndex(path);
-                    EnqueueRegisterImageFromSys(path, sysIndex, postAction);
+                    EnqueueRegisterImageFromSys(path, postAction);
+                }
+                else
+                {
+                    PiViLityCore.Global.InvokeMainThread(() => postAction(-1));
                 }
 
             }
@@ -292,7 +323,7 @@ namespace PiViLity
             if (!isFile && !Directory.Exists(path))
                 return;
 
-            _GetIconIndexSys(path, returnAction);
+            GetIconIndexSysSync(path, returnAction);
 
             //ファイルの場合はプラグインからのサムネイルを取得を試みる
             if (isFile)
@@ -316,33 +347,36 @@ namespace PiViLity
             }
         }
 
-        public void GetIconIndexNoThumbnail(string path, Action<int> returnAction)
+        public void GetIconIndexNoThumbnail(string path, Action<int>? returnAction)
         {
             var isFile = File.Exists(path);
             if (!isFile && !Directory.Exists(path))
                 return;
 
-            _GetIconIndexSys(path, returnAction);
+            GetIconIndexSysSync(path, returnAction);
         }
 
 
-        void _GetIconIndexSys(string path, Action<int> returnAction)
+        public void GetIconIndexSysSync(string path, Action<int>? returnAction)
         {
             //システムアイコンの取得
             var sysIndex = ShelAPIHelper.FileInfo.GetFileIconIndex(path);
             if (iconIndexToImageIndex.TryGetValue(sysIndex, out int imageIndex))
             {
-                returnAction(imageIndex);
+                returnAction?.Invoke(imageIndex);
             }
             else
             {
-                var small = _useSmall ? ShelAPIHelper.FileInfo.GetFileSmallIconFromIndex(sysIndex).ToBitmap() : null;
-                var large = _useLarge ? ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(sysIndex).ToBitmap() : null;
-                var jumbo = _useJumbo ? ShelAPIHelper.FileInfo.GetFileJumboIconFromIndex(sysIndex).ToBitmap() : null;
+                ///システムアイコンの取得
+                var small = _useSmall ? ShelAPIHelper.FileInfo.GetFileSmallIconFromIndex(sysIndex) : null;
+                var large = _useLarge ? ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(sysIndex) : null;
+                var jumbo = _useJumbo ? ShelAPIHelper.FileInfo.GetFileJumboIconFromIndex(sysIndex) : null;
+
+                ///アイコン登録
                 RegisterIcon(path, small, large, jumbo, imageIndex =>
                 {
                     iconIndexToImageIndex[sysIndex] = imageIndex;
-                    returnAction(imageIndex);
+                    returnAction?.Invoke(imageIndex);
                 });
             }
 
@@ -354,18 +388,21 @@ namespace PiViLity
         /// </summary>
         public void Clear()
         {
+            foreach (var icon in _needDestroyIcons)
+            {
+                icon.Dispose();
+            }
+            _needDestroyIcons.Clear();
             SmallIconList.Images.Clear();
             LargeIconList.Images.Clear();
             JumboIconList.Images.Clear();
             iconIndexToImageIndex.Clear();
+            
 
             GC.Collect();
 
             _registerGeneration++;
 
-            _abortReadThumbnail = true;
-            Task.WaitAll(_readThumbnailTasks);
-            _abortReadThumbnail = false;
         }
 
     }
