@@ -45,6 +45,66 @@ namespace PiViLity
             AfterSelect?.Invoke(this, args);
         }
 
+        /// <summary>
+        /// 指定されたパスのディレクトリノードを検索する
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        private DirTreeNode? SearchDirectory(string path)
+        {
+            if (!Directory.Exists(path))
+                return null;
+
+            //深さ優先でノードを探す
+            DirTreeNode? SearchDepthNode(DirTreeNode parent, string path)
+            {
+                path = path.ToLower();
+                if (parent.Tag is TreeNode tn)
+                {
+                    CheckAndAnalyzeUnknownDirectory(parent);
+                    DirTreeNode? matchNode = null;
+                    int maxMatchLength = 0;
+                    parent.Children.ForEach(node =>
+                    {
+                        if (maxMatchLength > node.Path.Length)
+                            return;
+
+                        if (path.StartsWith(node.Path, StringComparison.OrdinalIgnoreCase))
+                        {
+                            maxMatchLength = node.Path.Length;
+                            matchNode = node;
+                        }
+                    });
+                    if (matchNode == null)
+                        return null;
+                    if (String.Compare(path, matchNode.Path,StringComparison.OrdinalIgnoreCase)==0)
+                    {
+                        return matchNode;
+                    }
+                    else
+                    {
+                        return SearchDepthNode(matchNode, path);
+                    }
+                }
+                return null;
+            }
+
+            //まずは特殊ノードからルートになるものを探す
+            var node = dirTree?.RootNode;
+            while(node!=null)
+            {
+                if (node.Type == DirTreeNodeType.ThisPC)
+                {
+                    break;
+                }
+            }
+            //探す
+            if(node != null)
+                return SearchDepthNode(node, path);
+            return null;
+        }
+
         /// <summary lang="ja-JP">
         /// 
         /// </summary>
@@ -60,7 +120,16 @@ namespace PiViLity
             }
             set
             {
-
+                if(treeView == null)
+                {
+                    return;
+                }
+                var node = SearchDirectory(value);
+                if (node != null && node.Tag is TreeNode tn)
+                {
+                    treeView.SelectedNode = tn;
+                    tn.EnsureVisible();
+                }
             }
         }
 
@@ -85,8 +154,48 @@ namespace PiViLity
             dirTreeNode.Tag = tn;
             tn.Tag = dirTreeNode;
             tn.Name = dirTreeNode.Name;
-            iconStore.GetIconIndex(dirTreeNode.Path, index => tn.SelectedImageIndex = tn.ImageIndex = index);            
+            iconStore.GetIconIndexSysSync(dirTreeNode.Path, index => tn.SelectedImageIndex = tn.ImageIndex = index);            
             return tn;
+        }
+
+        private bool CheckAndAnalyzeUnknownDirectory(DirTreeNode dirNode)
+        {
+            if (treeView == null)
+                return false;
+            if (dirNode.Tag is TreeNode tvn)
+            {
+                if (dirNode.Type == DirTreeNodeType.DirectoryUnknown)
+                {
+                    List<TreeNode> addList = new();
+                    dirNode.SetType(DirTreeNodeType.Directory, dirNode.Path);
+                    dirNode.CurrentFirstTraversalTreeNodes((node, depth) =>
+                    {
+                        if (dirNode == node)
+                            return;
+                        var tn = TreeNodeFromDirNode(node);
+                        if (node.Parent?.Tag is TreeNode parentNode)
+                        {
+                            //追加先が展開自身ならあとで一括追加する
+                            if (parentNode == tvn)
+                            {
+                                addList.Add(tn);
+                            }
+                            else
+                            {
+                                parentNode.Nodes.Add(tn);
+                            }
+                        }
+                    });
+                    treeView.Visible = false;
+                    treeView.BeginUpdate();
+                    tvn.Nodes.Clear();
+                    tvn.Nodes.AddRange(addList.ToArray());
+                    treeView.EndUpdate();
+                    treeView.Visible = true;
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void TreeView_BeforeExpand(object? sender, TreeViewCancelEventArgs e)
@@ -95,36 +204,7 @@ namespace PiViLity
             {
                 if (e.Node?.Tag is DirTreeNode dirNode)
                 {
-                    if (dirNode.Type == DirTreeNodeType.DirectoryUnknown)
-                    {
-                        List<TreeNode> addList = new();
-                        dirNode.SetType(DirTreeNodeType.Directory, dirNode.Path);
-                        dirNode.CurrentFirstTraversalTreeNodes((node, depth) =>
-                        {
-                            if (dirNode == node)
-                                return;
-                            var tn = TreeNodeFromDirNode(node);
-                            if (node.Parent?.Tag is TreeNode parentNode)
-                            {
-                                //追加先が展開自身ならあとで一括追加する
-                                if (parentNode == e.Node)
-                                {
-                                    addList.Add(tn);
-                                }
-                                else
-                                {
-                                    parentNode.Nodes.Add(tn);
-                                }
-                            }
-                        });
-                        tvw.Visible = false;
-                        tvw.BeginUpdate();
-                        e.Node.Nodes.Clear();
-                        e.Node.Nodes.AddRange(addList.ToArray());
-                        tvw.EndUpdate();
-                        tvw.Visible = true;
-
-                    }
+                    CheckAndAnalyzeUnknownDirectory(dirNode);
                 }
             }
         }

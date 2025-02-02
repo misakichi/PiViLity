@@ -14,23 +14,29 @@ namespace PiViLity
 {
     public partial class TreeAndView : UserControl
     {
+
         private PiViLityCore.Shell.DirTree dirTree = new();
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        internal DirTreeViewControl dirTreeViewMgr { get; private set; } = new();
+        private DirTreeViewControl dirTreeViewMgr = new();
 
-
+        public event EventHandler? AfterSelect;
 
         public TreeAndView()
         {
             InitializeComponent();
+
 
             //各コントロールのフォントをSystem準拠にする
             PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
 
             //ツリービューセットアップ
             dirTreeViewMgr.Bind(dirTree, tvwDirMain);
+            tvwDirMain.FullRowSelect = true;
+            tvwDirMain.HideSelection = false;
 
             dirTreeViewMgr.AfterSelect += DirTreeViewMgr_AfterSelect;
+
+            lsvFile.LabelEdit = true;
+
         }
 
         /// <summary lang="ja-JP">
@@ -42,18 +48,22 @@ namespace PiViLity
         private void DirTreeViewMgr_AfterSelect(DirTreeViewControl sender, DirTreeViewControl.DirTreeViewControlEventArgs e)
         {
             lsvFile.Path = SelectedPath;
+            AfterSelect?.Invoke(this, EventArgs.Empty);
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string SelectedPath
         {
-            set => dirTreeViewMgr.SelectedPath = value;
-            get => dirTreeViewMgr.SelectedPath;
+            set { if (dirTreeViewMgr != null) { dirTreeViewMgr.SelectedPath = value; } }
+            get => dirTreeViewMgr?.SelectedPath ?? "";
         }
 
         public string SelectedName => dirTreeViewMgr.SelectedName;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public View View { get => lsvFile.View; set => lsvFile.View = value; }
+        public View View { 
+            get => lsvFile?.View ?? View.LargeIcon; 
+            set { if (lsvFile != null) { lsvFile.View = value; } } 
+        }
     }
 }

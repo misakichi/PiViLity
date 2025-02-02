@@ -40,7 +40,9 @@ namespace PiViLity
                 {
                     _detailSubItems = value;
                     Columns.Clear();
-                    Columns.Add(PiViLityCore.Global.GetResourceString(Resource.ResourceManager, "FileListDetailSubItem.Name"));
+                    var name = PiViLityCore.Global.GetResourceString(Resource.ResourceManager, "FileListDetailSubItem.Name");
+                    HeaderStyle = ColumnHeaderStyle.Clickable;
+                    var headColum = Columns.Add(name, 100, HorizontalAlignment.Left);
                     if (value.HasFlag(DetailSubItem.ModifiedDateTime))
                     {
                         Columns.Add(PiViLityCore.Global.GetResourceString(Resource.ResourceManager, "FileListDetailSubItem.ModifiedDateTime"));
@@ -51,8 +53,10 @@ namespace PiViLity
                     }
                     if (value.HasFlag(DetailSubItem.Size))
                     {
-                        Columns.Add(PiViLityCore.Global.GetResourceString(Resource.ResourceManager, "FileListDetailSubItem.Size"));
+                        Columns.Add(PiViLityCore.Global.GetResourceString(Resource.ResourceManager, "FileListDetailSubItem.Size")).TextAlign = HorizontalAlignment.Right;
                     }
+
+                    
                 }
             }
         }
@@ -80,6 +84,13 @@ namespace PiViLity
             _tileIconStore = new(false, false, true, null, null, TileSize);
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             UpdateStyles();
+
+            //if (ShelAPIHelper.SystemColor.IsDarkMode())
+            //{
+            //    BackColor = System.Drawing.Color.FromArgb(255, 255 - BackColor.R, 255 - BackColor.G, 255 - BackColor.B);
+            //    ForeColor = System.Drawing.Color.FromArgb(255, 255 - ForeColor.R, 255 - ForeColor.G, 255 - ForeColor.B);
+            //}
+
         }
 
         private void RefreshList()
@@ -110,6 +121,8 @@ namespace PiViLity
                                 LoadTileIconIndex = -1
                             };
 
+                            item.ToolTipText = $"{file.Name}{file.LastWriteTime}{PiViLityCore.Util.String.GetEasyReadFileSizeF(file.Length)}";
+
 
                             if (DetailSubItems.HasFlag(DetailSubItem.ModifiedDateTime))
                             {
@@ -121,7 +134,10 @@ namespace PiViLity
                             }
                             if (DetailSubItems.HasFlag(DetailSubItem.Size))
                             {
-                                item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{PiViLityCore.Util.String.GetEasyReadFileSize(file.Length)}"));
+                                if(file.Length<1024)
+                                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{file.Length} B"));
+                                else
+                                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{file.Length/1024:N0} KB"));
                             }
                             list.Add(item);
                         }
@@ -170,7 +186,7 @@ namespace PiViLity
                     if (itemData.LoadTileIconIndex == -1)
                     {
                         itemData.LoadTileIconIndex = -2;
-                        _tileIconStore.GetIconIndexNoSys(itemData.Path, index =>
+                        bool runTask = _tileIconStore.GetIconIndexNoSysAsync(itemData.Path, index =>
                         {
                             if (index >= 0)
                             {
@@ -186,6 +202,14 @@ namespace PiViLity
                                 });
                             }
                         });
+                        if (!runTask)
+                        {
+                            itemData.LoadTileIconIndex = -3;
+                            _iconStore.GetIconIndexSysSync(itemData.Path, index =>
+                            {
+                                e.Item.ImageIndex = index;
+                            });
+                        }
                     }
                     //取得できなかった場合はシステムアイコン表示に切り替えます
                     if (itemData.LoadTileIconIndex == -3)
@@ -216,6 +240,17 @@ namespace PiViLity
                         }
                     }
                 }
+
+                e.DrawFocusRectangle();
+                var plateBounds = new Rectangle(e.Bounds.Left, e.Bounds.Bottom-Font.Height, e.Bounds.Width, Font.Height);
+                using (var brush = new SolidBrush(Color.FromArgb(192, 24, 24, 24)))
+                {
+                    if (brush != null)
+                        e.Graphics.FillRectangle(brush, plateBounds);
+                }
+
+                e.DrawText(TextFormatFlags.Bottom | TextFormatFlags.HorizontalCenter | TextFormatFlags.TextBoxControl);
+                base.OnDrawItem(e);
                 return;
             }
 
@@ -237,6 +272,26 @@ namespace PiViLity
                 e.DrawDefault = true;
                 base.OnDrawItem(e);
             }
+        }
+
+        /// <summary>
+        /// DrawColumnHeaderイベントを発生させます。
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
+        {
+            e.DrawDefault = true;
+            base.OnDrawColumnHeader(e);
+        }
+
+        /// <summary>
+        /// DrawSubItemイベントを発生させます。
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnDrawSubItem(DrawListViewSubItemEventArgs e)
+        {
+            e.DrawDefault = true;
+            base.OnDrawSubItem(e);
         }
     }
 

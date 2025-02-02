@@ -275,11 +275,10 @@ namespace PiViLity
         }
 
         object _lockObj = new object();
-        private void GetThumbnailAsync(string path, Action<int> postAction, bool nouseSys)
+        private void GetThumbnailAsync(PiViLityCore.Plugin.IImageReader imageReader, string path, Action<int> postAction, bool nouseSys)
         {
             try
             {
-                var imageReader = PluginManager.Instance.GetImageReader(path);
                 if (imageReader != null)
                 {
                     if (imageReader.SetFilePath(path))
@@ -317,7 +316,7 @@ namespace PiViLity
         /// </summary>
         /// <param name="path"></param>
         /// <returns>アイコン画像。returnActionは何度か呼ばれる可能性がある</returns>
-        public void GetIconIndex(string path, Action<int> returnAction)
+        public void GetIconIndexAsync(string path, Action<int> returnAction)
         {
             var isFile = File.Exists(path);
             if (!isFile && !Directory.Exists(path))
@@ -328,23 +327,36 @@ namespace PiViLity
             //ファイルの場合はプラグインからのサムネイルを取得を試みる
             if (isFile)
             {
-                Task.Run(() => GetThumbnailAsync(path, returnAction, false));
-                //registerTimer.Enabled = true;
+                var imageReader = PluginManager.Instance.GetImageReader(path);
+                if (imageReader != null)
+                {
+                    Task.Run(() => GetThumbnailAsync(imageReader, path, returnAction, false));
+                }
             }
         }
 
-        public void GetIconIndexNoSys(string path, Action<int> returnAction)
+        /// <summary>
+        /// サムネールアイコンの取得
+        /// そもそも image reader がない場合は false を返す 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="returnAction"></param>
+        /// <returns></returns>
+        public bool GetIconIndexNoSysAsync(string path, Action<int> returnAction)
         {
+            //サムネイルの取得のみの関数なので、ディレクトリのチェックは不要
             var isFile = File.Exists(path);
-            if (!isFile && !Directory.Exists(path))
-                return;
+            if (!isFile)
+                return false;
 
             //ファイルの場合はプラグインからのサムネイルを取得を試みる
-            if (isFile)
+            var imageReader = PluginManager.Instance.GetImageReader(path);
+            if (imageReader != null)
             {
-                Task.Run(() => GetThumbnailAsync(path, returnAction, true));
-                //registerTimer.Enabled = true;
+                Task.Run(() => GetThumbnailAsync(imageReader, path, returnAction, true));
+                return true;
             }
+            return false;
         }
 
         public void GetIconIndexNoThumbnail(string path, Action<int>? returnAction)

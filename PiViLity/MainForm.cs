@@ -29,11 +29,49 @@ namespace PiViLity
             btnListView.Image = Global.GetResourceIcon(Resource.ResourceManager, "List")?.ToBitmap();
             btnDetailView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Detail")?.ToBitmap();
             btnTileView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Thumb")?.ToBitmap();
+
             //TreeAndViewTabを追加する
             treeAndViewTab = new();
             treeAndViewTab.Dock = DockStyle.Fill;
             panel.Controls.Add(treeAndViewTab);
 
+            //設定ファイルを元にタブを追加する
+            Setting.AppSettings.Instance.FileViews.ForEach( fileViewSetting =>
+            {
+                if(!System.IO.Directory.Exists(fileViewSetting.Path))
+                {
+                    return;
+                }
+
+                var newTreeView = treeAndViewTab.AddTab(fileViewSetting.Path);
+                newTreeView.AfterSelect += (s, e) =>
+                {
+                    if(s is TreeAndView newView)
+                        fileViewSetting.Path = newView.SelectedPath;
+                };
+
+            });
+
+            //タブがない場合新規追加
+            if (treeAndViewTab.TabCount == 0)
+            {
+                Setting.FileView newSetting = new()
+                {
+                    Path = System.IO.Directory.GetCurrentDirectory()
+                };
+                Setting.AppSettings.Instance.FileViews.Add(newSetting);
+
+                var newTreeView = treeAndViewTab.AddTab(System.IO.Directory.GetCurrentDirectory());
+                newTreeView.AfterSelect += (s, e) =>
+                {
+                    if (s is TreeAndView newView)
+                        newSetting.Path = newView.SelectedPath;
+                };
+
+            }
+            treeAndViewTab.SelectedIndex = 0;
+
+            ////リストビュー表示タイプ切り替えボタン
             items.Add(btnSmallIconView);
             items.Add(btnLargeIconView);
             items.Add(btnListView);
@@ -41,59 +79,29 @@ namespace PiViLity
             items.Add(btnTileView);
 
             toolStrip.Items.AddRange(items.ToArray());
-
-            btnSmallIconView.Click += (s, e) =>
-            {
-                if (treeAndViewTab.CurrentTreeAndView != null)
-                {
-                    treeAndViewTab.CurrentTreeAndView.View = View.SmallIcon;
-                    RefreshViewTypeBtnChecked();
-                }
-            };
-            btnLargeIconView.Click += (s, e) =>
-            {
-                if (treeAndViewTab.CurrentTreeAndView != null)
-                {
-                    treeAndViewTab.CurrentTreeAndView.View = View.LargeIcon;
-                    RefreshViewTypeBtnChecked();
-                }
-            };
-            btnListView.Click += (s, e) =>
-            {
-                if (treeAndViewTab.CurrentTreeAndView != null)
-                {
-                    treeAndViewTab.CurrentTreeAndView.View = View.List;
-                    RefreshViewTypeBtnChecked();
-                }
-            };
-            btnTileView.Click += (s, e) =>
-            {
-                if (treeAndViewTab.CurrentTreeAndView != null)
-                {
-                    treeAndViewTab.CurrentTreeAndView.View = View.Tile;
-                    RefreshViewTypeBtnChecked();
-                }
-            };
-
-            btnDetailView.Click += (s, e) =>
-            {
-                if (treeAndViewTab.CurrentTreeAndView != null)
-                {
-                    treeAndViewTab.CurrentTreeAndView.View = View.Details;
-                    RefreshViewTypeBtnChecked();
-                }
-            };
+            btnSmallIconView.Click += (s, e) => SetVireType(View.SmallIcon);
+            btnLargeIconView.Click += (s, e) => SetVireType(View.LargeIcon);
+            btnListView.Click += (s, e) => SetVireType(View.List);
+            btnTileView.Click += (s, e) => SetVireType(View.Tile);
+            btnDetailView.Click += (s, e) => SetVireType(View.Details);
 
             treeAndViewTab.TabIndexChanged += TreeAndViewTab_TabIndexChanged;
 
-            if (treeAndViewTab.CurrentTreeAndView != null)
-                treeAndViewTab.CurrentTreeAndView.View = Setting.AppSettings.Instance.FileView.FileListViewStyle;
             RefreshViewTypeBtnChecked();
 
 
             //各コントロールのフォントをSystem準拠にする
             PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
 
+        }
+
+        private void SetVireType(View view)
+        {
+            if (treeAndViewTab.CurrentTreeAndView != null)
+            {
+                Setting.AppSettings.Instance.FileListViewStyle = view;
+                RefreshViewTypeBtnChecked();
+            }
         }
 
         /// <summary lang="ja-JP">
@@ -104,7 +112,7 @@ namespace PiViLity
             if (treeAndViewTab.CurrentTreeAndView == null)
                 return;
 
-            Setting.AppSettings.Instance.FileView.FileListViewStyle = treeAndViewTab.CurrentTreeAndView.View;
+            treeAndViewTab.CurrentTreeAndView.View = Setting.AppSettings.Instance.FileListViewStyle;
             btnListView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.List;
             btnSmallIconView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.SmallIcon;
             btnLargeIconView.Checked = treeAndViewTab.CurrentTreeAndView.View== View.LargeIcon;

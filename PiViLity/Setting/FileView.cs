@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace PiViLity.Setting
         public FileView()
         { 
         }
-        public string CacheDbDirectory = Path.GetDirectoryName(Application.ExecutablePath) ?? "";
-        public View FileListViewStyle = View.Tile;
+
+        public string Path = SpecialDirectories.MyPictures;
     }
 }

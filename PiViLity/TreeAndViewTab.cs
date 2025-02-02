@@ -23,39 +23,44 @@ namespace PiViLity
             //各コントロールのフォントをSystem準拠にする
             PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
 
-            {
-                //初期タブ
-                TabPage tabPage = new TabPage("<PC>");
-                tabView.TabPages.Add(tabPage);
-                //タブページへTreeAndViewを登録
-                var newView = new TreeAndView();
-                newView.Dock = DockStyle.Fill;
-                newView.dirTreeViewMgr.AfterSelect += (s, e) =>
-                {
-                    tabPage.Text = e.dirTreeNode?.Name ?? "";
-                };
-                tabPage.Text = newView.SelectedName;
-                tabPage.Controls.Add(newView);
-                tabPage.Tag = newView;
-            }
-            //test
-            {
-                //初期タブ
-                TabPage tabPage = new TabPage("<PC>");
-                tabView.TabPages.Add(tabPage);
-                //タブページへTreeAndViewを登録
-                var newView = new TreeAndView();
-                newView.Dock = DockStyle.Fill;
-                newView.dirTreeViewMgr.AfterSelect += (s, e) =>
-                {
-                    tabPage.Text = e.dirTreeNode?.Name ?? "";
-                };
-                tabPage.Text = newView.SelectedName;
-                tabPage.Controls.Add(newView);
-                tabPage.Tag = newView;
-            }
+             tabView.SelectedIndexChanged += TabView_SelectedIndexChanged;
+        }
 
-            tabView.SelectedIndexChanged += TabView_SelectedIndexChanged;
+#if true
+        /// <summary>
+        /// タブにTreeAndViewを追加します。
+        /// </summary>
+        /// <param name="path"></param>
+        public TreeAndView AddTab(string path)
+        {
+            TabPage tabPage = new TabPage(Path.GetFileName(path));
+            tabView.TabPages.Add(tabPage);
+
+            //タブページへTreeAndViewを登録
+            var newView = new TreeAndView();
+            newView.Dock = DockStyle.Fill;
+            newView.SelectedPath = path;
+            newView.AfterSelect += (s, e) =>
+            {
+                tabPage.Text = newView.SelectedName;
+            };
+            tabPage.Text = newView.SelectedName;
+            tabPage.Controls.Add(newView);
+            tabPage.Tag = newView;
+
+            return newView;
+        }
+
+        /// <summary>
+        /// タブ個数を返します
+        /// </summary>
+        public int TabCount => tabView.TabCount;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int SelectedIndex
+        {
+            get => tabView.SelectedIndex;
+            set => tabView.SelectedIndex = value;
         }
 
         private void TabView_SelectedIndexChanged(object? sender, EventArgs e)
@@ -67,5 +72,6 @@ namespace PiViLity
         {
             get => tabView.SelectedTab?.Tag as TreeAndView;
         }
+#endif
     }
 }

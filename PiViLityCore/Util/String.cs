@@ -27,5 +27,18 @@ namespace PiViLityCore.Util
             else 
                 return $"{size / 1024 / 1024 / 1024 / 1024} TB";
         }
+        public static string GetEasyReadFileSizeF(long size, bool dontUseByte = true)
+        {
+            if(size<256 && !dontUseByte)
+                return $"{size} B";
+            if (size < 1024 * 1024)
+                return $"{size/1024.0f:N2} KB";
+            else if (size < 1024.0f * 1024 * 1024)
+                return $"{size/ 1024.0f / 1024:N2} MB";
+            else if (size < 1024L * 1024 * 1024 * 1024)
+                return $"{size / 1024.0f / 1024 / 1024:N2} GB";
+            else 
+                return $"{size / 1024.0f / 1024 / 1024 / 1024:N2} TB";
+        }
     }
 }
