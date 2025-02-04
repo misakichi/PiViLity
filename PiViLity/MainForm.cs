@@ -20,78 +20,105 @@ namespace PiViLity
         public MainForm()
         {
             InitializeComponent();
-            toolStrip.Renderer = new ToolStripProfessionalRenderer();
-            stsStrip.Renderer = new ToolStripProfessionalRenderer();
 
-            List<ToolStripItem> items = new List<ToolStripItem>();
-            btnSmallIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Icon")?.ToBitmap();
-            btnLargeIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "LargeIcon")?.ToBitmap();
-            btnListView.Image = Global.GetResourceIcon(Resource.ResourceManager, "List")?.ToBitmap();
-            btnDetailView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Detail")?.ToBitmap();
-            btnTileView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Thumb")?.ToBitmap();
-
-            //TreeAndViewTabを追加する
-            treeAndViewTab = new();
-            treeAndViewTab.Dock = DockStyle.Fill;
-            panel.Controls.Add(treeAndViewTab);
-
-            //設定ファイルを元にタブを追加する
-            Setting.AppSettings.Instance.FileViews.ForEach( fileViewSetting =>
+            if (DesignMode)
             {
-                if(!System.IO.Directory.Exists(fileViewSetting.Path))
+                toolStrip.Renderer = new ToolStripProfessionalRenderer();
+                stsStrip.Renderer = new ToolStripProfessionalRenderer();
+
+                List<ToolStripItem> items = new List<ToolStripItem>();
+                btnSmallIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Icon")?.ToBitmap();
+                btnLargeIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "LargeIcon")?.ToBitmap();
+                btnListView.Image = Global.GetResourceIcon(Resource.ResourceManager, "List")?.ToBitmap();
+                btnDetailView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Detail")?.ToBitmap();
+                btnTileView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Thumb")?.ToBitmap();
+
+                //TreeAndViewTabを追加する
+                treeAndViewTab = new();
+                treeAndViewTab.Dock = DockStyle.Fill;
+                panel.Controls.Add(treeAndViewTab);
+
+                if (Setting.AppSettings.Instance.WindowSize.Width <= 0 || Setting.AppSettings.Instance.WindowSize.Height <= 0)
                 {
-                    return;
+                    // フォームのサイズを現在ディスプレイの大きさの半分にしてセンタリングで表示する
+                    var screen = Screen.PrimaryScreen.WorkingArea;
+                    this.Size = new Size(screen.Width / 2, screen.Height / 2);
+                    this.StartPosition = FormStartPosition.CenterScreen;
+                }
+                else
+                {
+                    Size = Setting.AppSettings.Instance.WindowSize;
+                    Left = Setting.AppSettings.Instance.WindowPosition.X;
+                    Top = Setting.AppSettings.Instance.WindowPosition.Y;
+                    WindowState = Setting.AppSettings.Instance.WindowState;
                 }
 
-                var newTreeView = treeAndViewTab.AddTab(fileViewSetting.Path);
-                newTreeView.AfterSelect += (s, e) =>
+                //設定ファイルを元にタブを追加する
+                Setting.AppSettings.Instance.FileViews.ForEach(fileViewSetting =>
                 {
-                    if(s is TreeAndView newView)
-                        fileViewSetting.Path = newView.SelectedPath;
-                };
+                    if (!System.IO.Directory.Exists(fileViewSetting.Path))
+                    {
+                        return;
+                    }
 
-            });
+                    var newTreeView = treeAndViewTab.AddTab(fileViewSetting.Path);
+                    newTreeView.AfterSelect += (s, e) =>
+                    {
+                        if (s is TreeAndView newView)
+                            fileViewSetting.Path = newView.SelectedPath;
+                    };
 
-            //タブがない場合新規追加
-            if (treeAndViewTab.TabCount == 0)
-            {
-                Setting.FileView newSetting = new()
+                });
+
+                //タブがない場合新規追加
+                if (treeAndViewTab.TabCount == 0)
                 {
-                    Path = System.IO.Directory.GetCurrentDirectory()
-                };
-                Setting.AppSettings.Instance.FileViews.Add(newSetting);
+                    Setting.FileView newSetting = new()
+                    {
+                        Path = System.IO.Directory.GetCurrentDirectory()
+                    };
+                    Setting.AppSettings.Instance.FileViews.Add(newSetting);
 
-                var newTreeView = treeAndViewTab.AddTab(System.IO.Directory.GetCurrentDirectory());
-                newTreeView.AfterSelect += (s, e) =>
-                {
-                    if (s is TreeAndView newView)
-                        newSetting.Path = newView.SelectedPath;
-                };
+                    var newTreeView = treeAndViewTab.AddTab(System.IO.Directory.GetCurrentDirectory());
+                    newTreeView.AfterSelect += (s, e) =>
+                    {
+                        if (s is TreeAndView newView)
+                            newSetting.Path = newView.SelectedPath;
+                    };
 
+                }
+                treeAndViewTab.SelectedIndex = 0;
+
+                ////リストビュー表示タイプ切り替えボタン
+                items.Add(btnSmallIconView);
+                items.Add(btnLargeIconView);
+                items.Add(btnListView);
+                items.Add(btnDetailView);
+                items.Add(btnTileView);
+
+                toolStrip.Items.AddRange(items.ToArray());
+                btnSmallIconView.Click += (s, e) => SetVireType(View.SmallIcon);
+                btnLargeIconView.Click += (s, e) => SetVireType(View.LargeIcon);
+                btnListView.Click += (s, e) => SetVireType(View.List);
+                btnTileView.Click += (s, e) => SetVireType(View.Tile);
+                btnDetailView.Click += (s, e) => SetVireType(View.Details);
+
+                treeAndViewTab.TabIndexChanged += TreeAndViewTab_TabIndexChanged;
+
+                RefreshViewTypeBtnChecked();
+
+
+                //各コントロールのフォントをSystem準拠にする
+                PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
             }
-            treeAndViewTab.SelectedIndex = 0;
 
-            ////リストビュー表示タイプ切り替えボタン
-            items.Add(btnSmallIconView);
-            items.Add(btnLargeIconView);
-            items.Add(btnListView);
-            items.Add(btnDetailView);
-            items.Add(btnTileView);
+        }
 
-            toolStrip.Items.AddRange(items.ToArray());
-            btnSmallIconView.Click += (s, e) => SetVireType(View.SmallIcon);
-            btnLargeIconView.Click += (s, e) => SetVireType(View.LargeIcon);
-            btnListView.Click += (s, e) => SetVireType(View.List);
-            btnTileView.Click += (s, e) => SetVireType(View.Tile);
-            btnDetailView.Click += (s, e) => SetVireType(View.Details);
-
-            treeAndViewTab.TabIndexChanged += TreeAndViewTab_TabIndexChanged;
-
-            RefreshViewTypeBtnChecked();
-
-
-            //各コントロールのフォントをSystem準拠にする
-            PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
+        public void SaveSettings()
+        {
+            Setting.AppSettings.Instance.WindowSize = Size;
+            Setting.AppSettings.Instance.WindowPosition = new Point(Left, Top);
+            Setting.AppSettings.Instance.WindowState = WindowState;
 
         }
 
