@@ -33,8 +33,11 @@
             stsStrip = new StatusStrip();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             mnuForm = new MenuStrip();
+            fileToolStripMenuItem = new ToolStripMenuItem();
+            quitToolStripMenuItem = new ToolStripMenuItem();
             panel = new Panel();
             stsStrip.SuspendLayout();
+            mnuForm.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip
@@ -55,8 +58,20 @@
             // 
             // mnuForm
             // 
+            mnuForm.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem });
             resources.ApplyResources(mnuForm, "mnuForm");
             mnuForm.Name = "mnuForm";
+            // 
+            // fileToolStripMenuItem
+            // 
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { quitToolStripMenuItem });
+            fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            resources.ApplyResources(fileToolStripMenuItem, "fileToolStripMenuItem");
+            // 
+            // quitToolStripMenuItem
+            // 
+            quitToolStripMenuItem.Name = "quitToolStripMenuItem";
+            resources.ApplyResources(quitToolStripMenuItem, "quitToolStripMenuItem");
             // 
             // panel
             // 
@@ -73,8 +88,11 @@
             Controls.Add(mnuForm);
             MainMenuStrip = mnuForm;
             Name = "MainForm";
+            SizeChanged += TreeAndViewTab_TabIndexChanged;
             stsStrip.ResumeLayout(false);
             stsStrip.PerformLayout();
+            mnuForm.ResumeLayout(false);
+            mnuForm.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -86,5 +104,7 @@
         private MenuStrip mnuForm;
         private ToolStripStatusLabel toolStripStatusLabel1;
         private Panel panel;
+        private ToolStripMenuItem fileToolStripMenuItem;
+        private ToolStripMenuItem quitToolStripMenuItem;
     }
 }

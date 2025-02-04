@@ -9,8 +9,7 @@ namespace PiViLity
 {
     public partial class MainForm : Form
     {
-        TreeAndViewTab treeAndViewTab;
-        ToolStripButton btnIconView = new();
+        TreeAndViewTab treeAndViewTab = new();
         ToolStripButton btnSmallIconView = new();
         ToolStripButton btnLargeIconView = new();
         ToolStripButton btnListView = new();
@@ -21,7 +20,7 @@ namespace PiViLity
         {
             InitializeComponent();
 
-            if (DesignMode)
+            if (!DesignMode)
             {
                 toolStrip.Renderer = new ToolStripProfessionalRenderer();
                 stsStrip.Renderer = new ToolStripProfessionalRenderer();
@@ -34,14 +33,13 @@ namespace PiViLity
                 btnTileView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Thumb")?.ToBitmap();
 
                 //TreeAndViewTabを追加する
-                treeAndViewTab = new();
                 treeAndViewTab.Dock = DockStyle.Fill;
                 panel.Controls.Add(treeAndViewTab);
 
                 if (Setting.AppSettings.Instance.WindowSize.Width <= 0 || Setting.AppSettings.Instance.WindowSize.Height <= 0)
                 {
                     // フォームのサイズを現在ディスプレイの大きさの半分にしてセンタリングで表示する
-                    var screen = Screen.PrimaryScreen.WorkingArea;
+                    var screen = Screen.PrimaryScreen?.WorkingArea ?? new Rectangle(0, 0, 800, 600);
                     this.Size = new Size(screen.Width / 2, screen.Height / 2);
                     this.StartPosition = FormStartPosition.CenterScreen;
                 }
@@ -115,7 +113,7 @@ namespace PiViLity
         }
 
         public void SaveSettings()
-        {
+        { 
             Setting.AppSettings.Instance.WindowSize = Size;
             Setting.AppSettings.Instance.WindowPosition = new Point(Left, Top);
             Setting.AppSettings.Instance.WindowState = WindowState;
