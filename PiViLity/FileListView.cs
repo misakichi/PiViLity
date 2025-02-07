@@ -25,8 +25,8 @@ namespace PiViLity
             public string Path = "";
             public int LoadTileIconIndex = -1;
         }
-        IconStore _iconStore = new(true, true, true);
-        IconStore _tileIconStore;
+        private IconStore _iconStore = new(true, true, true);
+        private IconStoreThumbnail _thumbnailStore = new();
 
         private DetailSubItem _detailSubItems = DetailSubItem.None;
         
@@ -81,7 +81,8 @@ namespace PiViLity
             DetailSubItems = DetailSubItem.ModifiedDateTime | DetailSubItem.Size | DetailSubItem.Type;
             LargeImageList = _iconStore.LargeIconList;
             SmallImageList = _iconStore.SmallIconList;
-            _tileIconStore = new(false, false, true, null, null, TileSize);
+            TileSize = Setting.AppSettings.Instance.ThumbnailSize;
+            _thumbnailStore = new(TileSize);
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             UpdateStyles();
 
@@ -95,6 +96,7 @@ namespace PiViLity
 
         private void RefreshList()
         {
+            TileSize = Setting.AppSettings.Instance.ThumbnailSize;
             var path = _path;
             if (System.IO.Directory.Exists(path))
             {
@@ -104,10 +106,10 @@ namespace PiViLity
                     List<ListViewItem> list = new List<ListViewItem>();
                     Items.Clear();
                     _iconStore.Clear();
-                    _tileIconStore.Clear();
-                    if(_tileIconStore.JumboIconList.ImageSize != TileSize)
+                    _thumbnailStore.Clear();
+                    if(_thumbnailStore.ThumbnailSize != TileSize)
                     {
-                        _tileIconStore = new IconStore(false, false, true, null, null, TileSize);
+                        _thumbnailStore = new(TileSize);
                     }
                     var files = dirInfo.EnumerateFiles();
                     foreach (var file in files)
@@ -186,7 +188,7 @@ namespace PiViLity
                     if (itemData.LoadTileIconIndex == -1)
                     {
                         itemData.LoadTileIconIndex = -2;
-                        bool runTask = _tileIconStore.GetIconIndexNoSysAsync(itemData.Path, index =>
+                        _thumbnailStore.GetThumbnailImage(itemData.Path, index =>
                         {
                             if (index >= 0)
                             {
@@ -196,20 +198,12 @@ namespace PiViLity
                             else
                             {
                                 itemData.LoadTileIconIndex = -3;
-                                _iconStore.GetIconIndexSysSync(itemData.Path, index =>
+                                _iconStore.GetIcon(itemData.Path, index =>
                                 {
                                     e.Item.ImageIndex = index;
                                 });
                             }
                         });
-                        if (!runTask)
-                        {
-                            itemData.LoadTileIconIndex = -3;
-                            _iconStore.GetIconIndexSysSync(itemData.Path, index =>
-                            {
-                                e.Item.ImageIndex = index;
-                            });
-                        }
                     }
                     //取得できなかった場合はシステムアイコン表示に切り替えます
                     if (itemData.LoadTileIconIndex == -3)
@@ -221,15 +215,15 @@ namespace PiViLity
                     //取得後の場合はローディングアイコンを描画します。
                     else if (itemData.LoadTileIconIndex >= 0)
                     {
-                        if (_tileIconStore.JumboIconList.ImageSize == TileSize)
+                        if (_thumbnailStore.ThumbnailSize == TileSize)
                         {
-                            int x = e.Bounds.Left + (_tileIconStore.JumboIconList.ImageSize.Width - e.Bounds.Width) / 2;
-                            int y = e.Bounds.Top + (_tileIconStore.JumboIconList.ImageSize.Height - e.Bounds.Height) / 2;
-                            _tileIconStore.JumboIconList.Draw(e.Graphics, x, y, itemData.LoadTileIconIndex);
+                            int x = e.Bounds.Left + (_thumbnailStore.ThumbnailSize.Width - e.Bounds.Width) / 2;
+                            int y = e.Bounds.Top + (_thumbnailStore.ThumbnailSize.Height - e.Bounds.Height) / 2;
+                            _thumbnailStore.ImageList.Draw(e.Graphics, x, y, itemData.LoadTileIconIndex);
                         }
                         else
                         {
-                            using (var image = _tileIconStore.JumboIconList.Images[itemData.LoadTileIconIndex])
+                            using (var image = _thumbnailStore.ImageList.Images[itemData.LoadTileIconIndex])
                             {
                                 e.Graphics.SetClip(e.Bounds);
                                 int x = e.Bounds.Left + (e.Bounds.Width - image.Width) / 2;
@@ -261,7 +255,7 @@ namespace PiViLity
                 {
                     if (e.Item.Tag is ItemData itemData)
                     {
-                        _iconStore.GetIconIndexSysSync(itemData.Path, index =>
+                        _iconStore.GetIcon(itemData.Path, index =>
                     {
                         e.Item.ImageIndex = index >= 0 ? index : -2;
                     });

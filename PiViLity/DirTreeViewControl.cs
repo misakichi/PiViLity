@@ -12,7 +12,7 @@ namespace PiViLity
     {
         TreeView? treeView;
         DirTree? dirTree;
-        IconStore iconStore = new(false, true);
+        IconStore iconStore = new(false, true, false);
 
         public class DirTreeViewControlEventArgs : EventArgs
         {
@@ -154,7 +154,7 @@ namespace PiViLity
             dirTreeNode.Tag = tn;
             tn.Tag = dirTreeNode;
             tn.Name = dirTreeNode.Name;
-            iconStore.GetIconIndexSysSync(dirTreeNode.Path, index => tn.SelectedImageIndex = tn.ImageIndex = index);            
+            iconStore.GetIcon(dirTreeNode.Path, index => tn.SelectedImageIndex = tn.ImageIndex = index);            
             return tn;
         }
 

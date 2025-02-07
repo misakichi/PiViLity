@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Windows.UI.WebUI;
 using Microsoft.Data.Sqlite;
 using System.Drawing.Imaging;
+using System.IO;
 namespace PiViLity
 {
     internal class ThumbnailCache
@@ -14,8 +15,6 @@ namespace PiViLity
 
         public static ThumbnailCache Instance => _incetance;
         private string _dbFilename = "";
-
-        public Size ThumbnailSize { get; set; } = new Size(128, 128);
 
         public void Initialize(string dbFilename)
         {
@@ -36,6 +35,8 @@ namespace PiViLity
             var fi = new FileInfo(filename);
             if (!fi.Exists)
                 return null;
+
+            var ThumbnailSize = Setting.AppSettings.Instance.ThumbnailSize;
 
             using (SqliteConnection db = new SqliteConnection($"Filename={_dbFilename}"))
             {
@@ -70,37 +71,105 @@ namespace PiViLity
             return null;
         }
 
+
         public void SetThumbnail(string filename, Image thumbnail)
         {
+            ImageCodecInfo? GetImageCodecInfo(ImageFormat imageFormat)
+            {
+                ImageCodecInfo[] encoders = ImageCodecInfo.GetImageEncoders();
+                foreach (var encoder in encoders)
+                {
+                    if (encoder.FormatID == imageFormat.Guid)
+                    {
+                        return encoder;
+                    }
+                }
+                return null;
+            }
             var fi = new FileInfo(filename);
             if (!fi.Exists)
                 return;
+            var inDbFilename = filename.ToLower();
             using (SqliteConnection db = new SqliteConnection($"Filename={_dbFilename}"))
             {
                 db.Open();
-                using (SqliteCommand cmd = db.CreateCommand())
+                using (var transaction = db.BeginTransaction())
                 {
-                    cmd.CommandText = "INSERT INTO ThumbnailCache (Path, UpdateTime, FileSize, Width, Height, Thumbnail) VALUES (@Path, @UpdateTime, @FileSize, @Width, @Height, @Thumbnail)";
-                    cmd.Parameters.AddWithValue("@Path", filename.ToLower());
-                    cmd.Parameters.AddWithValue("@UpdateTime", fi.LastWriteTimeUtc.ToFileTimeUtc());
-                    cmd.Parameters.AddWithValue("@FileSize", fi.Length);
-                    cmd.Parameters.AddWithValue("@Width", ThumbnailSize.Width);
-                    cmd.Parameters.AddWithValue("@Height", ThumbnailSize.Height);
+                    bool isExistRecord = false;
+                    using (SqliteCommand cmd = db.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM ThumbnailCache WHERE Path = @Path";
+                        cmd.Parameters.AddWithValue("@Path", inDbFilename);
+                        cmd.Transaction = transaction;
+                        var execRet = cmd.ExecuteScalar();
+                        if (execRet != null)
+                        {
+                            isExistRecord = (long)execRet > 0;
+                        }
+                    }
+
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        if (thumbnail.PixelFormat == PixelFormat.Format16bppArgb1555 ||
+                        var ext = Path.GetExtension(filename).ToLower();
+                        ImageFormat? imageFormat = null;
+                        if (ext == ".jpg" || ext == ".jpeg" || ext==".bmp")
+                        {
+                            imageFormat = ImageFormat.Jpeg;
+                        }
+                        else if (thumbnail.PixelFormat == PixelFormat.Format16bppArgb1555 ||
                             thumbnail.PixelFormat == PixelFormat.Format32bppArgb ||
                             thumbnail.PixelFormat == PixelFormat.Format64bppArgb)
                         {
-                            thumbnail.Save(ms,ImageFormat.Png);
+                            imageFormat =  ImageFormat.Png;
                         }
                         else
                         {
-                            thumbnail.Save(ms, ImageFormat.Jpeg);
+                            imageFormat = ImageFormat.Jpeg;
                         }
-                        cmd.Parameters.AddWithValue("@Thumbnail", ms.ToArray());
+                        var codec = GetImageCodecInfo(imageFormat);
+                        if(codec != null)
+                        {
+                            using (var param0 = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)25L))
+                            {
+                                using (var eps = new EncoderParameters(1))
+                                {
+                                    eps.Param[0] = param0;
+
+                                    try
+                                    {
+                                        thumbnail.Save(ms, codec, eps);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        thumbnail.Save(ms, imageFormat);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            thumbnail.Save(ms, imageFormat);
+                        }
+                        using (SqliteCommand cmd = db.CreateCommand())
+                        {
+                            if (isExistRecord)
+                            {
+                                cmd.CommandText = "UPDATE ThumbnailCache SET UpdateTime = @UpdateTime, FileSize = @FileSize, Width = @Width, Height = @Height, Thumbnail = @Thumbnail WHERE Path = @Path";
+                            }
+                            else
+                            {
+                                cmd.CommandText = "INSERT INTO ThumbnailCache (Path, UpdateTime, FileSize, Width, Height, Thumbnail) VALUES (@Path, @UpdateTime, @FileSize, @Width, @Height, @Thumbnail)";
+                            }
+                            cmd.Parameters.AddWithValue("@Path", inDbFilename);
+                            cmd.Parameters.AddWithValue("@UpdateTime", fi.LastWriteTimeUtc.ToFileTimeUtc());
+                            cmd.Parameters.AddWithValue("@FileSize", fi.Length);
+                            cmd.Parameters.AddWithValue("@Width", thumbnail.Size.Width);
+                            cmd.Parameters.AddWithValue("@Height", thumbnail.Size.Height);
+                            cmd.Parameters.AddWithValue("@Thumbnail", ms.ToArray());
+                            cmd.ExecuteNonQuery();
+                        }
+                        transaction.Commit();
                     }
-                    cmd.ExecuteNonQuery();
                 }
             }
         }

@@ -32,20 +32,15 @@ namespace PiViLity
         /// </summary>
         uint _registerGeneration = 0;
 
-        /// <summary>
-        /// イメージ登録タイマー
-        /// </summary>
-        System.Windows.Forms.Timer registerTimer = new();
-
-        /// <summary>
+       /// <summary>
         /// イメージ登録情報
         /// </summary>
         class RegisterInfo
         {
             public uint registerGeneration;
-            public object? small;
-            public object? large;
-            public object? jumbo;
+            public Icon? small;
+            public Icon? large;
+            public Icon? jumbo;
             public Action<int>? postAction;
             public string path = "";
         }
@@ -92,7 +87,7 @@ namespace PiViLity
             return newImage;
         }
 
-        void EnqueueRegisterImage(string path, object? smallImage, object? largeImage, object? jumboImage, Action<int>? postAction)
+        void EnqueueRegisterImage(string path, Icon? smallImage, Icon? largeImage, Icon? jumboImage, Action<int>? postAction)
         {
             var info = new RegisterInfo()
             {
@@ -107,32 +102,6 @@ namespace PiViLity
             RegisterIcon(info);
 
 
-        }
-        /// <summary>
-        /// イメージの登録(サムネイル取得後の処理を指定する)
-        /// </summary>
-        /// <param name="baseImage"></param>
-        /// <param name="postAction"></param>
-        void EnqueueRegisterImage(string path, Image baseImage, Action<int>? postAction)
-        {
-            var small = _useSmall ? ResizeImage(path, baseImage, SmallIconList.ImageSize) : null;
-            var large = _useLarge ? ResizeImage(path, baseImage, LargeIconList.ImageSize) : null;
-            var jumbo = _useJumbo ? ResizeImage(path, baseImage, JumboIconList.ImageSize) : null;
-            if (small != baseImage && large != baseImage && jumbo != baseImage)
-            {
-                baseImage.Dispose();
-            }
-            EnqueueRegisterImage(path, small, large, jumbo, postAction);
-        }
-
-        /// <summary>
-        /// イメージの登録(システムアイコンインデックス取得後の処理を指定する)
-        /// </summary>
-        /// <param name="sysIndex"></param>
-        /// <param name="postAction"></param>
-        void EnqueueRegisterImageFromSys(string path, Action<int>? postAction)
-        {
-            GetIconIndexSysSync(path, postAction);
         }
 
         /// <summary>
@@ -150,10 +119,6 @@ namespace PiViLity
         {
             if (!useLarge && !useSmall && !useJumbo)
                 throw new ArgumentException("all size unused.");
-
-            registerTimer.Tick += RegisterTimer_Tick;
-            registerTimer.Interval = 200;
-            registerTimer.Enabled = true;
 
             _useLarge = useLarge;
             _useSmall = useSmall;
@@ -196,26 +161,12 @@ namespace PiViLity
             Debug.WriteLine("");
         }
 
-        private void RegisterIcon(string path, object? small, object? large, object? jumbo, Action<int>? postAction)
+        private void RegisterIcon(string path, Icon? small, Icon? large, Icon? jumbo, Action<int>? postAction)
         {
-            int RegisterIconOne(ImageList list, object? image)
+            int RegisterIconOne(ImageList list, Icon icon)
             {
-                if(image is IDisposable disposable)
-                {
-                    _needDestroyIcons.Add(disposable);
-                }
-                if (image is Icon icon)
-                {
-                    list.Images.Add(icon);
-                }
-                else if (image is Image img)
-                {
-                    list.Images.Add(img);
-                }
-                else
-                {
-                    throw new ArgumentException("invalid type");
-                }
+                _needDestroyIcons.Add(icon);
+                list.Images.Add(icon);
                 return list.Images.Count - 1;
             }
 
@@ -253,123 +204,12 @@ namespace PiViLity
             });
             return true;
         }
-        /// <summary>
-        /// イメージ登録タイマーイベント
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void RegisterTimer_Tick(object? sender, EventArgs e)
-        {
-            DateTime startTime = DateTime.Now;
-            while (_registerInfos.TryDequeue(out var info)) 
-            {
-                if(!RegisterIcon(info))
-                    continue;
-
-                if((DateTime.Now - startTime).TotalMilliseconds > 50)
-                {
-                    return;
-                }
-            }
-            registerTimer.Enabled = false;
-        }
 
         object _lockObj = new object();
-        private void GetThumbnailAsync(PiViLityCore.Plugin.IImageReader imageReader, string path, Action<int> postAction, bool nouseSys)
-        {
-            try
-            {
-                if (imageReader != null)
-                {
-                    if (imageReader.SetFilePath(path))
-                    {
-                        var small = _useSmall ? imageReader.GetThumbnailImage(SmallIconList.ImageSize) : null;
-                        var large = _useLarge ? imageReader.GetThumbnailImage(LargeIconList.ImageSize) : null;
-                        var jumbo = _useJumbo ? imageReader.GetThumbnailImage(JumboIconList.ImageSize) : null;
-                        if ((small != null)==_useSmall &&
-                            (large != null)==_useLarge && 
-                            (jumbo != null)==_useJumbo)
-                        {
-                            EnqueueRegisterImage(path, small, large, jumbo, postAction);
-                            return;
-                        }
-                    }
-                }
-                if (!nouseSys)
-                {
-                    EnqueueRegisterImageFromSys(path, postAction);
-                }
-                else
-                {
-                    PiViLityCore.Global.InvokeMainThread(() => postAction(-1));
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// アイコン画像の取得
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns>アイコン画像。returnActionは何度か呼ばれる可能性がある</returns>
-        public void GetIconIndexAsync(string path, Action<int> returnAction)
-        {
-            var isFile = File.Exists(path);
-            if (!isFile && !Directory.Exists(path))
-                return;
-
-            GetIconIndexSysSync(path, returnAction);
-
-            //ファイルの場合はプラグインからのサムネイルを取得を試みる
-            if (isFile)
-            {
-                var imageReader = PluginManager.Instance.GetImageReader(path);
-                if (imageReader != null)
-                {
-                    Task.Run(() => GetThumbnailAsync(imageReader, path, returnAction, false));
-                }
-            }
-        }
-
-        /// <summary>
-        /// サムネールアイコンの取得
-        /// そもそも image reader がない場合は false を返す 
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="returnAction"></param>
-        /// <returns></returns>
-        public bool GetIconIndexNoSysAsync(string path, Action<int> returnAction)
-        {
-            //サムネイルの取得のみの関数なので、ディレクトリのチェックは不要
-            var isFile = File.Exists(path);
-            if (!isFile)
-                return false;
-
-            //ファイルの場合はプラグインからのサムネイルを取得を試みる
-            var imageReader = PluginManager.Instance.GetImageReader(path);
-            if (imageReader != null)
-            {
-                Task.Run(() => GetThumbnailAsync(imageReader, path, returnAction, true));
-                return true;
-            }
-            return false;
-        }
-
-        public void GetIconIndexNoThumbnail(string path, Action<int>? returnAction)
-        {
-            var isFile = File.Exists(path);
-            if (!isFile && !Directory.Exists(path))
-                return;
-
-            GetIconIndexSysSync(path, returnAction);
-        }
 
 
-        public void GetIconIndexSysSync(string path, Action<int>? returnAction)
+
+        public void GetIcon(string path, Action<int>? returnAction)
         {
             //システムアイコンの取得
             var sysIndex = ShelAPIHelper.FileInfo.GetFileIconIndex(path);
@@ -409,9 +249,6 @@ namespace PiViLity
             LargeIconList.Images.Clear();
             JumboIconList.Images.Clear();
             iconIndexToImageIndex.Clear();
-            
-
-            GC.Collect();
 
             _registerGeneration++;
 
