@@ -1,4 +1,6 @@
-﻿namespace PiViLity
+﻿using System.Windows.Forms;
+
+namespace PiViLity
 {
     partial class TreeAndView
     {
@@ -28,11 +30,16 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             tvwDirMain = new TreeView();
             splitDirView = new Splitter();
+            panelViewInfo = new Panel();
+            panelInfo = new Panel();
+            splitViewInfo = new Splitter();
             lsvFile = new FileListView();
-            panel1 = new Panel();
-            splitter1 = new Splitter();
+            toolStrip = new ToolStrip();
+            panelViewInfo.SuspendLayout();
+            panelInfo.SuspendLayout();
             SuspendLayout();
             // 
             // tvwDirMain
@@ -43,58 +50,80 @@
             tvwDirMain.Location = new Point(0, 0);
             tvwDirMain.Name = "tvwDirMain";
             tvwDirMain.ShowLines = false;
-            tvwDirMain.Size = new Size(226, 363);
+            tvwDirMain.Size = new Size(226, 679);
             tvwDirMain.TabIndex = 4;
             // 
             // splitDirView
             // 
             splitDirView.Location = new Point(226, 0);
             splitDirView.Name = "splitDirView";
-            splitDirView.Size = new Size(3, 363);
+            splitDirView.Size = new Size(3, 679);
             splitDirView.TabIndex = 6;
             splitDirView.TabStop = false;
+            // 
+            // panelViewInfo
+            // 
+            panelViewInfo.Controls.Add(panelInfo);
+            panelViewInfo.Controls.Add(splitViewInfo);
+            panelViewInfo.Controls.Add(lsvFile);
+            panelViewInfo.Dock = DockStyle.Fill;
+            panelViewInfo.Location = new Point(229, 0);
+            panelViewInfo.Name = "panelViewInfo";
+            panelViewInfo.Size = new Size(598, 679);
+            panelViewInfo.TabIndex = 13;
+            // 
+            // panelInfo
+            // 
+            panelInfo.BorderStyle = BorderStyle.Fixed3D;
+            panelInfo.Dock = DockStyle.Fill;
+            panelInfo.Location = new Point(0, 197);
+            panelInfo.Name = "panelInfo";
+            panelInfo.Size = new Size(598, 482);
+            panelInfo.TabIndex = 15;
+            // 
+            // splitViewInfo
+            // 
+            splitViewInfo.Dock = DockStyle.Top;
+            splitViewInfo.Location = new Point(0, 194);
+            splitViewInfo.Name = "splitViewInfo";
+            splitViewInfo.Size = new Size(598, 3);
+            splitViewInfo.TabIndex = 13;
+            splitViewInfo.TabStop = false;
             // 
             // lsvFile
             // 
             lsvFile.BorderStyle = BorderStyle.None;
-            lsvFile.Dock = DockStyle.Fill;
-            lsvFile.Location = new Point(229, 0);
+            lsvFile.Dock = DockStyle.Top;
+            lsvFile.Location = new Point(0, 0);
             lsvFile.Name = "lsvFile";
-            lsvFile.Size = new Size(351, 363);
-            lsvFile.TabIndex = 7;
+            lsvFile.Size = new Size(598, 194);
+            lsvFile.TabIndex = 12;
             lsvFile.TileSize = new Size(320, 240);
             lsvFile.UseCompatibleStateImageBehavior = false;
-            lsvFile.View = View.Details;
             // 
-            // panel1
+            // toolStrip
             // 
-            panel1.Dock = DockStyle.Bottom;
-            panel1.Location = new Point(229, 263);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(351, 100);
-            panel1.TabIndex = 8;
-            // 
-            // splitter1
-            // 
-            splitter1.Dock = DockStyle.Bottom;
-            splitter1.Location = new Point(229, 260);
-            splitter1.Name = "splitter1";
-            splitter1.Size = new Size(351, 3);
-            splitter1.TabIndex = 9;
-            splitter1.TabStop = false;
+            toolStrip.Location = new Point(0, 0);
+            toolStrip.Name = "toolStrip";
+            toolStrip.Size = new Size(594, 25);
+            toolStrip.TabIndex = 0;
+            toolStrip.Text = "toolStrip";
+            toolStrip.Dock = DockStyle.Top;
             // 
             // TreeAndView
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
-            Controls.Add(splitter1);
-            Controls.Add(panel1);
-            Controls.Add(lsvFile);
+            Controls.Add(panelViewInfo);
             Controls.Add(splitDirView);
             Controls.Add(tvwDirMain);
+            Controls.Add(toolStrip);
             DoubleBuffered = true;
             Name = "TreeAndView";
-            Size = new Size(580, 363);
+            Size = new Size(827, 679);
+            panelViewInfo.ResumeLayout(false);
+            panelInfo.ResumeLayout(false);
+            panelInfo.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -102,8 +131,10 @@
 
         private TreeView tvwDirMain;
         private Splitter splitDirView;
+        private Panel panelViewInfo;
+        private Panel panelInfo;
+        private Splitter splitViewInfo;
         private FileListView lsvFile;
-        private Panel panel1;
-        private Splitter splitter1;
+        private ToolStrip toolStrip;
     }
 }

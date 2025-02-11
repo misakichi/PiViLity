@@ -15,5 +15,7 @@ namespace PiViLity.Setting
         }
 
         public string Path = SpecialDirectories.MyPictures;
+        public int SplitDirWidth = 200;
+        public int SplitListHeight = 400;
     }
 }

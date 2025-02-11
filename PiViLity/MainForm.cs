@@ -1,6 +1,7 @@
 using PiViLityCore;
 using System.Drawing;
 using System.Windows.Forms;
+using Windows.Devices.Enumeration;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
@@ -15,6 +16,8 @@ namespace PiViLity
         ToolStripButton btnListView = new();
         ToolStripButton btnDetailView = new();
         ToolStripButton btnTileView = new();
+
+        private List<Tuple<Setting.FileView, TreeAndView>> loadSettingPair = new();
 
         public MainForm()
         {
@@ -32,10 +35,6 @@ namespace PiViLity
                 btnDetailView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Detail")?.ToBitmap();
                 btnTileView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Thumb")?.ToBitmap();
 
-                //TreeAndViewTabを追加する
-                treeAndViewTab.Dock = DockStyle.Fill;
-                panel.Controls.Add(treeAndViewTab);
-
                 if (Setting.AppSettings.Instance.WindowSize.Width <= 0 || Setting.AppSettings.Instance.WindowSize.Height <= 0)
                 {
                     // フォームのサイズを現在ディスプレイの大きさの半分にしてセンタリングで表示する
@@ -51,6 +50,10 @@ namespace PiViLity
                     WindowState = Setting.AppSettings.Instance.WindowState;
                 }
 
+                //TreeAndViewTabを追加する
+                treeAndViewTab.Dock = DockStyle.Fill;
+                panel.Controls.Add(treeAndViewTab);
+
                 //設定ファイルを元にタブを追加する
                 Setting.AppSettings.Instance.FileViews.ForEach(fileViewSetting =>
                 {
@@ -60,12 +63,7 @@ namespace PiViLity
                     }
 
                     var newTreeView = treeAndViewTab.AddTab(fileViewSetting.Path);
-                    newTreeView.AfterSelect += (s, e) =>
-                    {
-                        if (s is TreeAndView newView)
-                            fileViewSetting.Path = newView.SelectedPath;
-                    };
-
+                    loadSettingPair.Add(new(fileViewSetting, newTreeView));
                 });
 
                 //タブがない場合新規追加
@@ -78,12 +76,6 @@ namespace PiViLity
                     Setting.AppSettings.Instance.FileViews.Add(newSetting);
 
                     var newTreeView = treeAndViewTab.AddTab(System.IO.Directory.GetCurrentDirectory());
-                    newTreeView.AfterSelect += (s, e) =>
-                    {
-                        if (s is TreeAndView newView)
-                            newSetting.Path = newView.SelectedPath;
-                    };
-
                 }
                 treeAndViewTab.SelectedIndex = 0;
 
@@ -105,6 +97,11 @@ namespace PiViLity
 
                 RefreshViewTypeBtnChecked();
 
+                //コントロールのレイアウトを行いサイズを現状に合わせる
+                PerformLayout();
+                Application.DoEvents();
+
+
 
                 //各コントロールのフォントをSystem準拠にする
                 PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
@@ -112,11 +109,41 @@ namespace PiViLity
 
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TreeAndViewTab_Load(object sender, EventArgs e)
+        {
+
+            //設定ファイルを元に各タブの設定を復元する
+            BeginInvoke(new Action(() =>
+            {
+                loadSettingPair.ForEach(pair =>
+                {
+                    pair.Item2.RestoreSettings(pair.Item1);
+                });
+            }));
+        }
+
+
         public void SaveSettings()
-        { 
+        {
             Setting.AppSettings.Instance.WindowSize = Size;
             Setting.AppSettings.Instance.WindowPosition = new Point(Left, Top);
             Setting.AppSettings.Instance.WindowState = WindowState;
+
+            Setting.AppSettings.Instance.FileViews.Clear();
+            for (int tabIndex = 0; tabIndex < treeAndViewTab.TabCount; tabIndex++)
+            {
+                var tab = treeAndViewTab.GetTab(tabIndex);
+                if (tab != null)
+                {
+                    Setting.FileView fileView = new();
+                    tab.SaveSettings(fileView);
+                    Setting.AppSettings.Instance.FileViews.Add(fileView);
+                }
+            }
 
         }
 
@@ -140,7 +167,7 @@ namespace PiViLity
             treeAndViewTab.CurrentTreeAndView.View = Setting.AppSettings.Instance.FileListViewStyle;
             btnListView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.List;
             btnSmallIconView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.SmallIcon;
-            btnLargeIconView.Checked = treeAndViewTab.CurrentTreeAndView.View== View.LargeIcon;
+            btnLargeIconView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.LargeIcon;
             btnTileView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.Tile;
             btnDetailView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.Details;
 
@@ -156,5 +183,11 @@ namespace PiViLity
             RefreshViewTypeBtnChecked();
 
         }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveSettings();
+        }
+
     }
 }

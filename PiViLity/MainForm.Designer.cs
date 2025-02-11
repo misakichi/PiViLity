@@ -88,6 +88,8 @@
             Controls.Add(mnuForm);
             MainMenuStrip = mnuForm;
             Name = "MainForm";
+            FormClosing += MainForm_FormClosing;
+            Load += TreeAndViewTab_Load;
             SizeChanged += TreeAndViewTab_TabIndexChanged;
             stsStrip.ResumeLayout(false);
             stsStrip.PerformLayout();

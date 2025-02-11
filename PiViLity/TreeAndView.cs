@@ -34,6 +34,7 @@ namespace PiViLity
             tvwDirMain.HideSelection = false;
 
             dirTreeViewMgr.AfterSelect += DirTreeViewMgr_AfterSelect;
+            tvwDirMain.HotTracking = true;
 
             lsvFile.LabelEdit = true;
 
@@ -65,5 +66,28 @@ namespace PiViLity
             get => lsvFile?.View ?? View.LargeIcon; 
             set { if (lsvFile != null) { lsvFile.View = value; } } 
         }
+
+        /// <summary>
+        /// 設定を復元する
+        /// </summary>
+        /// <param name="fileView"></param>
+        public void RestoreSettings(Setting.FileView fileView)
+        {
+            splitDirView.SplitPosition = fileView.SplitDirWidth;
+            splitViewInfo.SplitPosition = fileView.SplitListHeight;
+            SelectedPath = fileView.Path;
+        }
+
+        /// <summary>
+        /// 設定を保存する
+        /// </summary>
+        /// <param name="fileView"></param>
+        public void SaveSettings(Setting.FileView fileView)
+        {
+            fileView.SplitDirWidth = splitDirView.SplitPosition;
+            fileView.SplitListHeight = splitViewInfo.SplitPosition;
+            fileView.Path = SelectedPath;
+        }
+
     }
 }

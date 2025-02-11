@@ -34,8 +34,8 @@ namespace PiViLity
         public TreeAndView AddTab(string path)
         {
             TabPage tabPage = new TabPage(Path.GetFileName(path));
+            
             tabView.TabPages.Add(tabPage);
-
             //タブページへTreeAndViewを登録
             var newView = new TreeAndView();
             newView.Dock = DockStyle.Fill;
@@ -47,6 +47,7 @@ namespace PiViLity
             tabPage.Text = newView.SelectedName;
             tabPage.Controls.Add(newView);
             tabPage.Tag = newView;
+            newView.Size = tabPage.ClientSize;
 
             return newView;
         }
@@ -55,6 +56,13 @@ namespace PiViLity
         /// タブ個数を返します
         /// </summary>
         public int TabCount => tabView.TabCount;
+
+        public TreeAndView? GetTab(int index)
+        {
+            if (index < 0 || index >= tabView.TabCount)
+                return null;
+            return tabView.TabPages[index].Tag as TreeAndView;
+        }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int SelectedIndex

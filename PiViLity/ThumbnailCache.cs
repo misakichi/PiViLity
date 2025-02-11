@@ -9,6 +9,10 @@ using System.Drawing.Imaging;
 using System.IO;
 namespace PiViLity
 {
+    /// <summary>
+    /// サムネイル画像のキャッシュ
+    /// アルファ付はRgbのJpegとAlphaのPngを組み合わせて保存する
+    /// </summary>
     internal class ThumbnailCache
     {
         private static ThumbnailCache _incetance = new();
@@ -23,7 +27,7 @@ namespace PiViLity
                 db.Open();
                 using (SqliteCommand cmd = db.CreateCommand())
                 {
-                    cmd.CommandText = "CREATE TABLE IF NOT EXISTS ThumbnailCache (Path TEXT PRIMARY KEY, UpdateTime INTEGER, FileSize INTEGER, Width INTEGER, Height INTEGER, Thumbnail BLOB)";
+                    cmd.CommandText = "CREATE TABLE IF NOT EXISTS ThumbnailCache (Path TEXT PRIMARY KEY, UpdateTime INTEGER, FileSize INTEGER, Width INTEGER, Height INTEGER, Thumbnail BLOB, ThumbnailSub BLOB)";
                     cmd.ExecuteNonQuery();
                 }
                 _dbFilename = dbFilename;
@@ -43,7 +47,7 @@ namespace PiViLity
                 db.Open();
                 using (SqliteCommand cmd = db.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT UpdateTime, FileSize, Width, Height, Thumbnail FROM ThumbnailCache WHERE Path = @Path";
+                    cmd.CommandText = "SELECT UpdateTime, FileSize, Width, Height, Thumbnail, ThumbnailSub FROM ThumbnailCache WHERE Path = @Path";
                     cmd.Parameters.AddWithValue("@Path", filename.ToLower());
                     using (SqliteDataReader reader = cmd.ExecuteReader())
                     {
@@ -62,7 +66,29 @@ namespace PiViLity
                             else
                             {
                                 byte[] buffer = reader.GetFieldValue<byte[]>(4);
-                                return Image.FromStream(new MemoryStream(buffer));
+                                byte[] subBuffer = reader.GetFieldValue<byte[]>(5);
+                                if(subBuffer?.Length > 0)
+                                {
+                                    using (var ms = new MemoryStream(buffer))
+                                    using (var msa = new MemoryStream(subBuffer))
+                                    {
+                                        using (var rgb = Image.FromStream(ms))
+                                        using (var alpha = Image.FromStream(msa))
+                                        {
+                                            if (rgb is Bitmap rgbBmp && alpha is Bitmap alphaBmp)
+                                            {
+                                                Bitmap? argb = null;
+                                                ShelAPIHelper.BitmapUtil.RgbAndAlphaCombineToArgb((Bitmap)rgb, (Bitmap)alpha, ref argb);
+                                                if (argb != null)
+                                                {
+                                                    return argb;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                using(var ms = new MemoryStream(buffer))
+                                    return Image.FromStream(ms);
                             }
                         }
                     }
@@ -95,70 +121,107 @@ namespace PiViLity
                 db.Open();
                 using (var transaction = db.BeginTransaction())
                 {
-                    bool isExistRecord = false;
-                    using (SqliteCommand cmd = db.CreateCommand())
-                    {
-                        cmd.CommandText = "SELECT COUNT(*) FROM ThumbnailCache WHERE Path = @Path";
-                        cmd.Parameters.AddWithValue("@Path", inDbFilename);
-                        cmd.Transaction = transaction;
-                        var execRet = cmd.ExecuteScalar();
-                        if (execRet != null)
-                        {
-                            isExistRecord = (long)execRet > 0;
-                        }
-                    }
-
                     using (MemoryStream ms = new MemoryStream())
+                    using (MemoryStream msa = new MemoryStream())
                     {
                         var ext = Path.GetExtension(filename).ToLower();
-                        ImageFormat? imageFormat = null;
-                        if (ext == ".jpg" || ext == ".jpeg" || ext==".bmp")
+                        ImageFormat? imageFormat = ImageFormat.Jpeg;
+                        ImageFormat? imageFormatA = null;
+                        Image? rgbImage = null;
+                        Image? alphaImage = null;
+                        if (ext == ".jpg" || ext == ".jpeg" || ext == ".bmp")
                         {
                             imageFormat = ImageFormat.Jpeg;
                         }
-                        else if (thumbnail.PixelFormat == PixelFormat.Format16bppArgb1555 ||
-                            thumbnail.PixelFormat == PixelFormat.Format32bppArgb ||
-                            thumbnail.PixelFormat == PixelFormat.Format64bppArgb)
+                        else if (thumbnail.PixelFormat == PixelFormat.Format32bppArgb)
                         {
-                            imageFormat =  ImageFormat.Png;
-                        }
-                        else
-                        {
-                            imageFormat = ImageFormat.Jpeg;
-                        }
-                        var codec = GetImageCodecInfo(imageFormat);
-                        if(codec != null)
-                        {
-                            using (var param0 = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)25L))
+                            Bitmap? srcBmp = null;
+                            if (thumbnail is Bitmap bmp)
                             {
-                                using (var eps = new EncoderParameters(1))
-                                {
-                                    eps.Param[0] = param0;
-
-                                    try
-                                    {
-                                        thumbnail.Save(ms, codec, eps);
-                                    }
-                                    catch (Exception)
-                                    {
-                                        thumbnail.Save(ms, imageFormat);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            thumbnail.Save(ms, imageFormat);
-                        }
-                        using (SqliteCommand cmd = db.CreateCommand())
-                        {
-                            if (isExistRecord)
-                            {
-                                cmd.CommandText = "UPDATE ThumbnailCache SET UpdateTime = @UpdateTime, FileSize = @FileSize, Width = @Width, Height = @Height, Thumbnail = @Thumbnail WHERE Path = @Path";
+                                srcBmp = bmp;
                             }
                             else
                             {
-                                cmd.CommandText = "INSERT INTO ThumbnailCache (Path, UpdateTime, FileSize, Width, Height, Thumbnail) VALUES (@Path, @UpdateTime, @FileSize, @Width, @Height, @Thumbnail)";
+                                srcBmp = new Bitmap(thumbnail);
+                            }
+                            Bitmap? rgb = null;
+                            Bitmap? alpha = null;
+                            ShelAPIHelper.BitmapUtil.BitmapDivineRgbAndAlpha(srcBmp, ref rgb, ref alpha);
+                            if (rgb != null && alpha != null)
+                            {
+                                rgbImage = rgb;
+                                alphaImage = alpha;
+                                imageFormat = ImageFormat.Jpeg;
+                                imageFormatA = ImageFormat.Png;
+                            }
+                            if (srcBmp != thumbnail)
+                            {
+                                srcBmp.Dispose();
+                            }
+
+                        }
+                        else if (thumbnail.PixelFormat == PixelFormat.Format16bppArgb1555 || thumbnail.PixelFormat == PixelFormat.Format64bppArgb)
+                        {
+                            imageFormat = ImageFormat.Png;
+                        }
+                        else
+                        {
+                            imageFormat = ImageFormat.Jpeg;
+                        }
+
+                        void SaveImage(Image img, MemoryStream ms, ImageFormat format)
+                        {
+                            var codec = GetImageCodecInfo(format);
+                            if (codec != null)
+                            {
+                                using (var param0 = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)25L))
+                                {
+                                    using (var eps = new EncoderParameters(1))
+                                    {
+                                        eps.Param[0] = param0;
+                                        try
+                                        {
+                                            img.Save(ms, codec, eps);
+                                        }
+                                        catch (Exception)
+                                        {
+                                            img.Save(ms, format);
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                img.Save(ms, format);
+                            }
+                        }
+
+                        //サムネイルを保存
+                        if (rgbImage != null && alphaImage != null && imageFormatA!=null)
+                        {
+                            SaveImage(rgbImage, ms, imageFormat);
+                            SaveImage(alphaImage, msa, imageFormatA);
+                        }
+                        else
+                        {
+                            SaveImage(thumbnail, ms, imageFormat);
+                        }
+
+                        using (SqliteCommand cmdCheck = db.CreateCommand())
+                        using (SqliteCommand cmd = db.CreateCommand())
+                        {
+                            cmdCheck.CommandText = "SELECT COUNT(*) FROM ThumbnailCache WHERE Path = @Path";
+                            cmdCheck.Parameters.AddWithValue("@Path", inDbFilename);
+                            cmdCheck.Transaction = transaction;
+                            var execRet = cmdCheck.ExecuteScalar();
+                            bool isExistRecord = ((long?)execRet ?? 0) > 0;
+                            if (isExistRecord)
+                            {
+                                cmd.CommandText = "UPDATE ThumbnailCache SET UpdateTime = @UpdateTime, FileSize = @FileSize, Width = @Width, Height = @Height, Thumbnail = @Thumbnail, ThumbnailSub=@ThumbnailSub WHERE Path = @Path";
+                            }
+                            else
+                            {
+                                cmd.CommandText = "INSERT INTO ThumbnailCache (Path, UpdateTime, FileSize, Width, Height, Thumbnail, ThumbnailSub) VALUES (@Path, @UpdateTime, @FileSize, @Width, @Height, @Thumbnail, @ThumbnailSub)";
                             }
                             cmd.Parameters.AddWithValue("@Path", inDbFilename);
                             cmd.Parameters.AddWithValue("@UpdateTime", fi.LastWriteTimeUtc.ToFileTimeUtc());
@@ -166,6 +229,8 @@ namespace PiViLity
                             cmd.Parameters.AddWithValue("@Width", thumbnail.Size.Width);
                             cmd.Parameters.AddWithValue("@Height", thumbnail.Size.Height);
                             cmd.Parameters.AddWithValue("@Thumbnail", ms.ToArray());
+                            cmd.Parameters.AddWithValue("@ThumbnailSub", msa.ToArray());
+                            cmd.Transaction = transaction;
                             cmd.ExecuteNonQuery();
                         }
                         transaction.Commit();
