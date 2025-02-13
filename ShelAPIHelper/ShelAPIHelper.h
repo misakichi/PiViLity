@@ -4,11 +4,12 @@ using namespace System;
 
 namespace ShelAPIHelper
 {
-
-	public ref class SpecialFolder
+	public ref class ShellAPI
 	{
 	public:
 		static String^ GetMyCompute();
+		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd);
+		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, int);
 	};
 
 	public ref class FileInfo

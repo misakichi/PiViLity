@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using static PiViLity.FileListView;
 
 namespace PiViLity
 {
@@ -20,10 +21,11 @@ namespace PiViLity
             Type = 2,
             Size = 4,
         }
-        public class ItemData
+        public class FileListItemData
         {
             public string Path = "";
             public int LoadTileIconIndex = -1;
+            public bool IsFile = false;
         }
         private IconStore _iconStore = new(true, true, true);
         private IconStoreThumbnail _thumbnailStore = new();
@@ -81,7 +83,10 @@ namespace PiViLity
             DetailSubItems = DetailSubItem.ModifiedDateTime | DetailSubItem.Size | DetailSubItem.Type;
             LargeImageList = _iconStore.LargeIconList;
             SmallImageList = _iconStore.SmallIconList;
-            TileSize = Setting.AppSettings.Instance.ThumbnailSize;
+            if (!DesignMode)
+            {
+                TileSize = Setting.AppSettings.Instance.ThumbnailSize;
+            }
             _thumbnailStore = new(TileSize);
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             UpdateStyles();
@@ -111,24 +116,42 @@ namespace PiViLity
                     {
                         _thumbnailStore = new(TileSize);
                     }
-                    var files = dirInfo.EnumerateFiles();
-                    foreach (var file in files)
+                    var entries = dirInfo.EnumerateFileSystemInfos();
+                    foreach (var entry in entries)
                     {
-                        if (PiViLityCore.Global.settings.IsVisibleFile(file))
-                        {
-                            var item = new ListViewItem();
-                            item.Text = file.Name;
-                            item.Tag = new ItemData() {
-                                Path = file.FullName,
-                                LoadTileIconIndex = -1
-                            };
+                        if (entry == null)
+                            continue;
 
-                            item.ToolTipText = $"{file.Name}{file.LastWriteTime}{PiViLityCore.Util.String.GetEasyReadFileSizeF(file.Length)}";
+                        if (PiViLityCore.Global.settings.IsVisibleEntry(entry))
+                        {
+                            bool isFile = entry is FileInfo;
+                            var FileListItemData = new FileListItemData()
+                            {
+                                Path = entry.FullName,
+                                LoadTileIconIndex = -1,
+                                IsFile = isFile
+                            };
+                            var item = new ListViewItem();
+                            item.Text = entry.Name;
+                            item.Tag = FileListItemData;
+
+                            if (!isFile)
+                            {
+                                FileListItemData.LoadTileIconIndex = -3;
+                                _iconStore.GetIcon(entry.FullName, index =>
+                                {
+                                    item.ImageIndex = index;
+                                });
+                            }
+
+                            var length = (entry as FileInfo)?.Length ?? 0;
+                            var lengthStr = isFile ? PiViLityCore.Util.String.GetEasyReadFileSizeF(length) : "";
+                            item.ToolTipText = $"{entry.Name}{entry.LastWriteTime}{lengthStr}";
 
 
                             if (DetailSubItems.HasFlag(DetailSubItem.ModifiedDateTime))
                             {
-                                item.SubItems.Add(new ListViewItem.ListViewSubItem(item, file.LastWriteTime.ToString()));
+                                item.SubItems.Add(new ListViewItem.ListViewSubItem(item, entry.LastWriteTime.ToString()));
                             }
                             if (DetailSubItems.HasFlag(DetailSubItem.Type))
                             {
@@ -136,10 +159,12 @@ namespace PiViLity
                             }
                             if (DetailSubItems.HasFlag(DetailSubItem.Size))
                             {
-                                if(file.Length<1024)
-                                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{file.Length} B"));
+                                if (!isFile)
+                                    item.SubItems.Add("");
+                                else if (length < 1024)
+                                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{length} B"));
                                 else
-                                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{file.Length/1024:N0} KB"));
+                                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{length / 1024:N0} KB"));
                             }
                             list.Add(item);
                         }
@@ -182,23 +207,23 @@ namespace PiViLity
             //タイルの場合のみサムネイルをオーナードローで描画します。
             if (View == View.Tile)
             {
-                if (e.Item.Tag is ItemData itemData)
+                if (e.Item.Tag is FileListItemData FileListItemData)
                 {
                     //取得前の場合はロードを行います。
-                    if (itemData.LoadTileIconIndex == -1)
+                    if (FileListItemData.LoadTileIconIndex == -1)
                     {
-                        itemData.LoadTileIconIndex = -2;
-                        _thumbnailStore.GetThumbnailImage(itemData.Path, index =>
+                        FileListItemData.LoadTileIconIndex = -2;
+                        _thumbnailStore.GetThumbnailImage(FileListItemData.Path, index =>
                         {
                             if (index >= 0)
                             {
-                                itemData.LoadTileIconIndex = index;
+                                FileListItemData.LoadTileIconIndex = index;
                                 Invalidate(e.Item.Bounds);
                             }
                             else
                             {
-                                itemData.LoadTileIconIndex = -3;
-                                _iconStore.GetIcon(itemData.Path, index =>
+                                FileListItemData.LoadTileIconIndex = -3;
+                                _iconStore.GetIcon(FileListItemData.Path, index =>
                                 {
                                     e.Item.ImageIndex = index;
                                 });
@@ -206,24 +231,24 @@ namespace PiViLity
                         });
                     }
                     //取得できなかった場合はシステムアイコン表示に切り替えます
-                    if (itemData.LoadTileIconIndex == -3)
+                    if (FileListItemData.LoadTileIconIndex == -3)
                     {
                         int x = e.Bounds.Left + (e.Bounds.Width - _iconStore.LargeIconList.ImageSize.Width) / 2;
                         int y = e.Bounds.Top + (e.Bounds.Height - _iconStore.LargeIconList.ImageSize.Height) / 2;
                         _iconStore.LargeIconList.Draw(e.Graphics, x, y, e.Item.ImageIndex);
                     }
                     //取得後の場合はローディングアイコンを描画します。
-                    else if (itemData.LoadTileIconIndex >= 0)
+                    else if (FileListItemData.LoadTileIconIndex >= 0)
                     {
                         if (_thumbnailStore.ThumbnailSize == TileSize)
                         {
                             int x = e.Bounds.Left + (_thumbnailStore.ThumbnailSize.Width - e.Bounds.Width) / 2;
                             int y = e.Bounds.Top + (_thumbnailStore.ThumbnailSize.Height - e.Bounds.Height) / 2;
-                            _thumbnailStore.ImageList.Draw(e.Graphics, x, y, itemData.LoadTileIconIndex);
+                            _thumbnailStore.ImageList.Draw(e.Graphics, x, y, FileListItemData.LoadTileIconIndex);
                         }
                         else
                         {
-                            using (var image = _thumbnailStore.ImageList.Images[itemData.LoadTileIconIndex])
+                            using (var image = _thumbnailStore.ImageList.Images[FileListItemData.LoadTileIconIndex])
                             {
                                 e.Graphics.SetClip(e.Bounds);
                                 int x = e.Bounds.Left + (e.Bounds.Width - image.Width) / 2;
@@ -253,9 +278,9 @@ namespace PiViLity
                 //アイコンが未設定の場合は取得して設定します。
                 if (e.Item.ImageIndex == -1)
                 {
-                    if (e.Item.Tag is ItemData itemData)
+                    if (e.Item.Tag is FileListItemData FileListItemData)
                     {
-                        _iconStore.GetIcon(itemData.Path, index =>
+                        _iconStore.GetIcon(FileListItemData.Path, index =>
                     {
                         e.Item.ImageIndex = index >= 0 ? index : -2;
                     });

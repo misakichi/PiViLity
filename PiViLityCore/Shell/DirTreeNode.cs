@@ -58,6 +58,8 @@ namespace PiViLityCore.Shell
 
         public bool IsCannotAccess = false;
 
+        public bool IsPath => Type == DirTreeNodeType.Drive || Type == DirTreeNodeType.Directory || Type == DirTreeNodeType.DirectoryUnknown;
+
         /// <summary lang="ja">
         /// フルパス
         /// </summary>
@@ -229,7 +231,7 @@ namespace PiViLityCore.Shell
                 //子にDriveを用意する
                 case DirTreeNodeType.ThisPC:
                     Name = "PC";
-                    Path = ShelAPIHelper.SpecialFolder.GetMyCompute();
+                    Path = ShelAPIHelper.ShellAPI.GetMyCompute();
 
                     Children.Clear();
                     foreach (var drive in DriveInfo.GetDrives())

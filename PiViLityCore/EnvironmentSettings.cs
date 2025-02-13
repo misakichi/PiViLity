@@ -16,7 +16,7 @@ namespace PiViLityCore
         public bool IsVisibleHidden = false;
         public bool IsVisibleSystem = false;
 
-        private bool IsVisibleEntry(FileSystemInfo fileInfo)
+        public bool IsVisibleEntry(FileSystemInfo fileInfo)
         {
             if (fileInfo.Attributes.HasFlag(FileAttributes.Hidden) && !IsVisibleHidden)
                 return false;

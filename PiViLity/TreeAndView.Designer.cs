@@ -7,7 +7,7 @@ namespace PiViLity
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer components;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -39,25 +39,32 @@ namespace PiViLity
             lsvFile = new FileListView();
             toolStrip = new ToolStrip();
             panelViewInfo.SuspendLayout();
-            panelInfo.SuspendLayout();
             SuspendLayout();
             // 
             // tvwDirMain
             // 
+            tvwDirMain.AllowDrop = true;
             tvwDirMain.BorderStyle = BorderStyle.None;
             tvwDirMain.Dock = DockStyle.Left;
             tvwDirMain.FullRowSelect = true;
-            tvwDirMain.Location = new Point(0, 0);
+            tvwDirMain.HotTracking = true;
+            tvwDirMain.Location = new Point(0, 25);
             tvwDirMain.Name = "tvwDirMain";
             tvwDirMain.ShowLines = false;
-            tvwDirMain.Size = new Size(226, 679);
+            tvwDirMain.Size = new Size(226, 654);
             tvwDirMain.TabIndex = 4;
+            tvwDirMain.ItemDrag += tvwDirMain_ItemDrag;
+            tvwDirMain.DragDrop += tvwDirMain_DragDrop;
+            tvwDirMain.DragEnter += tvwDirMain_DragEnter;
+            tvwDirMain.DragOver += tvwDirMain_DragOver;
+            tvwDirMain.DragLeave += tvwDirMain_DragLeave;
+            tvwDirMain.MouseClick += tvwDirMain_MouseClick;
             // 
             // splitDirView
             // 
-            splitDirView.Location = new Point(226, 0);
+            splitDirView.Location = new Point(226, 25);
             splitDirView.Name = "splitDirView";
-            splitDirView.Size = new Size(3, 679);
+            splitDirView.Size = new Size(3, 654);
             splitDirView.TabIndex = 6;
             splitDirView.TabStop = false;
             // 
@@ -67,24 +74,24 @@ namespace PiViLity
             panelViewInfo.Controls.Add(splitViewInfo);
             panelViewInfo.Controls.Add(lsvFile);
             panelViewInfo.Dock = DockStyle.Fill;
-            panelViewInfo.Location = new Point(229, 0);
+            panelViewInfo.Location = new Point(229, 25);
             panelViewInfo.Name = "panelViewInfo";
-            panelViewInfo.Size = new Size(598, 679);
+            panelViewInfo.Size = new Size(598, 654);
             panelViewInfo.TabIndex = 13;
             // 
             // panelInfo
             // 
             panelInfo.BorderStyle = BorderStyle.Fixed3D;
             panelInfo.Dock = DockStyle.Fill;
-            panelInfo.Location = new Point(0, 197);
+            panelInfo.Location = new Point(0, 372);
             panelInfo.Name = "panelInfo";
-            panelInfo.Size = new Size(598, 482);
+            panelInfo.Size = new Size(598, 282);
             panelInfo.TabIndex = 15;
             // 
             // splitViewInfo
             // 
             splitViewInfo.Dock = DockStyle.Top;
-            splitViewInfo.Location = new Point(0, 194);
+            splitViewInfo.Location = new Point(0, 369);
             splitViewInfo.Name = "splitViewInfo";
             splitViewInfo.Size = new Size(598, 3);
             splitViewInfo.TabIndex = 13;
@@ -92,23 +99,32 @@ namespace PiViLity
             // 
             // lsvFile
             // 
+            lsvFile.Activation = ItemActivation.OneClick;
+            lsvFile.AllowDrop = true;
             lsvFile.BorderStyle = BorderStyle.None;
             lsvFile.Dock = DockStyle.Top;
+            lsvFile.HotTracking = true;
+            lsvFile.HoverSelection = true;
             lsvFile.Location = new Point(0, 0);
             lsvFile.Name = "lsvFile";
-            lsvFile.Size = new Size(598, 194);
+            lsvFile.Size = new Size(598, 369);
             lsvFile.TabIndex = 12;
             lsvFile.TileSize = new Size(320, 240);
             lsvFile.UseCompatibleStateImageBehavior = false;
+            lsvFile.ItemDrag += lsvFile_ItemDrag;
+            lsvFile.DragDrop += lsvFile_DragDrop;
+            lsvFile.DragEnter += lsvFile_DragEnter;
+            lsvFile.DragOver += lsvFile_DragOver;
+            lsvFile.DragLeave += lsvFile_DragLeave;
+            lsvFile.MouseClick += lsvFile_MouseClick;
             // 
             // toolStrip
             // 
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
-            toolStrip.Size = new Size(594, 25);
+            toolStrip.Size = new Size(827, 25);
             toolStrip.TabIndex = 0;
             toolStrip.Text = "toolStrip";
-            toolStrip.Dock = DockStyle.Top;
             // 
             // TreeAndView
             // 
@@ -122,9 +138,8 @@ namespace PiViLity
             Name = "TreeAndView";
             Size = new Size(827, 679);
             panelViewInfo.ResumeLayout(false);
-            panelInfo.ResumeLayout(false);
-            panelInfo.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

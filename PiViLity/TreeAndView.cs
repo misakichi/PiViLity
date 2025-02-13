@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -62,9 +63,10 @@ namespace PiViLity
         public string SelectedName => dirTreeViewMgr.SelectedName;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public View View { 
-            get => lsvFile?.View ?? View.LargeIcon; 
-            set { if (lsvFile != null) { lsvFile.View = value; } } 
+        public View View
+        {
+            get => lsvFile?.View ?? View.LargeIcon;
+            set { if (lsvFile != null) { lsvFile.View = value; } }
         }
 
         /// <summary>
@@ -89,5 +91,41 @@ namespace PiViLity
             fileView.Path = SelectedPath;
         }
 
+        private void lsvFile_ItemDrag(object sender, ItemDragEventArgs e)
+        {
+            List<string> files = new();
+            for (int i = 0; i < lsvFile.SelectedItems.Count; i++)
+            {
+                if (lsvFile.SelectedItems[i].Tag is  FileListView.FileListItemData data)
+                {
+                    files.Add(data.Path);
+                }
+            }
+            if (files.Count > 0)
+            {
+                lsvFile.DoDragDrop(new DataObject(DataFormats.FileDrop, files.ToArray()), DragDropEffects.Copy | DragDropEffects.Move);
+            }
+
+        }
+
+        private void lsvFile_DragEnter(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void lsvFile_DragDrop(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void lsvFile_DragLeave(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lsvFile_DragOver(object sender, DragEventArgs e)
+        {
+
+        }
     }
 }

@@ -4,6 +4,9 @@
 #include <shlobj.h>
 #include <commoncontrols.h>
 #include <vcclr.h>
+#include <string>
+#include <vector>
+#include <atlbase.h>
 using namespace System;
 
 static wchar_t* GetKnownFolderPath(const GUID& folderId)
@@ -20,7 +23,7 @@ static wchar_t* GetKnownFolderPath(const GUID& folderId)
 using namespace ShelAPIHelper;
 
 
-String^ SpecialFolder::GetMyCompute()
+String^ ShellAPI::GetMyCompute()
 {
     GUID folderId = { 0x374DE290, 0x123F, 0x4565, { 0xBC, 0x9C, 0x2D, 0x7B, 0xC3, 0xB3, 0xD6, 0xAC } }; // This PC の GUID
     if (auto path = GetKnownFolderPath(folderId))
@@ -179,4 +182,92 @@ System::Drawing::Icon^ FileInfo::GetFileJumboIcon(String^ path)
 
     auto icon = ImageList_GetIcon(systemJumboImageList_, info.iIcon, ILD_TRANSPARENT);
     return System::Drawing::Icon::FromHandle(IntPtr(icon));
+}
+
+
+void ShellAPI::ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd)
+{
+	ShowShellContextMenu(paths, hwnd, INT_MIN, INT_MIN);
+}
+
+CComPtr<IShellItemArray> filepathsToShellItemArray(std::vector<std::wstring>& paths)
+{
+	CComPtr<IShellItemArray> shellItemArray;
+	std::vector<LPITEMIDLIST> pidls;
+	for (const auto& path : paths)
+	{
+        LPITEMIDLIST pidl = nullptr;
+        auto hr = SHParseDisplayName(path.c_str(), nullptr, &pidl, 0, nullptr);
+        if (SUCCEEDED(hr) && pidl)
+        {
+            pidls.push_back(pidl);
+        }
+    }
+	if (pidls.empty())
+		return nullptr;
+    auto list = (LPCITEMIDLIST*)pidls.data();
+    SHCreateShellItemArrayFromIDLists(pidls.size(), list, &shellItemArray);
+	for (auto pidl : pidls)
+	{
+		CoTaskMemFree(pidl);
+	}
+    return shellItemArray;
+}
+
+/// <summary>
+/// シェルコンテキストメニューを表示します。
+/// </summary>
+/// <param name="paths"></param>
+/// <param name="hwnd"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+void ShellAPI::ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, int y)
+{
+    // パスをWCHAR*の配列に変換
+    std::vector<std::wstring> wPaths;
+    for each(String ^ path in paths)
+    {
+        pin_ptr<const wchar_t> wchPath = PtrToStringChars(path);
+        wPaths.push_back(std::wstring(wchPath));
+    }
+
+    auto shellItems = filepathsToShellItemArray(wPaths);
+	if (shellItems)
+	{
+		CComPtr<IContextMenu> contextMenu;
+		HRESULT hr = shellItems->BindToHandler(nullptr, BHID_SFUIObject, IID_PPV_ARGS(&contextMenu));
+		if (SUCCEEDED(hr))
+		{
+			HMENU hMenu = CreatePopupMenu();
+			if (hMenu)
+			{
+				hr = contextMenu->QueryContextMenu(hMenu, 0, 1, 0x7FFF, CMF_EXPLORE | CMF_EXTENDEDVERBS);
+				if (SUCCEEDED(hr))
+				{
+					if (x == INT_MIN || y == INT_MIN)
+					{
+						POINT point;
+						GetCursorPos(&point);
+						x = point.x;
+						y = point.y;
+					}
+					int cmd = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, 0, (HWND)hwnd.ToPointer(), nullptr);
+					if (cmd > 0)
+					{
+						CMINVOKECOMMANDINFOEX info = { 0 };
+						info.cbSize = sizeof(info);
+						info.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
+						info.hwnd = (HWND)hwnd.ToPointer();
+						info.lpVerb = MAKEINTRESOURCEA(cmd - 1);
+						info.lpVerbW = MAKEINTRESOURCEW(cmd - 1);
+						info.nShow = SW_SHOWNORMAL;
+						info.ptInvoke.x = x;
+						info.ptInvoke.y = y;
+						contextMenu->InvokeCommand((LPCMINVOKECOMMANDINFO)&info);
+					}
+				}
+				DestroyMenu(hMenu);
+			}
+		}
+	}
 }
