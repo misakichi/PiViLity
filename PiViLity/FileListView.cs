@@ -91,7 +91,7 @@ namespace PiViLity
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             UpdateStyles();
 
-            //if (ShelAPIHelper.SystemColor.IsDarkMode())
+            //if (PiVilityNative.SystemColor.IsDarkMode())
             //{
             //    BackColor = System.Drawing.Color.FromArgb(255, 255 - BackColor.R, 255 - BackColor.G, 255 - BackColor.B);
             //    ForeColor = System.Drawing.Color.FromArgb(255, 255 - ForeColor.R, 255 - ForeColor.G, 255 - ForeColor.B);

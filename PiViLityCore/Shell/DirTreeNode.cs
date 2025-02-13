@@ -231,7 +231,7 @@ namespace PiViLityCore.Shell
                 //子にDriveを用意する
                 case DirTreeNodeType.ThisPC:
                     Name = "PC";
-                    Path = ShelAPIHelper.ShellAPI.GetMyCompute();
+                    Path = PiVilityNative.ShellAPI.GetMyCompute();
 
                     Children.Clear();
                     foreach (var drive in DriveInfo.GetDrives())

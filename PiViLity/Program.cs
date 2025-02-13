@@ -18,7 +18,7 @@ namespace PiViLity
 #pragma warning restore WFO5001
             Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             System.Diagnostics.Debug.Assert(Application.RenderWithVisualStyles);
-            System.Diagnostics.Debug.WriteLine($"IsDark={ShelAPIHelper.SystemColor.IsDarkMode()} BackGround={ShelAPIHelper.SystemColor.BackGroundColor().ToString()}");
+            System.Diagnostics.Debug.WriteLine($"IsDark={PiVilityNative.SystemColor.IsDarkMode()} BackGround={PiVilityNative.SystemColor.BackGroundColor().ToString()}");
 
             var appDir = Path.GetDirectoryName(Application.ExecutablePath);
             if (appDir != null)

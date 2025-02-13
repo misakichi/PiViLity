@@ -2,7 +2,7 @@
 
 using namespace System;
 
-namespace ShelAPIHelper
+namespace PiVilityNative
 {
 	public ref class ShellAPI
 	{

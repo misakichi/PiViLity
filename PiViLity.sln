@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PiViLity", "PiViLity\PiViLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PiViLityCore", "PiViLityCore\PiViLityCore.csproj", "{B0E9F600-C4FA-463F-B511-BCA535F1DA65}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShelAPIHelper", "ShelAPIHelper\ShelAPIHelper.vcxproj", "{5322A171-1323-4357-B9DA-9F52A59343B4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PiViLityNative", "PiViLityNative\PiViLityNative.vcxproj", "{5322A171-1323-4357-B9DA-9F52A59343B4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicPlugin", "BasicPlugin\BasicPlugin.csproj", "{AE5FD8BB-AAA4-49ED-B8B0-23F763CEE4D0}"
 EndProject

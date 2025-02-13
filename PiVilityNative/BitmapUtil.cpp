@@ -10,7 +10,7 @@ using namespace System::Drawing::Imaging;
 /// <param name="source"></param>
 /// <param name="rgbBitmap"></param>
 /// <param name="alphaBitmap"></param>
-void ShelAPIHelper::BitmapUtil::BitmapDivineRgbAndAlpha(Bitmap^ source, Bitmap^% rgbBitmap, Bitmap^% alphaBitmap)
+void PiVilityNative::BitmapUtil::BitmapDivineRgbAndAlpha(Bitmap^ source, Bitmap^% rgbBitmap, Bitmap^% alphaBitmap)
 {
     if (source == nullptr)
         throw gcnew ArgumentNullException("source");
@@ -75,7 +75,7 @@ void ShelAPIHelper::BitmapUtil::BitmapDivineRgbAndAlpha(Bitmap^ source, Bitmap^%
 /// <param name="rgbBitmap"></param>
 /// <param name="alphaBitmap"></param>
 /// <param name="argbBitmap"></param>
-void ShelAPIHelper::BitmapUtil::RgbAndAlphaCombineToArgb(Bitmap^ rgbBitmap, Bitmap^ alphaBitmap, Bitmap^% argbBitmap)
+void PiVilityNative::BitmapUtil::RgbAndAlphaCombineToArgb(Bitmap^ rgbBitmap, Bitmap^ alphaBitmap, Bitmap^% argbBitmap)
 {
     if (rgbBitmap == nullptr)
         throw gcnew ArgumentNullException("rgbBitmap");

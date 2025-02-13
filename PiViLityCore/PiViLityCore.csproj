@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ShelAPIHelper\ShelAPIHelper.vcxproj" />
+    <ProjectReference Include="..\PiViLityNative\PiViLityNative.vcxproj" />
   </ItemGroup>
 
   <ItemGroup>

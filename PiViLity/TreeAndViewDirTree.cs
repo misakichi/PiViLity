@@ -72,7 +72,7 @@ namespace PiViLity
                         {
                             // フォルダの右クリックメニューを表示
                             var screen = tvwDirMain.PointToScreen(e.Location);
-                            ShelAPIHelper.ShellAPI.ShowShellContextMenu([dirTreeNode.Path], tvwDirMain.Handle, screen.X, screen.Y);
+                            PiVilityNative.ShellAPI.ShowShellContextMenu([dirTreeNode.Path], tvwDirMain.Handle, screen.X, screen.Y);
                         }
                     }
                 }

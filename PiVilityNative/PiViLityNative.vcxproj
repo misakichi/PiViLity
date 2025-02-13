@@ -23,7 +23,7 @@
     <EnableManagedPackageReferenceSupport>true</EnableManagedPackageReferenceSupport>
     <ProjectGuid>{5322A171-1323-4357-B9DA-9F52A59343B4}</ProjectGuid>
     <Keyword>NetCoreCProj</Keyword>
-    <RootNamespace>ShelAPIHelper</RootNamespace>
+    <RootNamespace>PiViLityNative</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <TargetFramework>net8.0</TargetFramework>
     <WindowsTargetPlatformMinVersion>10.0.17763.0</WindowsTargetPlatformMinVersion>
@@ -143,7 +143,7 @@
     <ClInclude Include="BitmapUtil.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="ShelAPIHelper.h" />
+    <ClInclude Include="ShellAPIHelper.h" />
     <ClInclude Include="SystemColor.h" />
   </ItemGroup>
   <ItemGroup>
@@ -155,7 +155,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ShelAPIHelper.cpp" />
+    <ClCompile Include="ShellAPIHelper.cpp" />
     <ClCompile Include="SystemColor.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿using ShelAPIHelper;
+﻿using PiVilityNative;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -132,7 +132,7 @@ namespace PiViLity
                 }
                 else
                 {
-                    using (var icon = ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(0))
+                    using (var icon = PiVilityNative.FileInfo.GetFileLargeIconFromIndex(0))
                         LargeIconList.ImageSize = icon?.Size ?? new Size(32, 32);
                 }
                 if (smallSize != null)
@@ -141,7 +141,7 @@ namespace PiViLity
                 }
                 else
                 {
-                    using(var icon = ShelAPIHelper.FileInfo.GetFileSmallIconFromIndex(0))
+                    using(var icon = PiVilityNative.FileInfo.GetFileSmallIconFromIndex(0))
                         SmallIconList.ImageSize = icon?.Size ?? new Size(16, 16);
                 }
                 if (jumboSize != null)
@@ -150,7 +150,7 @@ namespace PiViLity
                 }
                 else
                 {
-                    using (var icon = ShelAPIHelper.FileInfo.GetFileJumboIconFromIndex(0))
+                    using (var icon = PiVilityNative.FileInfo.GetFileJumboIconFromIndex(0))
                         JumboIconList.ImageSize = icon?.Size ?? new Size(32, 32);
                 }
             }
@@ -212,7 +212,7 @@ namespace PiViLity
         public void GetIcon(string path, Action<int>? returnAction)
         {
             //システムアイコンの取得
-            var sysIndex = ShelAPIHelper.FileInfo.GetFileIconIndex(path);
+            var sysIndex = PiVilityNative.FileInfo.GetFileIconIndex(path);
             if (iconIndexToImageIndex.TryGetValue(sysIndex, out int imageIndex))
             {
                 returnAction?.Invoke(imageIndex);
@@ -220,9 +220,9 @@ namespace PiViLity
             else
             {
                 ///システムアイコンの取得
-                var small = _useSmall ? ShelAPIHelper.FileInfo.GetFileSmallIconFromIndex(sysIndex) : null;
-                var large = _useLarge ? ShelAPIHelper.FileInfo.GetFileLargeIconFromIndex(sysIndex) : null;
-                var jumbo = _useJumbo ? ShelAPIHelper.FileInfo.GetFileJumboIconFromIndex(sysIndex) : null;
+                var small = _useSmall ? PiVilityNative.FileInfo.GetFileSmallIconFromIndex(sysIndex) : null;
+                var large = _useLarge ? PiVilityNative.FileInfo.GetFileLargeIconFromIndex(sysIndex) : null;
+                var jumbo = _useJumbo ? PiVilityNative.FileInfo.GetFileJumboIconFromIndex(sysIndex) : null;
 
                 ///アイコン登録
                 RegisterIcon(path, small, large, jumbo, imageIndex =>

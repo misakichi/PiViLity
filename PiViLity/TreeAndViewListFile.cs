@@ -27,7 +27,7 @@ namespace PiViLity
                 {
                     // ファイルの右クリックメニューを表示
                     var screen = lsvFile.PointToScreen(e.Location);
-                    ShelAPIHelper.ShellAPI.ShowShellContextMenu(list.ToArray(), lsvFile.Handle, screen.X, screen.Y);
+                    PiVilityNative.ShellAPI.ShowShellContextMenu(list.ToArray(), lsvFile.Handle, screen.X, screen.Y);
                 }
             }
         }

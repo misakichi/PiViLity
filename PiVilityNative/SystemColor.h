@@ -8,7 +8,7 @@ using namespace winrt::Windows::UI::ViewManagement;
 #pragma managed
 
 
-namespace ShelAPIHelper {
+namespace PiVilityNative {
     public enum class UIColorType
     {
         Background = winrt::Windows::UI::ViewManagement::UIColorType::Background,
@@ -59,8 +59,8 @@ namespace ShelAPIHelper {
 		static bool IsDarkMode();
 		static Drawing::Color BackGroundColor();
 		static Drawing::Color ForeGroundColor();
-		static Drawing::Color GetUIColor(ShelAPIHelper::UIColorType);
-		static Drawing::Color GetUIElementColor(ShelAPIHelper::UIElementType);
+		static Drawing::Color GetUIColor(PiVilityNative::UIColorType);
+		static Drawing::Color GetUIElementColor(PiVilityNative::UIElementType);
 
 
 	};

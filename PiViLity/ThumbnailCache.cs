@@ -78,7 +78,7 @@ namespace PiViLity
                                             if (rgb is Bitmap rgbBmp && alpha is Bitmap alphaBmp)
                                             {
                                                 Bitmap? argb = null;
-                                                ShelAPIHelper.BitmapUtil.RgbAndAlphaCombineToArgb((Bitmap)rgb, (Bitmap)alpha, ref argb);
+                                                PiVilityNative.BitmapUtil.RgbAndAlphaCombineToArgb((Bitmap)rgb, (Bitmap)alpha, ref argb);
                                                 if (argb != null)
                                                 {
                                                     return argb;
@@ -146,7 +146,7 @@ namespace PiViLity
                             }
                             Bitmap? rgb = null;
                             Bitmap? alpha = null;
-                            ShelAPIHelper.BitmapUtil.BitmapDivineRgbAndAlpha(srcBmp, ref rgb, ref alpha);
+                            PiVilityNative.BitmapUtil.BitmapDivineRgbAndAlpha(srcBmp, ref rgb, ref alpha);
                             if (rgb != null && alpha != null)
                             {
                                 rgbImage = rgb;

@@ -1,4 +1,4 @@
-﻿using ShelAPIHelper;
+﻿using PiVilityNative;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -69,7 +69,7 @@ namespace PiViLity
                 }
                 else
                 {
-                    using (var icon = ShelAPIHelper.FileInfo.GetFileJumboIconFromIndex(0))
+                    using (var icon = PiVilityNative.FileInfo.GetFileJumboIconFromIndex(0))
                         ImageList.ImageSize = icon?.Size ?? new Size(32, 32);
                 }
             }

@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "ShelAPIHelper.h"
+#include "ShellAPIHelper.h"
 #include <shlobj.h>
 #include <commoncontrols.h>
 #include <vcclr.h>
@@ -20,7 +20,7 @@ static wchar_t* GetKnownFolderPath(const GUID& folderId)
     return nullptr;
 }
 
-using namespace ShelAPIHelper;
+using namespace PiVilityNative;
 
 
 String^ ShellAPI::GetMyCompute()

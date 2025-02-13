@@ -36,7 +36,7 @@ namespace PiViLityCore.Util
                 if (c != null)
                 {
                     control.Font = SystemFonts.MessageBoxFont;
-                    //if (ShelAPIHelper.SystemColor.IsDarkMode())
+                    //if (PiVilityNative.SystemColor.IsDarkMode())
                     //{
                     //    control.BackColor = Color.FromArgb(255, 32, 32, 32);
                     //    control.ForeColor = Color.FromArgb(255, 0xCC, 0xCC, 0xCC);
