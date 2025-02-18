@@ -94,7 +94,7 @@ namespace PiViLity
             var node = dirTree?.RootNode;
             while(node!=null)
             {
-                if (node.Type == DirTreeNodeType.ThisPC)
+                if (node.IsSpecialFolder && node.Type==DirTreeNodeType.SpecialFolderMyComputer)
                 {
                     break;
                 }

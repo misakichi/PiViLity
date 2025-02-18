@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PiViLityCore.Shell;
+using PiViLityCore.Util;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Eventing.Reader;
@@ -10,10 +12,34 @@ using static PiViLity.FileListView;
 
 namespace PiViLity
 {
+    public class FileListItemData : PiViLityCore.Shell.IFileSystemItem
+    {
+        private string _path = "";
+        public string Path
+        {
+            set { _path = value; }
+            get=> _path;
+        }
+        public int LoadTileIconIndex = -1;
+        public bool IsFile = false;
+
+        public bool IsSpecialFolder => false;
+
+        public Environment.SpecialFolder SpecialFolder => Environment.SpecialFolder.Desktop;
+
+        public bool HasPath => true;
+
+
+        public FileSystemInfo? GetFileSystemInfo()
+        {
+            return IsFile ? new FileInfo(Path) : new DirectoryInfo(Path);
+        }
+    }
+
     public class FileListView : ListView
     {
         string _path = "C:\\";
-
+        private FileSystemWatcher _fsw = new();
         public enum DetailSubItem
         {
             None = 0,
@@ -21,15 +47,10 @@ namespace PiViLity
             Type = 2,
             Size = 4,
         }
-        public class FileListItemData
-        {
-            public string Path = "";
-            public int LoadTileIconIndex = -1;
-            public bool IsFile = false;
-        }
+
         private IconStore _iconStore = new(true, true, true);
         private IconStoreThumbnail _thumbnailStore = new();
-
+        private List<ListViewItem> _currentDirectoryItems = new List<ListViewItem>();
         private DetailSubItem _detailSubItems = DetailSubItem.None;
         
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -91,12 +112,111 @@ namespace PiViLity
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             UpdateStyles();
 
-            //if (PiVilityNative.SystemColor.IsDarkMode())
-            //{
-            //    BackColor = System.Drawing.Color.FromArgb(255, 255 - BackColor.R, 255 - BackColor.G, 255 - BackColor.B);
-            //    ForeColor = System.Drawing.Color.FromArgb(255, 255 - ForeColor.R, 255 - ForeColor.G, 255 - ForeColor.B);
-            //}
+        }
 
+        private void FileSystem_OnChanged(object sender, FileSystemEventArgs e)
+        {
+            PiViLityCore.Global.InvokeMainThread(() =>
+            {
+                RefreshList();
+            });
+        }
+        private void FileSystem_OnRenamed(object sender, RenamedEventArgs e)
+        {
+            var targetItem = _currentDirectoryItems.Find(ItemActivate => (ItemActivate.Tag as FileListItemData)?.Path == e.OldFullPath);
+            if(targetItem?.Tag is FileListItemData FileListItemData)
+            {
+                FileListItemData.Path = e.FullPath;
+                Invoke(()=>targetItem.Text = e.Name);
+            }
+        }
+
+        private void FileSystem_OnDeleted(object sender, FileSystemEventArgs e)
+        {
+            var targetItem = _currentDirectoryItems.Find(ItemActivate => (ItemActivate.Tag as FileListItemData)?.Path == e.FullPath);
+            if (targetItem != null)
+            {
+                _currentDirectoryItems.Remove(targetItem);
+                Invoke(() => Items.Remove(targetItem));
+            }
+        }
+        private void FileSystem_OnCreated(object sender, FileSystemEventArgs e)
+        {
+            var fi = new FileInfo(e.FullPath);
+            int i;
+            for (i = 0; i < _currentDirectoryItems.Count; i++)
+            {
+                if (_currentDirectoryItems[i].Text.CompareTo(fi.Name) > 0)
+                    break;
+            }
+            var newItem = makeItem(fi);
+            if (newItem != null)
+            {
+                _currentDirectoryItems.Insert(i, newItem);
+                Invoke(() =>
+                {
+                    int i;
+                    for (i = 0; i < Items.Count; i++)
+                    {
+                        if (Items[i].Text.CompareTo(fi.Name) > 0)
+                            break;
+                    }
+
+                    Items.Insert(i, newItem);
+                });
+
+            }
+        }
+
+        ListViewItem? makeItem(FileSystemInfo? entry)
+        {
+            if (entry!=null && PiViLityCore.Global.settings.IsVisibleEntry(entry))
+            {
+                bool isFile = entry is FileInfo;
+                var FileListItemData = new FileListItemData()
+                {
+                    Path = entry.FullName,
+                    LoadTileIconIndex = -1,
+                    IsFile = isFile
+                };
+                var item = new ListViewItem();
+                item.Text = entry.Name;
+                item.Tag = FileListItemData;
+
+                if (!isFile)
+                {
+                    FileListItemData.LoadTileIconIndex = -3;
+                    _iconStore.GetIcon(entry.FullName, index =>
+                    {
+                        item.ImageIndex = index;
+                    });
+                }
+
+                var length = (entry as FileInfo)?.Length ?? 0;
+                var lengthStr = isFile ? PiViLityCore.Util.String.GetEasyReadFileSizeF(length) : "";
+                item.ToolTipText = $"{entry.Name}{entry.LastWriteTime}{lengthStr}";
+
+
+                if (DetailSubItems.HasFlag(DetailSubItem.ModifiedDateTime))
+                {
+                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, entry.LastWriteTime.ToString()));
+                }
+                if (DetailSubItems.HasFlag(DetailSubItem.Type))
+                {
+                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, ""));
+                }
+                if (DetailSubItems.HasFlag(DetailSubItem.Size))
+                {
+                    if (!isFile)
+                        item.SubItems.Add("");
+                    else if (length < 1024)
+                        item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{length} B"));
+                    else
+                        item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{length / 1024:N0} KB"));
+                }
+                return item;
+            }
+            return null;
         }
 
         private void RefreshList()
@@ -108,6 +228,14 @@ namespace PiViLity
                 var dirInfo = new DirectoryInfo(path);
                 if (dirInfo != null)
                 {
+                    _fsw?.Dispose();
+                    _fsw = new FileSystemWatcher(path);
+                    _fsw.NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.Size;
+                    _fsw.Changed += FileSystem_OnChanged;
+                    _fsw.Renamed += FileSystem_OnRenamed;
+                    _fsw.Deleted += FileSystem_OnDeleted;
+                    _fsw.Created += FileSystem_OnCreated;
+
                     List<ListViewItem> list = new List<ListViewItem>();
                     Items.Clear();
                     _iconStore.Clear();
@@ -119,57 +247,15 @@ namespace PiViLity
                     var entries = dirInfo.EnumerateFileSystemInfos();
                     foreach (var entry in entries)
                     {
-                        if (entry == null)
-                            continue;
-
-                        if (PiViLityCore.Global.settings.IsVisibleEntry(entry))
+                        var item = makeItem(entry);
+                        if (item != null)
                         {
-                            bool isFile = entry is FileInfo;
-                            var FileListItemData = new FileListItemData()
-                            {
-                                Path = entry.FullName,
-                                LoadTileIconIndex = -1,
-                                IsFile = isFile
-                            };
-                            var item = new ListViewItem();
-                            item.Text = entry.Name;
-                            item.Tag = FileListItemData;
-
-                            if (!isFile)
-                            {
-                                FileListItemData.LoadTileIconIndex = -3;
-                                _iconStore.GetIcon(entry.FullName, index =>
-                                {
-                                    item.ImageIndex = index;
-                                });
-                            }
-
-                            var length = (entry as FileInfo)?.Length ?? 0;
-                            var lengthStr = isFile ? PiViLityCore.Util.String.GetEasyReadFileSizeF(length) : "";
-                            item.ToolTipText = $"{entry.Name}{entry.LastWriteTime}{lengthStr}";
-
-
-                            if (DetailSubItems.HasFlag(DetailSubItem.ModifiedDateTime))
-                            {
-                                item.SubItems.Add(new ListViewItem.ListViewSubItem(item, entry.LastWriteTime.ToString()));
-                            }
-                            if (DetailSubItems.HasFlag(DetailSubItem.Type))
-                            {
-                                item.SubItems.Add(new ListViewItem.ListViewSubItem(item, ""));
-                            }
-                            if (DetailSubItems.HasFlag(DetailSubItem.Size))
-                            {
-                                if (!isFile)
-                                    item.SubItems.Add("");
-                                else if (length < 1024)
-                                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{length} B"));
-                                else
-                                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, $"{length / 1024:N0} KB"));
-                            }
                             list.Add(item);
                         }
                     }
-                    Items.AddRange(list.ToArray());                    
+                    _currentDirectoryItems = list;
+                    Items.AddRange(list.ToArray());
+                    _fsw.EnableRaisingEvents = true;
                 }
             }
         }

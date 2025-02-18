@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+
 using namespace System;
 
 namespace PiVilityNative
@@ -10,6 +11,11 @@ namespace PiVilityNative
 		static String^ GetMyCompute();
 		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd);
 		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, int);
+
+		static void FileOperationCopy(Collections::Generic::IEnumerable<String^>^ srcPath, String^ destPath);
+		static void FileOperationMove(Collections::Generic::IEnumerable<String^>^ srcPath, String^ destPath);
+		static void FileOperationDelete(Collections::Generic::IEnumerable<String^>^ paths);
+		static void CreateShortCut(String^ srcPath, String^ destPath, String^ description);
 	};
 
 	public ref class FileInfo

@@ -1,13 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IWshRuntimeLibrary;
+using PiVilityNative;
 
 namespace PiViLityCore.Util
 {
-    internal static class Shell
+    public static class Shell
     {
+        public static void Copy(string srcPath, string path)
+        {
+            ShellAPI.FileOperationCopy([srcPath], path);
+        }
+        public static void Copy(IEnumerable<string> srcPath, string path)
+        {
+            ShellAPI.FileOperationCopy(srcPath, path);
+        }
+        public static void Move(string srcPath, string path)
+        {
+            ShellAPI.FileOperationMove([srcPath], path);
+        }
+        public static void Move(IEnumerable<string> srcPath, string path)
+        {
+            ShellAPI.FileOperationMove(srcPath, path);
+        }
+        public static void Delete(string path)
+        {
+            ShellAPI.FileOperationDelete([path]);
+        }
+        public static void Delete(IEnumerable<string> paths)
+        {
+            ShellAPI.FileOperationDelete(paths);
+        }
+        public static void CreateShortCut(string srcPath, string path, string description)
+        {
+            ShellAPI.CreateShortCut(srcPath, path, description);
+        }
+
         /// <summary>
         /// ドライブの種類を文字列で返します。
         /// </summary>
@@ -33,6 +65,43 @@ namespace PiViLityCore.Util
                     return "Ramディスク";
             }
             return "";
+        }
+
+        static public bool IsDirectory(string path)
+        {
+            return System.IO.Directory.Exists(path);
+        }
+        static public bool IsExecute(string path)
+        {
+            if (System.IO.File.Exists(path))
+            {
+                var extension = Path.GetExtension(path).ToLower();
+                if (extension == ".exe" || extension == ".com" || extension == ".bat")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        static public bool IsShortCut(string path)
+        {
+            if (System.IO.File.Exists(path))
+            {
+                var extension = Path.GetExtension(path).ToLower();
+                return extension == ".lnk";
+            }
+            return false;
+        }
+
+        static string? GetShortcutTarget(string path)
+        {
+            if (IsShortCut(path))
+            {
+                IWshShell shell = new WshShell();
+                IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(path);
+                return shortcut?.TargetPath;
+            }
+            return null;
         }
     }
 }

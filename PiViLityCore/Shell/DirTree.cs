@@ -9,7 +9,7 @@ namespace PiViLityCore.Shell
         public DirTree()
         {
             RootNode = new(this);
-            RootNode.SetType(DirTreeNodeType.ThisPC, null);
+            RootNode.SetType(DirTreeNodeType.SpecialFolderMyComputer, null);
         }
 
 

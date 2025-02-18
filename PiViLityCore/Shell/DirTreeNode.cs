@@ -16,15 +16,14 @@ namespace PiViLityCore.Shell
         DirectoryUnknown,
         Dummy,
 
-        /// <summary lang="ja">
-        /// "PC" on Explorer
-        /// </summary>
-        ThisPC,  
+        SpecialFolderMyComputer,  
 
     }
 
-    public class DirTreeNode
+    public class DirTreeNode : IFileSystemItem
     {
+        Environment.SpecialFolder _spericalFolder = Environment.SpecialFolder.Desktop;
+
         DirTreeNodeType _type = DirTreeNodeType.None;
         public DirTreeNodeType Type
         { 
@@ -58,14 +57,12 @@ namespace PiViLityCore.Shell
 
         public bool IsCannotAccess = false;
 
-        public bool IsPath => Type == DirTreeNodeType.Drive || Type == DirTreeNodeType.Directory || Type == DirTreeNodeType.DirectoryUnknown;
-
         /// <summary lang="ja">
         /// フルパス
         /// </summary>
         public string Path
         {
-            get; private set;
+            get; set;
         } = "";
 
         /// <summary lang="ja">
@@ -92,6 +89,42 @@ namespace PiViLityCore.Shell
         {
             get; private set;
         } = null;
+
+        /// <summary>
+        /// 特殊フォルダかどうか
+        /// </summary>
+        public bool IsSpecialFolder => _type >= DirTreeNodeType.SpecialFolderMyComputer;
+
+        /// <summary>
+        /// 特殊フォルダの場合、その種類
+        /// </summary>
+        public Environment.SpecialFolder SpecialFolder => _spericalFolder;
+
+        /// <summary>
+        /// パスを持っているか
+        /// </summary>
+        public bool HasPath => Type == DirTreeNodeType.Drive || Type == DirTreeNodeType.Directory || Type == DirTreeNodeType.DirectoryUnknown || IsSpecialFolder;
+
+        /// <summary>
+        /// ファイル情報を取得する
+        /// </summary>
+        /// <returns></returns>
+        public FileSystemInfo? GetFileSystemInfo()
+        {
+            if (HasPath)
+            {
+                try
+                {
+                    var fi = new DirectoryInfo(Path);
+                    return fi;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
 
         public DirTreeNode(DirTree dirTree)
         {
@@ -229,9 +262,9 @@ namespace PiViLityCore.Shell
 
                 //PCの場合、PCであることさえわかればいい。
                 //子にDriveを用意する
-                case DirTreeNodeType.ThisPC:
+                case DirTreeNodeType.SpecialFolderMyComputer:
                     Name = "PC";
-                    Path = PiVilityNative.ShellAPI.GetMyCompute();
+                    Path = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
 
                     Children.Clear();
                     foreach (var drive in DriveInfo.GetDrives())
@@ -275,6 +308,7 @@ namespace PiViLityCore.Shell
                 action(cur.Item1, cur.Item2);
             }
         }
+
     }
     
 }

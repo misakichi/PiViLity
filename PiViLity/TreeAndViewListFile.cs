@@ -31,5 +31,45 @@ namespace PiViLity
                 }
             }
         }
+
+
+        private void lsvFile_ItemDrag(object sender, ItemDragEventArgs e)
+        {
+            List<string> files = new();
+            for (int i = 0; i < lsvFile.SelectedItems.Count; i++)
+            {
+                if (lsvFile.SelectedItems[i].Tag is FileListItemData data)
+                {
+                    files.Add(data.Path);
+                }
+            }
+            if (files.Count > 0)
+            {
+                lsvFile.DoDragDrop(new DataObject(DataFormats.FileDrop, files.ToArray()), DragDropEffects.Copy | DragDropEffects.Move | DragDropEffects.Link);
+            }
+
+        }
+
+        private void lsvFile_DragEnter(object sender, DragEventArgs e)
+        {
+            _dragEnterKeyState = e.KeyState;
+            ChgeckProcessDragItem(sender, e);
+        }
+
+        private void lsvFile_DragDrop(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void lsvFile_DragLeave(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lsvFile_DragOver(object sender, DragEventArgs e)
+        {
+            ChgeckProcessDragItem(sender, e);
+        }
+
     }
 }
