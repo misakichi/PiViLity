@@ -1,4 +1,4 @@
-﻿namespace PiViLity
+﻿namespace PiViLity.Forms
 {
     partial class MainForm
     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime;
 using System.Text;
@@ -183,16 +184,19 @@ namespace PiViLityCore.Shell
                     {
                         if(drive.Name[0] == path[0])
                         {
-                            DriveInfo = drive;
+                            DriveInfo = drive;                            
                             Path = drive.Name;
-                            try
+                            if (drive.DriveType != DriveType.Network || PiViLityCore.Util.Shell.IsNetworkDriveAvailable(Path))
                             {
-                                Name = drive.VolumeLabel;
-                                AddUnknownChildren(new DirectoryInfo(path));
-                            }
-                            catch (IOException)
-                            {
+                                try
+                                {
+                                    Name = drive.VolumeLabel;
+                                    AddUnknownChildren(new DirectoryInfo(path));
+                                }
+                                catch (IOException)
+                                {
 
+                                }
                             }
                         }
                     }

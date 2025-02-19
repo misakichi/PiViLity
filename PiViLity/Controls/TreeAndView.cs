@@ -9,9 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static PiViLity.TreeAndView;
+using static PiViLity.Controls.TreeAndView;
 
-namespace PiViLity
+namespace PiViLity.Controls
 {
     public partial class TreeAndView : UserControl
     {

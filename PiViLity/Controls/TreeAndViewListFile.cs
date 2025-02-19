@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static PiViLity.FileListView;
+using static PiViLity.Controls.FileListView;
 
-namespace PiViLity
+namespace PiViLity.Controls
 {
 
     public partial class TreeAndView
@@ -18,7 +18,7 @@ namespace PiViLity
                 List<string> list = new();
                 foreach (ListViewItem? item in lsvFile.SelectedItems)
                 {
-                    if(item?.Tag is FileListItemData data)
+                    if(item is FileListViewItem data)
                     {
                         list.Add(data.Path);
                     }
@@ -38,7 +38,7 @@ namespace PiViLity
             List<string> files = new();
             for (int i = 0; i < lsvFile.SelectedItems.Count; i++)
             {
-                if (lsvFile.SelectedItems[i].Tag is FileListItemData data)
+                if (lsvFile.SelectedItems[i] is FileListViewItem data)
                 {
                     files.Add(data.Path);
                 }

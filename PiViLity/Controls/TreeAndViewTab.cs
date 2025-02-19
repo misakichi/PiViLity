@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace PiViLity
+namespace PiViLity.Controls
 {
     public partial class TreeAndViewTab : UserControl
     {

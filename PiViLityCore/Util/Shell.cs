@@ -11,6 +11,34 @@ namespace PiViLityCore.Util
 {
     public static class Shell
     {
+        public static bool IsNetworkDriveAvailable(string path)
+        {
+            try
+            {
+                var driveLetter = Path.GetPathRoot(path)?.TrimEnd('\\');
+                if (string.IsNullOrEmpty(driveLetter))
+                    return false;
+
+                var query = $"SELECT * FROM Win32_NetworkConnection WHERE LocalName = '{driveLetter}'";
+                using (var searcher = new System.Management.ManagementObjectSearcher(query))
+                using (var results = searcher.Get())
+                {
+                    foreach (var result in results)
+                    {
+                        var status = result["Status"]?.ToString();
+                        if (status == "OK")
+                            return true;
+                    }
+                }
+            }
+            catch
+            {
+                // エラーが発生した場合はネットワークドライブが利用不可とみなす
+                return false;
+            }
+
+            return false;
+        }
         public static void Copy(string srcPath, string path)
         {
             ShellAPI.FileOperationCopy([srcPath], path);

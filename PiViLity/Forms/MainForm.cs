@@ -6,18 +6,19 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
-namespace PiViLity
+namespace PiViLity.Forms
+
 {
     public partial class MainForm : Form
     {
-        TreeAndViewTab treeAndViewTab = new();
+        Controls.TreeAndViewTab treeAndViewTab = new();
         ToolStripButton btnSmallIconView = new();
         ToolStripButton btnLargeIconView = new();
         ToolStripButton btnListView = new();
         ToolStripButton btnDetailView = new();
         ToolStripButton btnTileView = new();
 
-        private List<Tuple<Setting.FileView, TreeAndView>> loadSettingPair = new();
+        private List<Tuple<Setting.FileView, Controls.TreeAndView>> loadSettingPair = new();
 
         public MainForm()
         {

@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace PiViLity
+namespace PiViLity.Controls
 {
     public partial class TreeAndView
     {

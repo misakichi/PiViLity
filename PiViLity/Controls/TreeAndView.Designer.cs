@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace PiViLity
+namespace PiViLity.Controls
 {
     partial class TreeAndView
     {
@@ -30,13 +30,11 @@ namespace PiViLity
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
             tvwDirMain = new TreeView();
             splitDirView = new Splitter();
             panelViewInfo = new Panel();
             panelInfo = new Panel();
             splitViewInfo = new Splitter();
-            lsvFile = new FileListView();
             toolStrip = new ToolStrip();
             panelViewInfo.SuspendLayout();
             SuspendLayout();
@@ -51,7 +49,7 @@ namespace PiViLity
             tvwDirMain.Location = new Point(0, 25);
             tvwDirMain.Name = "tvwDirMain";
             tvwDirMain.ShowLines = false;
-            tvwDirMain.Size = new Size(226, 654);
+            tvwDirMain.Size = new Size(226, 423);
             tvwDirMain.TabIndex = 4;
             tvwDirMain.ItemDrag += tvwDirMain_ItemDrag;
             tvwDirMain.DragDrop += tvwDirMain_DragDrop;
@@ -64,7 +62,7 @@ namespace PiViLity
             // 
             splitDirView.Location = new Point(226, 25);
             splitDirView.Name = "splitDirView";
-            splitDirView.Size = new Size(3, 654);
+            splitDirView.Size = new Size(3, 423);
             splitDirView.TabIndex = 6;
             splitDirView.TabStop = false;
             // 
@@ -72,57 +70,35 @@ namespace PiViLity
             // 
             panelViewInfo.Controls.Add(panelInfo);
             panelViewInfo.Controls.Add(splitViewInfo);
-            panelViewInfo.Controls.Add(lsvFile);
             panelViewInfo.Dock = DockStyle.Fill;
             panelViewInfo.Location = new Point(229, 25);
             panelViewInfo.Name = "panelViewInfo";
-            panelViewInfo.Size = new Size(598, 654);
+            panelViewInfo.Size = new Size(458, 423);
             panelViewInfo.TabIndex = 13;
             // 
             // panelInfo
             // 
             panelInfo.BorderStyle = BorderStyle.Fixed3D;
             panelInfo.Dock = DockStyle.Fill;
-            panelInfo.Location = new Point(0, 372);
+            panelInfo.Location = new Point(0, 3);
             panelInfo.Name = "panelInfo";
-            panelInfo.Size = new Size(598, 282);
+            panelInfo.Size = new Size(458, 420);
             panelInfo.TabIndex = 15;
             // 
             // splitViewInfo
             // 
             splitViewInfo.Dock = DockStyle.Top;
-            splitViewInfo.Location = new Point(0, 369);
+            splitViewInfo.Location = new Point(0, 0);
             splitViewInfo.Name = "splitViewInfo";
-            splitViewInfo.Size = new Size(598, 3);
+            splitViewInfo.Size = new Size(458, 3);
             splitViewInfo.TabIndex = 13;
             splitViewInfo.TabStop = false;
-            // 
-            // lsvFile
-            // 
-            lsvFile.Activation = ItemActivation.OneClick;
-            lsvFile.AllowDrop = true;
-            lsvFile.BorderStyle = BorderStyle.None;
-            lsvFile.Dock = DockStyle.Top;
-            lsvFile.HotTracking = true;
-            lsvFile.HoverSelection = true;
-            lsvFile.Location = new Point(0, 0);
-            lsvFile.Name = "lsvFile";
-            lsvFile.Size = new Size(598, 369);
-            lsvFile.TabIndex = 12;
-            lsvFile.TileSize = new Size(320, 240);
-            lsvFile.UseCompatibleStateImageBehavior = false;
-            lsvFile.ItemDrag += lsvFile_ItemDrag;
-            lsvFile.DragDrop += lsvFile_DragDrop;
-            lsvFile.DragEnter += lsvFile_DragEnter;
-            lsvFile.DragOver += lsvFile_DragOver;
-            lsvFile.DragLeave += lsvFile_DragLeave;
-            lsvFile.MouseClick += lsvFile_MouseClick;
             // 
             // toolStrip
             // 
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
-            toolStrip.Size = new Size(827, 25);
+            toolStrip.Size = new Size(687, 25);
             toolStrip.TabIndex = 0;
             toolStrip.Text = "toolStrip";
             // 
@@ -136,7 +112,7 @@ namespace PiViLity
             Controls.Add(toolStrip);
             DoubleBuffered = true;
             Name = "TreeAndView";
-            Size = new Size(827, 679);
+            Size = new Size(687, 448);
             panelViewInfo.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();

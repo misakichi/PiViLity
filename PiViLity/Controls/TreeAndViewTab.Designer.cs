@@ -1,4 +1,4 @@
-﻿namespace PiViLity
+﻿namespace PiViLity.Controls
 {
     partial class TreeAndViewTab
     {
