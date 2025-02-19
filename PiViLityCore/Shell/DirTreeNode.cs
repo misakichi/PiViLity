@@ -179,28 +179,53 @@ namespace PiViLityCore.Shell
                         throw new ArgumentOutOfRangeException(nameof(path));
 
                     Children.Clear();
-                    DriveInfo = null;
-                    foreach (var drive in DriveInfo.GetDrives())
+                    DriveInfo? drive = null;
+                    try
                     {
-                        if(drive.Name[0] == path[0])
+                        drive = new DriveInfo(path);
+                    }
+                    catch (Exception)
+                    {
+                        
+                    }
+
+                    foreach (var drv in DriveInfo.GetDrives())
+                    {
+                        if (drv.Name[0] == path[0])
                         {
-                            DriveInfo = drive;                            
-                            Path = drive.Name;
-                            if (drive.DriveType != DriveType.Network || PiViLityCore.Util.Shell.IsNetworkDriveAvailable(Path))
+                            drive = drv;
+                        }
+                    }
+                    if (drive != null)
+                    {
+                        Path = drive.Name;
+                        if (drive.DriveType == DriveType.Network)
+                        {
+                            Task.Run(() =>
                             {
-                                try
+                                if (PiViLityCore.Util.Shell.IsNetworkDriveAvailable(Path))
                                 {
                                     Name = drive.VolumeLabel;
-                                    AddUnknownChildren(new DirectoryInfo(path));
+                                    PiViLityCore.Global.InvokeMainThread(() => AddUnknownChildren(new DirectoryInfo(path)));
                                 }
-                                catch (IOException)
-                                {
+                            });
+                            //PiViLityCore.Util.Shell.IsNetworkDriveAvailable(Path))
+                        }
+                        else
+                        {
+                            try
+                            {
+                                Name = drive.VolumeLabel;
+                                AddUnknownChildren(new DirectoryInfo(path));
+                            }
+                            catch (IOException)
+                            {
 
-                                }
                             }
                         }
                     }
-                    if(DriveInfo==null)
+                    DriveInfo = drive;
+                    if (DriveInfo==null)
                         throw new DirectoryNotFoundException(nameof(Path));
 
                     break;
@@ -271,10 +296,10 @@ namespace PiViLityCore.Shell
                     Path = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
 
                     Children.Clear();
-                    foreach (var drive in DriveInfo.GetDrives())
+                    foreach (var drv in DriveInfo.GetDrives())
                     {
                         var child = new DirTreeNode(this, Tree);
-                        child.SetType(DirTreeNodeType.Drive, drive.Name);
+                        child.SetType(DirTreeNodeType.Drive, drv.Name);
                         Children.Add(child);
                     }
 

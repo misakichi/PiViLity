@@ -90,5 +90,10 @@ namespace PiViLity.Controls
             fileView.SplitListHeight = splitViewInfo.SplitPosition;
             fileView.Path = SelectedPath;
         }
+
+        private void lsvFile_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+
+        }
     }
 }

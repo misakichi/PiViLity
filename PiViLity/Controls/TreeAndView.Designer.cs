@@ -30,11 +30,13 @@ namespace PiViLity.Controls
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             tvwDirMain = new TreeView();
             splitDirView = new Splitter();
             panelViewInfo = new Panel();
             panelInfo = new Panel();
             splitViewInfo = new Splitter();
+            lsvFile = new FileListView();
             toolStrip = new ToolStrip();
             panelViewInfo.SuspendLayout();
             SuspendLayout();
@@ -70,6 +72,7 @@ namespace PiViLity.Controls
             // 
             panelViewInfo.Controls.Add(panelInfo);
             panelViewInfo.Controls.Add(splitViewInfo);
+            panelViewInfo.Controls.Add(lsvFile);
             panelViewInfo.Dock = DockStyle.Fill;
             panelViewInfo.Location = new Point(229, 25);
             panelViewInfo.Name = "panelViewInfo";
@@ -80,19 +83,42 @@ namespace PiViLity.Controls
             // 
             panelInfo.BorderStyle = BorderStyle.Fixed3D;
             panelInfo.Dock = DockStyle.Fill;
-            panelInfo.Location = new Point(0, 3);
+            panelInfo.Location = new Point(0, 372);
             panelInfo.Name = "panelInfo";
-            panelInfo.Size = new Size(458, 420);
+            panelInfo.Size = new Size(458, 51);
             panelInfo.TabIndex = 15;
             // 
             // splitViewInfo
             // 
             splitViewInfo.Dock = DockStyle.Top;
-            splitViewInfo.Location = new Point(0, 0);
+            splitViewInfo.Location = new Point(0, 369);
             splitViewInfo.Name = "splitViewInfo";
             splitViewInfo.Size = new Size(458, 3);
             splitViewInfo.TabIndex = 13;
             splitViewInfo.TabStop = false;
+            // 
+            // lsvFile
+            // 
+            lsvFile.Activation = ItemActivation.OneClick;
+            lsvFile.AllowDrop = true;
+            lsvFile.BorderStyle = BorderStyle.None;
+            lsvFile.Dock = DockStyle.Top;
+            lsvFile.HotTracking = true;
+            lsvFile.HoverSelection = true;
+            lsvFile.Location = new Point(0, 0);
+            lsvFile.Name = "lsvFile";
+            lsvFile.Size = new Size(458, 369);
+            lsvFile.Sorting = SortOrder.Descending;
+            lsvFile.TabIndex = 12;
+            lsvFile.TileSize = new Size(320, 240);
+            lsvFile.UseCompatibleStateImageBehavior = false;
+            lsvFile.ColumnClick += lsvFile_ColumnClick;
+            lsvFile.ItemDrag += lsvFile_ItemDrag;
+            lsvFile.DragDrop += lsvFile_DragDrop;
+            lsvFile.DragEnter += lsvFile_DragEnter;
+            lsvFile.DragOver += lsvFile_DragOver;
+            lsvFile.DragLeave += lsvFile_DragLeave;
+            lsvFile.MouseClick += lsvFile_MouseClick;
             // 
             // toolStrip
             // 
