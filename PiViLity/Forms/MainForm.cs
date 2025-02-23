@@ -59,32 +59,29 @@ namespace PiViLity.Forms
         /// <param name="e"></param>
         private void TreeAndViewTab_Load(object sender, EventArgs e)
         {
-            List<Tuple<Setting.FileView, Controls.TreeAndView>> loadSettingPair = new();
+            List<Tuple<Setting.TvLvTabPage, Controls.TreeAndView>> loadSettingPair = new();
 
             //TreeAndViewTabを追加する
             treeAndViewTab.Dock = DockStyle.Fill;
             panel.Controls.Add(treeAndViewTab);
 
             //設定ファイルを元にタブを追加する
-            Setting.AppSettings.Instance.FileViews.ForEach(fileViewSetting =>
+            Setting.AppSettings.Instance.TvLvTabPages.ForEach(fileViewSetting =>
             {
-                if (!System.IO.Directory.Exists(fileViewSetting.Path))
+                if (!System.IO.Directory.Exists(fileViewSetting.FileListView.Path))
                 {
                     return;
                 }
 
-                var newTreeView = treeAndViewTab.AddTab(fileViewSetting.Path);
+                var newTreeView = treeAndViewTab.AddTab(fileViewSetting.FileListView.Path);
                 loadSettingPair.Add(new(fileViewSetting, newTreeView));
             });
 
             //タブがない場合新規追加
             if (treeAndViewTab.TabCount == 0)
             {
-                Setting.FileView newSetting = new()
-                {
-                    Path = System.IO.Directory.GetCurrentDirectory()
-                };
-                Setting.AppSettings.Instance.FileViews.Add(newSetting);
+                Setting.TvLvTabPage newSetting = new();
+                Setting.AppSettings.Instance.TvLvTabPages.Add(newSetting);
 
                 var newTreeView = treeAndViewTab.AddTab(System.IO.Directory.GetCurrentDirectory());
             }
@@ -133,15 +130,15 @@ namespace PiViLity.Forms
             Setting.AppSettings.Instance.WindowPosition = new Point(Left, Top);
             Setting.AppSettings.Instance.WindowState = WindowState;
 
-            Setting.AppSettings.Instance.FileViews.Clear();
+            Setting.AppSettings.Instance.TvLvTabPages.Clear();
             for (int tabIndex = 0; tabIndex < treeAndViewTab.TabCount; tabIndex++)
             {
                 var tab = treeAndViewTab.GetTab(tabIndex);
                 if (tab != null)
                 {
-                    Setting.FileView fileView = new();
+                    Setting.TvLvTabPage fileView = new();
                     tab.SaveSettings(fileView);
-                    Setting.AppSettings.Instance.FileViews.Add(fileView);
+                    Setting.AppSettings.Instance.TvLvTabPages.Add(fileView);
                 }
             }
 

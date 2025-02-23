@@ -1,4 +1,4 @@
-﻿using PiViLity.Setting;
+﻿using Microsoft.VisualBasic.FileIO;
 using PiViLityCore.Shell;
 using PiViLityCore.Util;
 using System;
@@ -6,12 +6,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using static PiViLity.Controls.FileListView;
+using System.Runtime.InteropServices;
 
-namespace PiViLity.Controls
+namespace PiViLityCore.Controls
 {
     /// <summary>
     /// ファイル一覧用ListView
@@ -33,13 +30,14 @@ namespace PiViLity.Controls
         //private fields
         private string _path = "C:\\";
         private FileSystemWatcher _fsw = new();
-        private IconStore _iconStore = new(true, true, true);
-        private IconStoreThumbnail _thumbnailStore = new();
+        private IconStoreSystem _iconStore = new(true, true, true);
+        public IIconStore? ThumbnailIconStore = null;
         private List<FileListViewItem> _currentDirectoryItems = new ();
         private List<FileListViewItem> _currentViewItems = new();
         private FileListViewSubItemTypes _detailSubItems = FileListViewSubItemTypes.Name;
         private FileListColumnHeader[] SubItemColums = new FileListColumnHeader[(int)FileListViewSubItemBit.Max];
         private int _activeSortIndex = 0;
+        private int _dragEnterKeyState = 0;
 
         /// <summary>
         /// コンストラクタ
@@ -53,7 +51,7 @@ namespace PiViLity.Controls
                 SubItemColums[i] = new()
                 {
                     Name = subItemName,
-                    Text = PiViLityCore.Global.GetResourceString(Resource.ResourceManager, $"FileListDetailSubItem.{subItemName}"),
+                    Text = PiViLityCore.Global.GetResourceString($"FileListDetailSubItem.{subItemName}"),
                     SubItemBit = (FileListViewSubItemBit)i,
                     Comparer = cmpType!=null ? Activator.CreateInstance(cmpType, [this]) as System.Collections.IComparer : null,
                     Width = DefaultSubItemWidth,
@@ -66,11 +64,6 @@ namespace PiViLity.Controls
             DetailSubItems = FileListViewSubItemTypes.All;
             LargeImageList = _iconStore.LargeIconList;
             SmallImageList = _iconStore.SmallIconList;
-            if (!DesignMode)
-            {
-                TileSize = Setting.AppSettings.Instance.ThumbnailSize;
-            }
-            _thumbnailStore = new(TileSize);
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             UpdateStyles();
 
@@ -242,7 +235,6 @@ namespace PiViLity.Controls
         /// </summary>
         private void RemakeFileList()
         {
-            TileSize = Setting.AppSettings.Instance.ThumbnailSize;
             var path = _path;
             if (Directory.Exists(path))
             {
@@ -259,11 +251,7 @@ namespace PiViLity.Controls
 
                     List<FileListViewItem> list = new();
                     _iconStore.Clear();
-                    _thumbnailStore.Clear();
-                    if(_thumbnailStore.ThumbnailSize != TileSize)
-                    {
-                        _thumbnailStore = new(TileSize);
-                    }
+                    ThumbnailIconStore?.Clear();
                     var entries = dirInfo.EnumerateFileSystemInfos();
                     foreach (var entry in entries)
                     {
@@ -311,7 +299,7 @@ namespace PiViLity.Controls
             {
                 if(value==View.Tile)
                 {
-                    LargeImageList = _iconStore.JumboIconList;
+                    LargeImageList = _iconStore.TileIconList;
                     OwnerDraw = true;
                 }
                 else
@@ -331,7 +319,7 @@ namespace PiViLity.Controls
         protected override void OnDrawItem(DrawListViewItemEventArgs e)
         {
             //タイルの場合のみサムネイルをオーナードローで描画します。
-            if (View == View.Tile)
+            if (View == View.Tile && ThumbnailIconStore != null)
             {
                 if (e.Item is FileListViewItem FileListViewItem)
                 {
@@ -339,7 +327,7 @@ namespace PiViLity.Controls
                     if (FileListViewItem.LoadTileIconIndex == -1)
                     {
                         FileListViewItem.LoadTileIconIndex = -2;
-                        _thumbnailStore.GetThumbnailImage(FileListViewItem.Path, index =>
+                        ThumbnailIconStore.GetIcon(FileListViewItem.Path, index =>
                         {
                             if (index >= 0)
                             {
@@ -366,15 +354,15 @@ namespace PiViLity.Controls
                     //取得後の場合はローディングアイコンを描画します。
                     else if (FileListViewItem.LoadTileIconIndex >= 0)
                     {
-                        if (_thumbnailStore.ThumbnailSize == TileSize)
+                        if (ThumbnailIconStore.TileIconList.ImageSize == TileSize)
                         {
-                            int x = e.Bounds.Left + (_thumbnailStore.ThumbnailSize.Width - e.Bounds.Width) / 2;
-                            int y = e.Bounds.Top + (_thumbnailStore.ThumbnailSize.Height - e.Bounds.Height) / 2;
-                            _thumbnailStore.ImageList.Draw(e.Graphics, x, y, FileListViewItem.LoadTileIconIndex);
+                            int x = e.Bounds.Left + (TileSize.Width - e.Bounds.Width) / 2;
+                            int y = e.Bounds.Top + (TileSize.Height - e.Bounds.Height) / 2;
+                            ThumbnailIconStore.TileIconList.Draw(e.Graphics, x, y, FileListViewItem.LoadTileIconIndex);
                         }
                         else
                         {
-                            using (var image = _thumbnailStore.ImageList.Images[FileListViewItem.LoadTileIconIndex])
+                            using (var image = ThumbnailIconStore.TileIconList.Images[FileListViewItem.LoadTileIconIndex])
                             {
                                 e.Graphics.SetClip(e.Bounds);
                                 int x = e.Bounds.Left + (e.Bounds.Width - image.Width) / 2;
@@ -484,10 +472,127 @@ namespace PiViLity.Controls
         }
 
         /// <summary>
+        /// MouseClickイベントを処理し、必要に応じてファイルの右クリックメニューを表示します。
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            // lsvFileの右クリックイベント処理
+            if (e.Button == MouseButtons.Right)
+            {
+                List<string> list = new();
+                foreach (ListViewItem? item in SelectedItems)
+                {
+                    if (item is FileListViewItem data)
+                    {
+                        list.Add(data.Path);
+                    }
+                }
+                if (list.Count > 0)
+                {
+                    // ファイルの右クリックメニューを表示
+                    var screen = PointToScreen(e.Location);
+                    PiVilityNative.ShellAPI.ShowShellContextMenu(list.ToArray(), Handle, screen.X, screen.Y);
+                }
+            }
+            base.OnMouseClick(e);
+        }
+
+        protected override void OnItemDrag(ItemDragEventArgs e)
+        {
+            if (e.Item is IFileSystemItem isi)
+            {
+                if (isi.HasPath)
+                {
+                    var paths = new string[1];
+                    var path = isi.Path;
+                    if (Directory.Exists(path) || File.Exists(path))
+                    {
+                        paths[0] = path;
+                        DoDragDrop(new DataObject(DataFormats.FileDrop, paths), DragDropEffects.Copy | DragDropEffects.Move | DragDropEffects.Link);
+                    }
+                }
+            }
+            base.OnItemDrag(e);
+        }
+        protected override void OnDragEnter(DragEventArgs e)
+        {
+            _dragEnterKeyState = e.KeyState;
+            PiViLityCore.Util.Forms.ChgeckProcessDragItem(this, e);
+            base.OnDragEnter(e);
+        }
+
+        protected override void OnDragOver(DragEventArgs e)
+        {
+            PiViLityCore.Util.Forms.ChgeckProcessDragItem(this, e);
+            base.OnDragOver(e);
+        }
+
+        protected override void OnDragDrop(DragEventArgs e)
+        {
+            PiViLityCore.Util.Forms.ChgeckProcessDragItem(this, e);
+            if (e.Effect != DragDropEffects.None)
+            {
+                var pt = new Point(e.X, e.Y);
+                var clientPt = PointToClient(pt);
+                var test = HitTest(clientPt.X, clientPt.Y);
+                var item = test?.Item;
+                if (item is IFileSystemItem isi&& isi.HasPath)
+                {
+                    var isDir = PiViLityCore.Util.Shell.IsDirectory(isi.Path);
+                    var isExe = PiViLityCore.Util.Shell.IsExecute(isi.Path);
+                    if ((_dragEnterKeyState & 2) != 0)
+                    {
+                        if (e.Data?.GetData(DataFormats.FileDrop) is string[] pathList)
+                        {
+                            var drop = Marshal.GetIUnknownForObject(this);
+                            var dragData = Marshal.GetIUnknownForObject(e.Data);
+                            var screen = (pt);
+                            //PiVilityNative.ShellAPI.ShowShellDropContextMenu(DirectoryTreeNode.Path, drop, dragData, tvwDirMain.Handle, screen.X, screen.Y);
+                        }
+                    }
+                    else
+                    {
+                        if (e.Data?.GetData(DataFormats.FileDrop) is string[] pathList)
+                        {
+                            foreach (var srcPath in pathList)
+                            {
+                                if (isDir)
+                                {
+                                    if (ModifierKeys.HasFlag(Keys.Control))
+                                    {
+                                        PiViLityCore.Util.Shell.Copy(srcPath, isi.Path);
+                                    }
+                                    else if (ModifierKeys.HasFlag(Keys.Shift))
+                                    {
+                                        PiViLityCore.Util.Shell.Move(srcPath, isi.Path);
+                                    }
+                                    else if (ModifierKeys.HasFlag(Keys.Alt))
+                                    {
+                                        PiViLityCore.Util.Shell.CreateShortCut(srcPath, isi.Path, "new shortcut");
+                                    }
+                                    else
+                                    {
+                                        PiViLityCore.Util.Shell.Move(srcPath, isi.Path);
+                                    }
+                                }
+                                else
+                                {
+                                    //実行
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            base.OnDragDrop(e);
+        }
+
+        /// <summary>
         /// 設定復元
         /// </summary>
         /// <param name="fileView"></param>
-        internal void RestoreSettings(PiViLity.Setting.FileView fileView)
+        public void RestoreSettings(FileListViewSettings fileView)
         {
             for(int i = 0; i < SubItemColums.Length; i++)
             {
@@ -507,7 +612,7 @@ namespace PiViLity.Controls
         /// </summary>
         /// <param name="fileView"></param>
         /// <exception cref="NotImplementedException"></exception>
-        internal void SaveSettings(PiViLity.Setting.FileView fileView)
+        public void SaveSettings(FileListViewSettings fileView)
         {
             fileView.SubItemWidth = new int[SubItemColums.Length];
             for (int i = 0; i < SubItemColums.Length; i++)
@@ -517,5 +622,12 @@ namespace PiViLity.Controls
             fileView.Path = Path;
         }
     }
+
+    public class FileListViewSettings
+    {
+        public string Path = SpecialDirectories.MyPictures;
+        public int[] SubItemWidth = new int[(int)FileListViewSubItemBit.Max];
+    }
+
 
 }

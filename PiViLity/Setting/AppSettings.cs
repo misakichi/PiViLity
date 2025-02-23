@@ -11,7 +11,7 @@ namespace PiViLity.Setting
     {
         static public readonly AppSettings Instance = new();
 
-        public List<FileView> FileViews { get; set; } = new();
+        public List<TvLvTabPage> TvLvTabPages { get; set; } = new();
 
         public string CacheDb = System.IO.Path.GetDirectoryName(Application.ExecutablePath) + "\\thumbnail.db" ?? "";
         public View FileListViewStyle = View.Tile;

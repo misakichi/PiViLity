@@ -12,6 +12,8 @@ namespace PiViLityCore.Shell
         Environment.SpecialFolder SpecialFolder { get; }
         string Path { get; }
 
+        string FileName { get; }
+
         bool HasPath { get; }
 
         FileSystemInfo? GetFileSystemInfo();

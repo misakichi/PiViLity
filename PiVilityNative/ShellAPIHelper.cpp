@@ -91,6 +91,132 @@ System::String^ FileInfo::GetFileTypeName(String^ pathOrExtension)
 	SHGetFileInfo(wcharPath, 0, &info, sizeof(info), SHGFI_TYPENAME);
 	return gcnew System::String(info.szTypeName);
 }
+
+/// <summary>
+/// 特殊フォルダからCSIDLを取得します。
+/// </summary>
+/// <param name="folder"></param>
+/// <returns></returns>
+static int ToCSIDL(Environment::SpecialFolder folder)
+{
+	switch (folder)
+	{
+	case Environment::SpecialFolder::Desktop:
+		return CSIDL_DESKTOP;
+	case Environment::SpecialFolder::Programs:
+		return CSIDL_PROGRAMS;
+	case Environment::SpecialFolder::MyDocuments:
+		return CSIDL_PERSONAL;
+	case Environment::SpecialFolder::Favorites:
+		return CSIDL_FAVORITES;
+	case Environment::SpecialFolder::Startup:
+		return CSIDL_STARTUP;
+	case Environment::SpecialFolder::Recent:
+		return CSIDL_RECENT;
+	case Environment::SpecialFolder::SendTo:
+		return CSIDL_SENDTO;
+	case Environment::SpecialFolder::StartMenu:
+		return CSIDL_STARTMENU;
+	case Environment::SpecialFolder::MyMusic:
+		return CSIDL_MYMUSIC;
+	case Environment::SpecialFolder::MyVideos:
+		return CSIDL_MYVIDEO;
+	case Environment::SpecialFolder::DesktopDirectory:
+		return CSIDL_DESKTOPDIRECTORY;
+	case Environment::SpecialFolder::MyComputer:
+		return CSIDL_DRIVES;
+	case Environment::SpecialFolder::NetworkShortcuts:
+		return CSIDL_NETWORK;
+	case Environment::SpecialFolder::Fonts:
+		return CSIDL_FONTS;
+	case Environment::SpecialFolder::Templates:
+		return CSIDL_TEMPLATES;
+	case Environment::SpecialFolder::CommonStartMenu:
+		return CSIDL_COMMON_STARTMENU;
+	case Environment::SpecialFolder::CommonPrograms:
+		return CSIDL_COMMON_PROGRAMS;
+	case Environment::SpecialFolder::CommonStartup:
+		return CSIDL_COMMON_STARTUP;
+	case Environment::SpecialFolder::CommonDesktopDirectory:
+		return CSIDL_COMMON_DESKTOPDIRECTORY;
+	case Environment::SpecialFolder::ApplicationData:
+		return CSIDL_APPDATA;
+	case Environment::SpecialFolder::PrinterShortcuts:
+		return CSIDL_PRINTHOOD;
+	case Environment::SpecialFolder::LocalApplicationData:
+		return CSIDL_LOCAL_APPDATA;
+	case Environment::SpecialFolder::InternetCache:
+		return CSIDL_INTERNET_CACHE;
+	case Environment::SpecialFolder::Cookies:
+		return CSIDL_COOKIES;
+	case Environment::SpecialFolder::History:
+		return CSIDL_HISTORY;
+	case Environment::SpecialFolder::CommonApplicationData:
+		return CSIDL_COMMON_APPDATA;
+	case Environment::SpecialFolder::Windows:
+		return CSIDL_WINDOWS;
+	case Environment::SpecialFolder::System:
+		return CSIDL_SYSTEM;
+	case Environment::SpecialFolder::ProgramFiles:
+		return CSIDL_PROGRAM_FILES;
+	case Environment::SpecialFolder::MyPictures:
+		return CSIDL_MYPICTURES;
+	case Environment::SpecialFolder::UserProfile:
+		return CSIDL_PROFILE;
+	case Environment::SpecialFolder::SystemX86:
+		return CSIDL_SYSTEMX86;
+	case Environment::SpecialFolder::ProgramFilesX86:
+		return CSIDL_PROGRAM_FILESX86;
+	case Environment::SpecialFolder::CommonProgramFiles:
+		return CSIDL_PROGRAM_FILES_COMMON;
+	case Environment::SpecialFolder::CommonProgramFilesX86:
+		return CSIDL_PROGRAM_FILES_COMMONX86;
+	case Environment::SpecialFolder::CommonTemplates:
+		return CSIDL_COMMON_TEMPLATES;
+	case Environment::SpecialFolder::CommonDocuments:
+		return CSIDL_COMMON_DOCUMENTS;
+	case Environment::SpecialFolder::CommonAdminTools:
+		return CSIDL_COMMON_ADMINTOOLS;
+	case Environment::SpecialFolder::AdminTools:
+		return CSIDL_ADMINTOOLS;
+	case Environment::SpecialFolder::CommonMusic:
+		return CSIDL_COMMON_MUSIC;
+	case Environment::SpecialFolder::CommonPictures:
+		return CSIDL_COMMON_PICTURES;
+	case Environment::SpecialFolder::CommonVideos:
+		return CSIDL_COMMON_VIDEO;
+	case Environment::SpecialFolder::Resources:
+		return CSIDL_RESOURCES;
+	case Environment::SpecialFolder::LocalizedResources:
+		return CSIDL_RESOURCES_LOCALIZED;
+	case Environment::SpecialFolder::CommonOemLinks:
+		return CSIDL_COMMON_OEM_LINKS;
+	case Environment::SpecialFolder::CDBurning:
+		return CSIDL_CDBURN_AREA;
+	default:
+		throw gcnew ArgumentOutOfRangeException("folder", "Unknown special folder");
+	}
+}
+
+/// <summary>
+/// 特殊フォルダからファイルのアイコンインデックスを取得します。
+/// </summary>
+/// <param name="specialFolder"></param>
+/// <returns></returns>
+int FileInfo::GetFileIconIndex(Environment::SpecialFolder specialFolder)
+{
+	auto cidl = ToCSIDL(specialFolder);
+	LPITEMIDLIST pidl = nullptr;
+	if (SUCCEEDED(SHGetSpecialFolderLocation(NULL, cidl, &pidl)))
+	{
+		SHFILEINFO info = {};
+		SHGetFileInfo((LPCWSTR)pidl, 0, &info, sizeof(info), SHGFI_SYSICONINDEX | SHGFI_PIDL);
+		CoTaskMemFree(pidl);
+		return info.iIcon;
+	}
+	return -1;
+}
+
 /// <summary>
 /// ファイルパスからファイルのアイコンインデックスを取得します。
 /// </summary>

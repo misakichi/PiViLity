@@ -31,6 +31,7 @@ namespace PiVilityNative
 
 
 		static System::String^ GetFileTypeName(String^ pathOrExtension);
+		static int GetFileIconIndex(Environment::SpecialFolder specialFolder);
 		static int GetFileIconIndex(String^ path);
 		static System::Drawing::Icon^ GetFileLargeIconFromIndex(int index);
 		static System::Drawing::Icon^ GetFileSmallIconFromIndex(int index);

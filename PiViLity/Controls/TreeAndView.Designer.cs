@@ -1,4 +1,5 @@
 ﻿using System.Windows.Forms;
+using PiViLityCore.Controls;
 
 namespace PiViLity.Controls
 {
@@ -31,7 +32,7 @@ namespace PiViLity.Controls
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            tvwDirMain = new TreeView();
+            tvwDirMain = new DirectoryTreeView();
             splitDirView = new Splitter();
             panelViewInfo = new Panel();
             panelInfo = new Panel();
@@ -53,12 +54,6 @@ namespace PiViLity.Controls
             tvwDirMain.ShowLines = false;
             tvwDirMain.Size = new Size(226, 423);
             tvwDirMain.TabIndex = 4;
-            tvwDirMain.ItemDrag += tvwDirMain_ItemDrag;
-            tvwDirMain.DragDrop += tvwDirMain_DragDrop;
-            tvwDirMain.DragEnter += tvwDirMain_DragEnter;
-            tvwDirMain.DragOver += tvwDirMain_DragOver;
-            tvwDirMain.DragLeave += tvwDirMain_DragLeave;
-            tvwDirMain.MouseClick += tvwDirMain_MouseClick;
             // 
             // splitDirView
             // 
@@ -113,13 +108,7 @@ namespace PiViLity.Controls
             lsvFile.View = View.Details;
             lsvFile.TileSize = new Size(320, 240);
             lsvFile.UseCompatibleStateImageBehavior = false;
-            lsvFile.ColumnClick += lsvFile_ColumnClick;
-            lsvFile.ItemDrag += lsvFile_ItemDrag;
-            lsvFile.DragDrop += lsvFile_DragDrop;
-            lsvFile.DragEnter += lsvFile_DragEnter;
-            lsvFile.DragOver += lsvFile_DragOver;
-            lsvFile.DragLeave += lsvFile_DragLeave;
-            lsvFile.MouseClick += lsvFile_MouseClick;
+
             // 
             // toolStrip
             // 
@@ -147,12 +136,12 @@ namespace PiViLity.Controls
 
         #endregion
 
-        private TreeView tvwDirMain;
+        private PiViLityCore.Controls.DirectoryTreeView tvwDirMain;
         private Splitter splitDirView;
         private Panel panelViewInfo;
         private Panel panelInfo;
         private Splitter splitViewInfo;
-        private FileListView lsvFile;
+        private PiViLityCore.Controls.FileListView lsvFile;
         private ToolStrip toolStrip;
     }
 }

@@ -6,28 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PiViLity.Controls
+namespace PiViLityCore.Controls
 {
-    internal enum FileListViewSubItemBit : int
-    {
-        Name = 0,
-        ModifiedDateTime,
-        Type,
-        Size,
-        Max,    
-
-    }
-    [Flags]
-    public enum FileListViewSubItemTypes
-    {
-        Name = 1<< FileListViewSubItemBit.Name,
-        ModifiedDateTime = 1 << FileListViewSubItemBit.ModifiedDateTime,
-        Type = 1 << FileListViewSubItemBit.Type,
-        Size = 1 << FileListViewSubItemBit.Size,
-
-        All = ModifiedDateTime | Type | Size
-    }
-
     /// <summary>
     /// ファイルリスト用ListView(FileListView)のアイテムデータ
     /// </summary>
@@ -35,6 +15,7 @@ namespace PiViLity.Controls
     {
         private FileListViewSubItemTypes _fileListViewSubItemType;
         private string _path = "";
+        public string FileName { get; private set; } = "";
 
         /// <summary>
         /// コンストラクタ
@@ -71,6 +52,7 @@ namespace PiViLity.Controls
         private void RefreshItems(FileSystemInfo fsi)
         {
             _path = fsi.FullName;
+            FileName = fsi.Name;
             Text = fsi.Name;
             var fi = fsi as FileInfo;
             IsFile = fi != null;
@@ -186,4 +168,26 @@ namespace PiViLity.Controls
             return IsFile ? new FileInfo(Path) : new DirectoryInfo(Path);
         }
     }
+
+    internal enum FileListViewSubItemBit : int
+    {
+        Name = 0,
+        ModifiedDateTime,
+        Type,
+        Size,
+        Max,
+
+    }
+    [Flags]
+    public enum FileListViewSubItemTypes
+    {
+        Name = 1 << FileListViewSubItemBit.Name,
+        ModifiedDateTime = 1 << FileListViewSubItemBit.ModifiedDateTime,
+        Type = 1 << FileListViewSubItemBit.Type,
+        Size = 1 << FileListViewSubItemBit.Size,
+
+        All = ModifiedDateTime | Type | Size
+    }
+
+
 }

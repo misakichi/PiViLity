@@ -45,9 +45,9 @@ namespace PiViLity.Controls
             newView.SelectedPath = path;
             newView.AfterSelect += (s, e) =>
             {
-                tabPage.Text = newView.SelectedName;
+                tabPage.Text = newView.SelectedText;
             };
-            tabPage.Text = newView.SelectedName;
+            tabPage.Text = newView.SelectedText;
             tabPage.Controls.Add(newView);
             tabPage.Tag = newView;
             newView.Size = tabPage.ClientSize;

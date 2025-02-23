@@ -9,15 +9,14 @@ using System.Threading.Tasks;
 namespace PiViLity.Setting
 {
     [Serializable]
-    public class FileView
+    public class TvLvTabPage
     {
-        public FileView()
+        public TvLvTabPage()
         { 
         }
 
         //ファイルビューの設定
-        public string Path = SpecialDirectories.MyPictures;
-        public int[] SubItemWidth = new int[(int)FileListViewSubItemBit.Max];
+        public PiViLityCore.Controls.FileListViewSettings FileListView = new();
 
 
         //タブ内容全体の設定

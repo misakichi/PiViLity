@@ -2,9 +2,10 @@
 
 namespace PiViLityCore.Shell
 {
+#if false
     public class DirTree
     {
-        public DirTreeNode RootNode;
+        public DirectoryTreeNode RootNode;
 
         public DirTree()
         {
@@ -15,4 +16,5 @@ namespace PiViLityCore.Shell
 
 
     }
+#endif
 }

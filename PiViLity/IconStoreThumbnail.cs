@@ -13,10 +13,8 @@ using System.Threading.Tasks;
 
 namespace PiViLity
 {
-    public class IconStoreThumbnail
+    public class IconStoreThumbnail : PiViLityCore.Shell.IIconStore
     {
-        public ImageList ImageList { get; private set; } = new();
-
         List<IDisposable> _needDestroyObjects = new();
 
         Image dummyImage = new Bitmap(1, 1);
@@ -29,15 +27,18 @@ namespace PiViLity
         /// <summary>
         /// イメージ登録情報
         /// </summary>
-        class RegisterInfo
+        private class RegisterInfo
         {
             public uint registerGeneration;
             public Image? image; 
             public Action<int>? postAction;
             public string path = "";
         }
+        public ImageList SmallIconList { get; private set; } = new();
 
-        public Size ThumbnailSize => ImageList.ImageSize;
+        public ImageList LargeIconList { get; private set; } = new();
+
+        public ImageList TileIconList { get; private set; } = new();
 
         void EnqueueRegisterImage(string path, Image? _image, Action<int>? postAction)
         {
@@ -65,12 +66,12 @@ namespace PiViLity
             {
                 if (thumbnailSize != null)
                 {
-                    ImageList.ImageSize = (Size)thumbnailSize;
+                    TileIconList.ImageSize = (Size)thumbnailSize;
                 }
                 else
                 {
                     using (var icon = PiVilityNative.FileInfo.GetFileJumboIconFromIndex(0))
-                        ImageList.ImageSize = icon?.Size ?? new Size(32, 32);
+                        TileIconList.ImageSize = icon?.Size ?? new Size(32, 32);
                 }
             }
             catch (Exception ex)
@@ -92,7 +93,7 @@ namespace PiViLity
             int index = -1;
             if (image != null)
             {
-                index = RegisterImageOne(ImageList, image);
+                index = RegisterImageOne(TileIconList, image);
             }
             postAction?.Invoke(index);
         }
@@ -116,7 +117,7 @@ namespace PiViLity
 
         object _lockObj = new object();
 
-        private void GetThumbnailAsync(PiViLityCore.Plugin.IImageReader imageReader, string path, Action<int> postAction, bool nouseSys)
+        private void  GetThumbnailAsync(PiViLityCore.Plugin.IImageReader imageReader, string path, Action<int>? postAction, bool nouseSys)
         {
             try
             {
@@ -130,7 +131,7 @@ namespace PiViLity
                 {
                     if (imageReader.SetFilePath(path))
                     {
-                        Image? image = imageReader.GetThumbnailImage(ImageList.ImageSize);
+                        Image? image = imageReader.GetThumbnailImage(TileIconList.ImageSize);
                         if (image!=null)
                         {
                             ThumbnailCache.Instance.SetThumbnail(path, image);
@@ -139,7 +140,7 @@ namespace PiViLity
                         }
                     }
                 }
-                PiViLityCore.Global.InvokeMainThread(() => postAction(-1));
+                PiViLityCore.Global.InvokeMainThread(() => postAction?.Invoke(-1));
             }
             catch (Exception ex)
             {
@@ -152,7 +153,7 @@ namespace PiViLity
         /// </summary>
         /// <param name="path"></param>
         /// <returns>アイコン画像。returnActionは何度か呼ばれる可能性がある</returns>
-        public void GetThumbnailImage(string path, Action<int> returnAction)
+        private void GetThumbnailImage(string path, Action<int>? returnAction)
         {
             var isFile = File.Exists(path);
             if (!isFile)
@@ -167,24 +168,49 @@ namespace PiViLity
                     Task.Run(() => GetThumbnailAsync(imageReader, path, returnAction, false));
                 }
             }
-            returnAction(-1);
+            else
+            {
+                returnAction?.Invoke(-1);
+            }
         }
 
         /// <summary>
         /// アイコン画像クリア
         /// </summary>
-        public void Clear()
+        public void Clear(Size? largeSize = null, Size? smallSize = null, Size? tileSize = null)
         {
             foreach (var icon in _needDestroyObjects)
             {
                 icon.Dispose();
             }
             _needDestroyObjects.Clear();
-            ImageList.Images.Clear();
-            
+            TileIconList.Images.Clear();
+            if(tileSize is Size size)
+                TileIconList.ImageSize = size;
+
 
             _registerGeneration++;
 
+        }
+
+        /// <summary>
+        /// 特殊フォルダのアイコン取得
+        /// </summary>
+        /// <param name="specialFolder"></param>
+        /// <param name="returnAction"></param>
+        public void GetIcon(Environment.SpecialFolder specialFolder, Action<int>? returnAction)
+        {
+            returnAction?.Invoke(-1);
+        }
+
+        /// <summary>
+        /// ファイルのアイコン取得
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="returnAction"></param>
+        public void GetIcon(string path, Action<int>? returnAction)
+        {
+            GetThumbnailImage(path, returnAction);
         }
 
     }

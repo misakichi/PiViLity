@@ -1,4 +1,5 @@
-﻿using PiViLityCore.Shell;
+﻿using PiViLityCore.Controls;
+using PiViLityCore.Shell;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Windows.UI.StartScreen;
 using static PiViLity.Controls.TreeAndView;
 
 namespace PiViLity.Controls
@@ -16,8 +18,6 @@ namespace PiViLity.Controls
     public partial class TreeAndView : UserControl
     {
 
-        private PiViLityCore.Shell.DirTree dirTree = new();
-        private DirTreeViewControl dirTreeViewMgr = new();
 
         public event EventHandler? AfterSelect;
 
@@ -25,19 +25,21 @@ namespace PiViLity.Controls
         {
             InitializeComponent();
 
-
             //各コントロールのフォントをSystem準拠にする
-            PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
+            //PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
 
-            //ツリービューセットアップ
-            dirTreeViewMgr.Bind(dirTree, tvwDirMain);
-            tvwDirMain.FullRowSelect = true;
-            tvwDirMain.HideSelection = false;
-
-            dirTreeViewMgr.AfterSelect += DirTreeViewMgr_AfterSelect;
-            tvwDirMain.HotTracking = true;
-
+            var rootNode = new DirectoryTreeNode(tvwDirMain);
+            rootNode.SetType(DirTreeNodeType.SpecialFolderMyComputer, null);
+            tvwDirMain.Nodes.Add(rootNode);
+            tvwDirMain.AfterSelect += OnAfterSelectDir;
             lsvFile.LabelEdit = true;
+            lsvFile.ThumbnailIconStore = new IconStoreThumbnail(Setting.AppSettings.Instance.ThumbnailSize);
+
+            if (!DesignMode)
+            {
+                lsvFile.TileSize = Setting.AppSettings.Instance.ThumbnailSize;
+            }
+
 
         }
 
@@ -47,7 +49,7 @@ namespace PiViLity.Controls
         /// <param name="sender"></param>
         /// <param name="e"></param>
         /// <exception cref="NotImplementedException"></exception>
-        private void DirTreeViewMgr_AfterSelect(DirTreeViewControl sender, DirTreeViewControl.DirTreeViewControlEventArgs e)
+        private void OnAfterSelectDir(object? sender, EventArgs e)
         {
             lsvFile.Path = SelectedPath;
             AfterSelect?.Invoke(this, EventArgs.Empty);
@@ -56,11 +58,11 @@ namespace PiViLity.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string SelectedPath
         {
-            set { if (dirTreeViewMgr != null) { dirTreeViewMgr.SelectedPath = value; } }
-            get => dirTreeViewMgr?.SelectedPath ?? "";
+            set { if (tvwDirMain != null) { tvwDirMain.SelectedPath = value; } }
+            get => tvwDirMain?.SelectedPath ?? "";
         }
 
-        public string SelectedName => dirTreeViewMgr.SelectedName;
+        public string SelectedText => tvwDirMain.SelectedNode?.Text ?? "";
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public View View
@@ -73,22 +75,22 @@ namespace PiViLity.Controls
         /// 設定を復元する
         /// </summary>
         /// <param name="fileView"></param>
-        public void RestoreSettings(Setting.FileView fileView)
+        public void RestoreSettings(Setting.TvLvTabPage pageSetting)
         {
-            splitDirView.SplitPosition = fileView.SplitDirWidth;
-            splitViewInfo.SplitPosition = fileView.SplitListHeight;
-            lsvFile.RestoreSettings(fileView);
+            splitDirView.SplitPosition = pageSetting.SplitDirWidth;
+            splitViewInfo.SplitPosition = pageSetting.SplitListHeight;
+            lsvFile.RestoreSettings(pageSetting.FileListView);
         }
 
-        /// <summary>
+        /// <summary> 
         /// 設定を保存する
         /// </summary>
         /// <param name="fileView"></param>
-        public void SaveSettings(Setting.FileView fileView)
+        public void SaveSettings(Setting.TvLvTabPage pageSetting)
         {
-            fileView.SplitDirWidth = splitDirView.SplitPosition;
-            fileView.SplitListHeight = splitViewInfo.SplitPosition;
-            lsvFile.SaveSettings(fileView);
+            pageSetting.SplitDirWidth = splitDirView.SplitPosition;
+            pageSetting.SplitListHeight = splitViewInfo.SplitPosition;
+            lsvFile.SaveSettings(pageSetting.FileListView);
         }
 
         private void lsvFile_ColumnClick(object sender, ColumnClickEventArgs e)
