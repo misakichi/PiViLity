@@ -77,7 +77,7 @@ namespace PiViLity.Controls
         {
             splitDirView.SplitPosition = fileView.SplitDirWidth;
             splitViewInfo.SplitPosition = fileView.SplitListHeight;
-            SelectedPath = fileView.Path;
+            lsvFile.RestoreSettings(fileView);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace PiViLity.Controls
         {
             fileView.SplitDirWidth = splitDirView.SplitPosition;
             fileView.SplitListHeight = splitViewInfo.SplitPosition;
-            fileView.Path = SelectedPath;
+            lsvFile.SaveSettings(fileView);
         }
 
         private void lsvFile_ColumnClick(object sender, ColumnClickEventArgs e)

@@ -10,10 +10,14 @@ namespace PiViLityCore.Shell
     {
         bool IsSpecialFolder { get; }
         Environment.SpecialFolder SpecialFolder { get; }
-        string Path { get; set; }
+        string Path { get; }
 
         bool HasPath { get; }
 
         FileSystemInfo? GetFileSystemInfo();
+
+        long Length { get; }
+
+        string FileType { get; }
     }
 }

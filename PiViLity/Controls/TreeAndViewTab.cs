@@ -15,6 +15,9 @@ namespace PiViLity.Controls
     {
         public event EventHandler? SelectedIndexChanged;
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public TreeAndViewTab()
         {
             InitializeComponent();
@@ -64,6 +67,9 @@ namespace PiViLity.Controls
             return tabView.TabPages[index].Tag as TreeAndView;
         }
 
+        /// <summary>
+        /// 選択されたタブのインデックスを取得または設定します。
+        /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int SelectedIndex
         {
@@ -71,11 +77,19 @@ namespace PiViLity.Controls
             set => tabView.SelectedIndex = value;
         }
 
+        /// <summary>
+        /// タブの選択が変更されたときに発生します。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TabView_SelectedIndexChanged(object? sender, EventArgs e)
         {
             SelectedIndexChanged?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// 現在選択されているTreeAndViewを取得します。
+        /// </summary>
         public TreeAndView? CurrentTreeAndView
         {
             get => tabView.SelectedTab?.Tag as TreeAndView;

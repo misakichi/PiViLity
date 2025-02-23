@@ -28,6 +28,9 @@ namespace PiVilityNative
 		//static IntPtr GetSmallImageList();
 		//static int GetFileLargeIconIndex(String^ path);
 		//static int GetFileSmallIconIndex(String^ path);
+
+
+		static System::String^ GetFileTypeName(String^ pathOrExtension);
 		static int GetFileIconIndex(String^ path);
 		static System::Drawing::Icon^ GetFileLargeIconFromIndex(int index);
 		static System::Drawing::Icon^ GetFileSmallIconFromIndex(int index);

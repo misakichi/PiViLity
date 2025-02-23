@@ -63,8 +63,12 @@ namespace PiViLityCore.Shell
         /// </summary>
         public string Path
         {
-            get; set;
+            get; private set;
         } = "";
+
+        public string FileType { get; private set; } = "";
+
+        public long Length => 0;
 
         /// <summary lang="ja">
         /// 文字列化して返す
@@ -306,6 +310,7 @@ namespace PiViLityCore.Shell
                     break;
             }
             Type = setType;
+            FileType = PiVilityNative.FileInfo.GetFileTypeName(Path);
         }
 
         //子を含むこのノード以降に対して同一の処理を行う

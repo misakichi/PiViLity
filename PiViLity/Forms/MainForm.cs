@@ -18,8 +18,6 @@ namespace PiViLity.Forms
         ToolStripButton btnDetailView = new();
         ToolStripButton btnTileView = new();
 
-        private List<Tuple<Setting.FileView, Controls.TreeAndView>> loadSettingPair = new();
-
         public MainForm()
         {
             InitializeComponent();
@@ -29,7 +27,6 @@ namespace PiViLity.Forms
                 toolStrip.Renderer = new ToolStripProfessionalRenderer();
                 stsStrip.Renderer = new ToolStripProfessionalRenderer();
 
-                List<ToolStripItem> items = new List<ToolStripItem>();
                 btnSmallIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Icon")?.ToBitmap();
                 btnLargeIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "LargeIcon")?.ToBitmap();
                 btnListView.Image = Global.GetResourceIcon(Resource.ResourceManager, "List")?.ToBitmap();
@@ -51,61 +48,7 @@ namespace PiViLity.Forms
                     WindowState = Setting.AppSettings.Instance.WindowState;
                 }
 
-                //TreeAndViewTabを追加する
-                treeAndViewTab.Dock = DockStyle.Fill;
-                panel.Controls.Add(treeAndViewTab);
 
-                //設定ファイルを元にタブを追加する
-                Setting.AppSettings.Instance.FileViews.ForEach(fileViewSetting =>
-                {
-                    if (!System.IO.Directory.Exists(fileViewSetting.Path))
-                    {
-                        return;
-                    }
-
-                    var newTreeView = treeAndViewTab.AddTab(fileViewSetting.Path);
-                    loadSettingPair.Add(new(fileViewSetting, newTreeView));
-                });
-
-                //タブがない場合新規追加
-                if (treeAndViewTab.TabCount == 0)
-                {
-                    Setting.FileView newSetting = new()
-                    {
-                        Path = System.IO.Directory.GetCurrentDirectory()
-                    };
-                    Setting.AppSettings.Instance.FileViews.Add(newSetting);
-
-                    var newTreeView = treeAndViewTab.AddTab(System.IO.Directory.GetCurrentDirectory());
-                }
-                treeAndViewTab.SelectedIndex = 0;
-
-                ////リストビュー表示タイプ切り替えボタン
-                items.Add(btnSmallIconView);
-                items.Add(btnLargeIconView);
-                items.Add(btnListView);
-                items.Add(btnDetailView);
-                items.Add(btnTileView);
-
-                toolStrip.Items.AddRange(items.ToArray());
-                btnSmallIconView.Click += (s, e) => SetVireType(View.SmallIcon);
-                btnLargeIconView.Click += (s, e) => SetVireType(View.LargeIcon);
-                btnListView.Click += (s, e) => SetVireType(View.List);
-                btnTileView.Click += (s, e) => SetVireType(View.Tile);
-                btnDetailView.Click += (s, e) => SetVireType(View.Details);
-
-                treeAndViewTab.TabIndexChanged += TreeAndViewTab_TabIndexChanged;
-
-                RefreshViewTypeBtnChecked();
-
-                //コントロールのレイアウトを行いサイズを現状に合わせる
-                PerformLayout();
-                Application.DoEvents();
-
-
-
-                //各コントロールのフォントをSystem準拠にする
-                PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
             }
 
         }
@@ -116,7 +59,63 @@ namespace PiViLity.Forms
         /// <param name="e"></param>
         private void TreeAndViewTab_Load(object sender, EventArgs e)
         {
+            List<Tuple<Setting.FileView, Controls.TreeAndView>> loadSettingPair = new();
 
+            //TreeAndViewTabを追加する
+            treeAndViewTab.Dock = DockStyle.Fill;
+            panel.Controls.Add(treeAndViewTab);
+
+            //設定ファイルを元にタブを追加する
+            Setting.AppSettings.Instance.FileViews.ForEach(fileViewSetting =>
+            {
+                if (!System.IO.Directory.Exists(fileViewSetting.Path))
+                {
+                    return;
+                }
+
+                var newTreeView = treeAndViewTab.AddTab(fileViewSetting.Path);
+                loadSettingPair.Add(new(fileViewSetting, newTreeView));
+            });
+
+            //タブがない場合新規追加
+            if (treeAndViewTab.TabCount == 0)
+            {
+                Setting.FileView newSetting = new()
+                {
+                    Path = System.IO.Directory.GetCurrentDirectory()
+                };
+                Setting.AppSettings.Instance.FileViews.Add(newSetting);
+
+                var newTreeView = treeAndViewTab.AddTab(System.IO.Directory.GetCurrentDirectory());
+            }
+            treeAndViewTab.SelectedIndex = 0;
+
+            ////リストビュー表示タイプ切り替えボタン
+            List<ToolStripItem> items = new List<ToolStripItem>();
+            items.Add(btnSmallIconView);
+            items.Add(btnLargeIconView);
+            items.Add(btnListView);
+            items.Add(btnDetailView);
+            items.Add(btnTileView);
+
+            toolStrip.Items.AddRange(items.ToArray());
+            btnSmallIconView.Click += (s, e) => SetVireType(View.SmallIcon);
+            btnLargeIconView.Click += (s, e) => SetVireType(View.LargeIcon);
+            btnListView.Click += (s, e) => SetVireType(View.List);
+            btnTileView.Click += (s, e) => SetVireType(View.Tile);
+            btnDetailView.Click += (s, e) => SetVireType(View.Details);
+
+            treeAndViewTab.TabIndexChanged += TreeAndViewTab_TabIndexChanged;
+
+            Show();
+            RefreshViewTypeBtnChecked();
+
+            //コントロールのレイアウトを行いサイズを現状に合わせる
+            PerformLayout();
+            Application.DoEvents();
+
+            //各コントロールのフォントをSystem準拠にする
+            PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
             //設定ファイルを元に各タブの設定を復元する
             BeginInvoke(new Action(() =>
             {

@@ -78,6 +78,19 @@ void FileInfo::StaticConstruct()
 	systemJumboImageList_ = hImageList;
 }
 
+
+/// <summary>
+/// ファイルまたは拡張子のファイル種別名を取得します
+/// </summary>
+/// <param name="pathOrExtension"></param>
+/// <returns></returns>
+System::String^ FileInfo::GetFileTypeName(String^ pathOrExtension)
+{
+	pin_ptr<const wchar_t> wcharPath = PtrToStringChars(pathOrExtension);
+	SHFILEINFO info = {};
+	SHGetFileInfo(wcharPath, 0, &info, sizeof(info), SHGFI_TYPENAME);
+	return gcnew System::String(info.szTypeName);
+}
 /// <summary>
 /// ファイルパスからファイルのアイコンインデックスを取得します。
 /// </summary>

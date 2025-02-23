@@ -8,13 +8,22 @@ using System.Threading.Tasks;
 
 namespace PiViLity.Controls
 {
+    internal enum FileListViewSubItemBit : int
+    {
+        Name = 0,
+        ModifiedDateTime,
+        Type,
+        Size,
+        Max,    
+
+    }
     [Flags]
     public enum FileListViewSubItemTypes
     {
-        None = 0,
-        ModifiedDateTime = 1,
-        Type = 2,
-        Size = 4,
+        Name = 1<< FileListViewSubItemBit.Name,
+        ModifiedDateTime = 1 << FileListViewSubItemBit.ModifiedDateTime,
+        Type = 1 << FileListViewSubItemBit.Type,
+        Size = 1 << FileListViewSubItemBit.Size,
 
         All = ModifiedDateTime | Type | Size
     }
@@ -24,27 +33,41 @@ namespace PiViLity.Controls
     /// </summary>
     public class FileListViewItem : ListViewItem, IFileSystemItem
     {
-        public FileListViewItem(string path) 
+        private FileListViewSubItemTypes _fileListViewSubItemType;
+        private string _path = "";
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="path"></param>
+        public FileListViewItem(string path)
         {
-            if(System.IO.File.Exists(path))
-            {
-                RefreshItems(new System.IO.FileInfo(path));
-            }
-            else if (System.IO.Directory.Exists(path))
-            {
-                RefreshItems(new System.IO.DirectoryInfo(path));
-            }
+            RefreshItems(path);
         }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="fsi"></param>
         public FileListViewItem(FileSystemInfo fsi) : this(fsi, FileListViewSubItemTypes.All)
         {
         }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="fsi"></param>
+        /// <param name="subItemType"></param>
         public FileListViewItem(FileSystemInfo fsi, FileListViewSubItemTypes subItemType)
         {
             _fileListViewSubItemType = subItemType;
             RefreshItems(fsi);
         }
 
+        /// <summary>
+        /// アイテムを更新する
+        /// </summary>
+        /// <param name="fsi"></param>
         private void RefreshItems(FileSystemInfo fsi)
         {
             _path = fsi.FullName;
@@ -58,20 +81,20 @@ namespace PiViLity.Controls
 
             ModifiedDateTime = fsi.LastWriteTime;
             Length = length;
-            FileType = fi?.Extension ?? "";
+            FileType = PiVilityNative.FileInfo.GetFileTypeName(_path);
 
-            if (fi!=null)
-            { 
-                if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
-                {
-                    SubItems.Add(fi.LastWriteTime.ToString());
-                }
-                if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.Type))
-                {
-                    SubItems.Add(fi.Extension);
-                }
+            if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
+            {
+                SubItems.Add($"{fsi.LastWriteTime:yyyy/MM/dd H:m}");
+            }
+            if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.Type))
+            {
+                SubItems.Add(FileType);
+            }
+            if (fi != null)
+            {
                 if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.Size))
-                { 
+                {
                     if (fi.Length < 1024)
                         SubItems.Add(new ListViewItem.ListViewSubItem(this, $"{fi.Length} B"));
                     else
@@ -80,28 +103,26 @@ namespace PiViLity.Controls
             }
             else
             {
-                if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
-                    SubItems.Add(fsi.LastWriteTime.ToString());
-                if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.Type))
-                    SubItems.Add("");
                 if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.Size))
                     SubItems.Add("");
             }
         }
 
-        private void RefreshItems()
+        /// <summary>
+        /// アイテムを更新する
+        /// </summary>
+        private void RefreshItems(string path)
         {
-            if (System.IO.File.Exists(_path))
+            if (System.IO.File.Exists(path))
             {
-                RefreshItems(new System.IO.FileInfo(_path));
+                RefreshItems(new System.IO.FileInfo(path));
             }
-            else if (System.IO.Directory.Exists(_path))
+            else if (System.IO.Directory.Exists(path))
             {
-                RefreshItems(new System.IO.DirectoryInfo(_path));
+                RefreshItems(new System.IO.DirectoryInfo(path));
             }
         }
 
-        private FileListViewSubItemTypes _fileListViewSubItemType;
         public FileListViewSubItemTypes FileListViewSubItemType
         {
             get => _fileListViewSubItemType;
@@ -111,9 +132,9 @@ namespace PiViLity.Controls
             }
         }
 
-
-
-        private string _path = "";
+        /// <summary>
+        /// パス
+        /// </summary>
         public string Path
         {
             set
@@ -121,15 +142,15 @@ namespace PiViLity.Controls
                 if (_path != value)
                 {
                     _path = value;
-                    RefreshItems();
+                    RefreshItems(_path);
                 }
             }
             get => _path;
         }
+        public string FileType { get; private set; } = "";
 
         public DateTime ModifiedDateTime { get; private set; } = DateTime.MinValue;
-        public long Length { get; private set; } = 0;
-        public string FileType { get; private set; } = "";
+        public long Length { get; protected set; } = 0;
 
         /// <summary>
         /// タイルアイコンのインデックス
@@ -163,26 +184,6 @@ namespace PiViLity.Controls
         public FileSystemInfo? GetFileSystemInfo()
         {
             return IsFile ? new FileInfo(Path) : new DirectoryInfo(Path);
-        }
-    }
-
-    class FileListViewItemComparer : System.Collections.IComparer
-    {
-        public int Compare(object? x, object? y)
-        {
-            if (x is FileListViewItem item1 && y is FileListViewItem item2)
-            {
-                if (item1.IsSpecialFolder && !item2.IsSpecialFolder)
-                    return -1;
-                if (!item1.IsSpecialFolder && item2.IsSpecialFolder)
-                    return 1;
-                if (item1.IsFile && !item2.IsFile)
-                    return 1;
-                if (!item1.IsFile && item2.IsFile)
-                    return -1;
-                return string.Compare(item1.Text, item2.Text);
-            }
-            return 0;
         }
     }
 }

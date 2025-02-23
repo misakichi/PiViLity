@@ -108,8 +108,9 @@ namespace PiViLity.Controls
             lsvFile.Location = new Point(0, 0);
             lsvFile.Name = "lsvFile";
             lsvFile.Size = new Size(458, 369);
-            lsvFile.Sorting = SortOrder.Descending;
+            lsvFile.Sorting = SortOrder.Ascending;
             lsvFile.TabIndex = 12;
+            lsvFile.View = View.Details;
             lsvFile.TileSize = new Size(320, 240);
             lsvFile.UseCompatibleStateImageBehavior = false;
             lsvFile.ColumnClick += lsvFile_ColumnClick;

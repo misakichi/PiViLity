@@ -1,4 +1,5 @@
-﻿using PiViLityCore.Shell;
+﻿using PiViLity.Setting;
+using PiViLityCore.Shell;
 using PiViLityCore.Util;
 using System;
 using System.Collections.Generic;
@@ -12,67 +13,56 @@ using static PiViLity.Controls.FileListView;
 
 namespace PiViLity.Controls
 {
+    /// <summary>
+    /// ファイル一覧用ListView
+    /// </summary>
     public class FileListView : ListView
     {
-        string _path = "C:\\";
+        /// <summary>
+        /// ファイルリストのサブアイテムの種類
+        /// </summary>
+        private class FileListColumnHeader : ColumnHeader
+        {
+            public FileListViewSubItemBit SubItemBit;
+            public System.Collections.IComparer? Comparer;
+        }
+
+        //constant variables
+        private const int DefaultSubItemWidth = 200;
+
+        //private fields
+        private string _path = "C:\\";
         private FileSystemWatcher _fsw = new();
         private IconStore _iconStore = new(true, true, true);
         private IconStoreThumbnail _thumbnailStore = new();
         private List<FileListViewItem> _currentDirectoryItems = new ();
-        private FileListViewSubItemTypes _detailSubItems = FileListViewSubItemTypes.None;
-        
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public FileListViewSubItemTypes DetailSubItems
-        {
-            get => _detailSubItems;
-            set
-            {
-                if (_detailSubItems != value)
-                {
-                    _detailSubItems = value;
-                    Columns.Clear();
-                    var name = PiViLityCore.Global.GetResourceString(Resource.ResourceManager, "FileListDetailSubItem.Name");
-                    HeaderStyle = ColumnHeaderStyle.Clickable;
-                    var headColum = Columns.Add(name, 100, HorizontalAlignment.Left);
-                    if (value.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
-                    {
-                        Columns.Add(PiViLityCore.Global.GetResourceString(Resource.ResourceManager, "FileListDetailSubItem.ModifiedDateTime"));
-                    }
-                    if (value.HasFlag(FileListViewSubItemTypes.Type))
-                    {
-                        Columns.Add(PiViLityCore.Global.GetResourceString(Resource.ResourceManager, "FileListDetailSubItem.Type"));
-                    }
-                    if (value.HasFlag(FileListViewSubItemTypes.Size))
-                    {
-                        Columns.Add(PiViLityCore.Global.GetResourceString(Resource.ResourceManager, "FileListDetailSubItem.Size")).TextAlign = HorizontalAlignment.Right;
-                    }
+        private List<FileListViewItem> _currentViewItems = new();
+        private FileListViewSubItemTypes _detailSubItems = FileListViewSubItemTypes.Name;
+        private FileListColumnHeader[] SubItemColums = new FileListColumnHeader[(int)FileListViewSubItemBit.Max];
+        private int _activeSortIndex = 0;
 
-                    _currentDirectoryItems.ForEach(item => item.FileListViewSubItemType = value);
-
-
-                }
-            }
-        }
-
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string Path
-        {
-            get => _path; 
-            set
-            {
-                if (_path != value)
-                {
-                    _path = value;
-                    RefreshList();
-                }
-            }
-        }
-
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public FileListView()
         {
-            Sorting = SortOrder.Descending;
-            ListViewItemSorter = new FileListViewItemComparer();
+            for (int i = 0; i < SubItemColums.Length; i++)
+            {
+                var subItemName = ((FileListViewSubItemBit)i).ToString();
+                var cmpType = Type.GetType($"PiViLity.Controls.FileListViewItemComparer{subItemName}");
+                SubItemColums[i] = new()
+                {
+                    Name = subItemName,
+                    Text = PiViLityCore.Global.GetResourceString(Resource.ResourceManager, $"FileListDetailSubItem.{subItemName}"),
+                    SubItemBit = (FileListViewSubItemBit)i,
+                    Comparer = cmpType!=null ? Activator.CreateInstance(cmpType, [this]) as System.Collections.IComparer : null,
+                    Width = DefaultSubItemWidth,
+                    TextAlign = HorizontalAlignment.Left
+                };
+            }
+            SubItemColums[(int)FileListViewSubItemBit.Size].TextAlign = HorizontalAlignment.Right;
+
+            ListViewItemSorter = new FileListViewItemComparerName(this);
             DetailSubItems = FileListViewSubItemTypes.All;
             LargeImageList = _iconStore.LargeIconList;
             SmallImageList = _iconStore.SmallIconList;
@@ -86,13 +76,86 @@ namespace PiViLity.Controls
 
         }
 
+
+        /// <summary>
+        /// ファイルリストのサブアイテムの種類を取得または設定します。
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public FileListViewSubItemTypes DetailSubItems
+        {
+            get => _detailSubItems;
+            set
+            {
+                //Nameは必ず設定される
+                value |= FileListViewSubItemTypes.Name;
+
+                if (_detailSubItems != value)
+                {
+                    _detailSubItems = value;
+                    RefreshSubItems();
+                }
+            }
+        }
+
+        /// <summary>
+        /// サブアイテムを再設定します。
+        /// </summary>
+        private void RefreshSubItems()
+        {
+            //設定が変更された場合はサブアイテムを再設定します。
+            Columns.Clear();
+            var headColum = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Name]);
+            if (_detailSubItems.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
+            {
+                Columns.Add(SubItemColums[(int)FileListViewSubItemBit.ModifiedDateTime]);
+            }
+            if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Type))
+            {
+                Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Type]);
+            }
+            if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Size))
+            {
+                var sub = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Size]);
+            }
+
+            _currentDirectoryItems.ForEach(item => item.FileListViewSubItemType = _detailSubItems);
+        }
+
+        /// <summary>
+        /// ファイルリストの表示パスを取得または設定します。
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string Path
+        {
+            get => _path; 
+            set
+            {
+                if (_path != value)
+                {
+                    _path = value;
+                    RemakeFileList();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 現在表示中のPathの中にあるなんらかのステータス内容に変更があった場合に発生するイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FileSystem_OnChanged(object sender, FileSystemEventArgs e)
         {
             PiViLityCore.Global.InvokeMainThread(() =>
             {
-                RefreshList();
+                RemakeFileList();
             });
         }
+
+        /// <summary>
+        /// 現在表示中のPathの中にある項目に名称変更があった場合に発生するイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FileSystem_OnRenamed(object sender, RenamedEventArgs e)
         {
             var targetItem = _currentDirectoryItems.Find(item => item.Path == e.OldFullPath);
@@ -102,6 +165,11 @@ namespace PiViLity.Controls
             }
         }
 
+        /// <summary>
+        /// 現在表示中のPathの中にある項目が削除された場合に発生するイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FileSystem_OnDeleted(object sender, FileSystemEventArgs e)
         {
             var targetItem = _currentDirectoryItems.Find(item => item.Path == e.FullPath);
@@ -111,6 +179,12 @@ namespace PiViLity.Controls
                 Invoke(() => Items.Remove(targetItem));
             }
         }
+
+        /// <summary>
+        /// 現在表示中のPathの中にある項目が新規作成された場合に発生するイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FileSystem_OnCreated(object sender, FileSystemEventArgs e)
         {
             var fi = new FileInfo(e.FullPath);
@@ -138,7 +212,12 @@ namespace PiViLity.Controls
             }
         }
 
-        FileListViewItem? makeItem(FileSystemInfo? entry)
+        /// <summary>
+        /// ファイルリストのアイテムを作成します。
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <returns></returns>
+        private FileListViewItem? makeItem(FileSystemInfo? entry)
         {
             if (entry!=null && PiViLityCore.Global.settings.IsVisibleEntry(entry))
             {
@@ -153,14 +232,15 @@ namespace PiViLity.Controls
                         item.ImageIndex = index;
                     });
                 }
-
-
                 return item;
             }
             return null;
         }
 
-        private void RefreshList()
+        /// <summary>
+        /// ファイルリストを再作成します。
+        /// </summary>
+        private void RemakeFileList()
         {
             TileSize = Setting.AppSettings.Instance.ThumbnailSize;
             var path = _path;
@@ -178,7 +258,6 @@ namespace PiViLity.Controls
                     _fsw.Created += FileSystem_OnCreated;
 
                     List<FileListViewItem> list = new();
-                    Items.Clear();
                     _iconStore.Clear();
                     _thumbnailStore.Clear();
                     if(_thumbnailStore.ThumbnailSize != TileSize)
@@ -195,10 +274,30 @@ namespace PiViLity.Controls
                         }
                     }
                     _currentDirectoryItems = list;
-                    Items.AddRange(list.ToArray());
+                    _currentViewItems = list;
+                    RefreshFileList();
                     _fsw.EnableRaisingEvents = true;
                 }
             }
+        }
+
+        /// <summary>
+        /// ファイルリストを更新します。
+        /// </summary>
+        private void RefreshFileList()
+        {
+            List<ListViewItem> preSelected = new();
+            foreach (ListViewItem item in SelectedItems)
+            {
+                preSelected.Add(item);
+            }
+            ;
+            BeginUpdate();
+            Items.Clear();
+            Items.AddRange(_currentViewItems.ToArray());
+            preSelected.ForEach(item =>item.Selected = true);
+            preSelected.Find(item=> _currentViewItems.Contains(item))?.EnsureVisible();
+            EndUpdate();
         }
 
         /// <summary>
@@ -320,14 +419,58 @@ namespace PiViLity.Controls
             }
         }
 
+        
+        /// <summary>
+        /// カルムヘッダクリック時（ソート順変更）
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnColumnClick(ColumnClickEventArgs e)
+        {
+            BeginUpdate();
+            if(_activeSortIndex!= e.Column)
+            {
+                _activeSortIndex = e.Column;
+                ListViewItemSorter = SubItemColums[_activeSortIndex].Comparer;
+                Sorting = SortOrder.Ascending;
+            }
+            else
+            {
+                Sorting = Sorting == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+            }
+            EndUpdate();
+        }
         /// <summary>
         /// DrawColumnHeaderイベントを発生させます。
         /// </summary>
         /// <param name="e"></param>
         protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
         {
-            e.DrawDefault = true;
-            base.OnDrawColumnHeader(e);
+            //e.DrawDefault = true;
+            //base.OnDrawColumnHeader(e);
+            //e.DrawDefault = false; ;
+            e.DrawBackground();
+            e.DrawText();
+            if (e.ColumnIndex == _activeSortIndex)
+            {
+                if (Sorting == SortOrder.Ascending)
+                {
+                    e.Graphics.DrawLines(Pens.Gray, new Point[] {
+                        new Point(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 1),
+                        new Point(e.Bounds.Left + e.Bounds.Width / 2 -10, e.Bounds.Top + 5),
+                        new Point(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 1),
+                        new Point(e.Bounds.Left + e.Bounds.Width / 2 + 10, e.Bounds.Top + 5),
+                    });
+                }
+                else
+                {
+                    e.Graphics.DrawLines(Pens.Gray, new Point[] {
+                        new Point(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 5),
+                        new Point(e.Bounds.Left + e.Bounds.Width / 2 -10, e.Bounds.Top + 1),
+                        new Point(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 5),
+                        new Point(e.Bounds.Left + e.Bounds.Width / 2 + 10, e.Bounds.Top + 1),
+                    });
+                }
+            }
         }
 
         /// <summary>
@@ -338,6 +481,40 @@ namespace PiViLity.Controls
         {
             e.DrawDefault = true;
             base.OnDrawSubItem(e);
+        }
+
+        /// <summary>
+        /// 設定復元
+        /// </summary>
+        /// <param name="fileView"></param>
+        internal void RestoreSettings(PiViLity.Setting.FileView fileView)
+        {
+            for(int i = 0; i < SubItemColums.Length; i++)
+            {
+                if (fileView.SubItemWidth.Count() > i)
+                {
+                    if (fileView.SubItemWidth[i] > 0)
+                    {
+                        SubItemColums[i].Width = fileView.SubItemWidth[i];
+                    }
+                }
+            }
+            Path = fileView.Path;
+        }
+
+        /// <summary>
+        /// 設定保存
+        /// </summary>
+        /// <param name="fileView"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        internal void SaveSettings(PiViLity.Setting.FileView fileView)
+        {
+            fileView.SubItemWidth = new int[SubItemColums.Length];
+            for (int i = 0; i < SubItemColums.Length; i++)
+            {
+                fileView.SubItemWidth[i] = SubItemColums[i].Width;
+            }
+            fileView.Path = Path;
         }
     }
 
