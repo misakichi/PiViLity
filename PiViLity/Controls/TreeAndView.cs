@@ -17,9 +17,10 @@ namespace PiViLity.Controls
 {
     public partial class TreeAndView : UserControl
     {
+        List<string> directoryRecent_ = new();
+        int currentRecentIndex_ = -1;
 
-
-        public event EventHandler? AfterSelect;
+        public event EventHandler? DirectoryChanged;
 
         public TreeAndView()
         {
@@ -32,6 +33,7 @@ namespace PiViLity.Controls
             rootNode.SetType(DirTreeNodeType.SpecialFolderMyComputer, null);
             tvwDirMain.Nodes.Add(rootNode);
             tvwDirMain.AfterSelect += OnAfterSelectDir;
+            lsvFile.DirectoryChanged += FlvOnDirectoryChanged;
             lsvFile.LabelEdit = true;
             lsvFile.ThumbnailIconStore = new IconStoreThumbnail(Setting.AppSettings.Instance.ThumbnailSize);
 
@@ -40,7 +42,23 @@ namespace PiViLity.Controls
                 lsvFile.TileSize = Setting.AppSettings.Instance.ThumbnailSize;
             }
 
-
+            //ツールストリップの基本機能を追加
+            {
+                var upDdir = new ToolStripButton("↑");
+                upDdir.Click += (s, e) =>
+                {
+                    var path = lsvFile.Path;
+                    if (path != null)
+                    {
+                        var dir = new DirectoryInfo(path);
+                        if (dir.Parent is DirectoryInfo parentDir)
+                        {
+                            lsvFile.Path = parentDir.FullName;
+                        }
+                    }
+                };
+                toolStrip.Items.Add(upDdir);
+            }
         }
 
         /// <summary lang="ja-JP">
@@ -51,18 +69,25 @@ namespace PiViLity.Controls
         /// <exception cref="NotImplementedException"></exception>
         private void OnAfterSelectDir(object? sender, EventArgs e)
         {
-            lsvFile.Path = SelectedPath;
-            AfterSelect?.Invoke(this, EventArgs.Empty);
+            lsvFile.Path = tvwDirMain.SelectedPath;
+        }
+
+        private void FlvOnDirectoryChanged(object? sender, EventArgs e)
+        {
+            DirectoryChanged?.Invoke(this, EventArgs.Empty);
+            directoryRecent_.RemoveRange(currentRecentIndex_ + 1, directoryRecent_.Count - currentRecentIndex_ - 1);
+            directoryRecent_.Add(lsvFile.Path);
+            currentRecentIndex_ = directoryRecent_.Count - 1;
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string SelectedPath
+        public string DirectoryPath
         {
             set { if (tvwDirMain != null) { tvwDirMain.SelectedPath = value; } }
-            get => tvwDirMain?.SelectedPath ?? "";
+            get => lsvFile.Path ?? "";
         }
 
-        public string SelectedText => tvwDirMain.SelectedNode?.Text ?? "";
+        public string SelectedText => Path.GetFileName(lsvFile.Path) ?? "";
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public View View

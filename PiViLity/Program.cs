@@ -31,6 +31,9 @@ namespace PiViLity
 
             ThumbnailCache.Instance.Initialize(Setting.AppSettings.Instance.CacheDb);
 
+            ThreadPool.SetMinThreads(32,32);
+            ThreadPool.SetMaxThreads(64, 64);
+
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();

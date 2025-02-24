@@ -74,44 +74,6 @@ namespace PiViLityCore.Controls
             }
         }
 
-#if false
-        /// <summary lang="ja">
-        /// 現状の保持状態からTreeViewを初期化する
-        /// </summary>
-        void RefreshTree()
-        {
-            var curPath = SelectedPath;
-
-            //JA 各ノードに対しTreeNodeを割り当てる
-            dirTree.RootNode.CurrentFirstTraversalTreeNodes((node, depth) =>
-            {
-                var tn = TreeNodeFromDirNode(node);
-                if (node.Parent?.Tag is TreeNode parentNode)
-                {
-                    parentNode.Nodes.Add(tn);
-                }
-            });
-
-            //JA TreeViewのノードを現状のものにする
-            Nodes.Clear();
-            if (dirTree.RootNode.Tag is TreeNode tvNode)
-            {
-                treeView.Nodes.Add(tvNode);
-            }
-
-            SelectedPath = curPath;
-            if (treeView.SelectedNode == null)
-            {
-                if (treeView.Nodes.Count > 0)
-                {
-                    treeView.TopNode = treeView.SelectedNode = treeView.Nodes[0];
-                }
-            }
-
-        }
-#endif
-
-
         /// <summary>
         /// 指定されたパスのディレクトリノードを検索する
         /// </summary>

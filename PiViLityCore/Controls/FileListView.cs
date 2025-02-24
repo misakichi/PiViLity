@@ -10,11 +10,24 @@ using System.Runtime.InteropServices;
 
 namespace PiViLityCore.Controls
 {
+    public class FileListViewItemEventArgs : EventArgs
+    {
+        public FileListViewItem Item { get; }
+        public bool Default { get; set; } = true;
+
+        public FileListViewItemEventArgs(FileListViewItem item) : base()
+        {
+            Item = item;
+        }
+    }
     /// <summary>
     /// ファイル一覧用ListView
     /// </summary>
     public class FileListView : ListView
     {
+        public delegate void FileListViewItemEventHandler(FileListViewItemEventArgs item);
+        public event FileListViewItemEventHandler? ItemDoubleClick;
+        public event EventHandler? DirectoryChanged;
         /// <summary>
         /// ファイルリストのサブアイテムの種類
         /// </summary>
@@ -127,6 +140,7 @@ namespace PiViLityCore.Controls
                 {
                     _path = value;
                     RemakeFileList();
+                    DirectoryChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -469,6 +483,31 @@ namespace PiViLityCore.Controls
         {
             e.DrawDefault = true;
             base.OnDrawSubItem(e);
+        }
+
+        protected override void OnDoubleClick(EventArgs e)
+        {
+            base.OnDoubleClick(e);
+
+            if (SelectedItems.Count == 1)
+            {
+                if (SelectedItems[0] is FileListViewItem item)
+                {
+                    FileListViewItemEventArgs args = new(item);
+                    ItemDoubleClick?.Invoke(args);
+                    if (args.Default)
+                    {
+                        if (item.IsFile)
+                        {
+
+                        }
+                        else
+                        {
+                            Path = item.Path;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>

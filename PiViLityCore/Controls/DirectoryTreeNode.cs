@@ -50,6 +50,7 @@ namespace PiViLityCore.Controls
                 DependencyDirectoryTree.IconStore.GetIcon(SpecialFolder,
                 idx =>
                 {
+                    SelectedImageIndex = idx;
                     ImageIndex = idx;
                 }
             );
@@ -59,6 +60,7 @@ namespace PiViLityCore.Controls
                 DependencyDirectoryTree.IconStore.GetIcon(Path,
                     idx =>
                     {
+                        SelectedImageIndex = idx;
                         ImageIndex = idx;
                     }
                 );
@@ -331,7 +333,6 @@ namespace PiViLityCore.Controls
                         child.SetType(DirTreeNodeType.Drive, drv.Name);
                         Children.Add(child);
                     }
-
                     break;
             }
 

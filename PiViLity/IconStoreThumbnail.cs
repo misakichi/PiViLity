@@ -117,7 +117,7 @@ namespace PiViLity
 
         object _lockObj = new object();
 
-        private void  GetThumbnailAsync(PiViLityCore.Plugin.IImageReader imageReader, string path, Action<int>? postAction, bool nouseSys)
+        private void GetThumbnailAsync(PiViLityCore.Plugin.IImageReader imageReader, string path, Action<int>? postAction, bool nouseSys)
         {
             try
             {
@@ -162,16 +162,22 @@ namespace PiViLity
             //ファイルの場合はプラグインからのサムネイルを取得を試みる
             if (isFile)
             {
+                var thumbnail = ThumbnailCache.Instance.GetThumbnail(path);
+                if (thumbnail != null)
+                {
+                    EnqueueRegisterImage(path, thumbnail, returnAction);
+                    return;
+                }
+
                 var imageReader = PluginManager.Instance.GetImageReader(path);
                 if (imageReader != null)
                 {
                     Task.Run(() => GetThumbnailAsync(imageReader, path, returnAction, false));
+                    return;
                 }
             }
-            else
-            {
-                returnAction?.Invoke(-1);
-            }
+
+            returnAction?.Invoke(-1);
         }
 
         /// <summary>

@@ -48,9 +48,12 @@ namespace PiViLity.Controls
             tvwDirMain.BorderStyle = BorderStyle.None;
             tvwDirMain.Dock = DockStyle.Left;
             tvwDirMain.FullRowSelect = true;
+            tvwDirMain.HideSelection = false;
             tvwDirMain.HotTracking = true;
+            tvwDirMain.ImageIndex = 0;
             tvwDirMain.Location = new Point(0, 25);
             tvwDirMain.Name = "tvwDirMain";
+            tvwDirMain.SelectedImageIndex = 0;
             tvwDirMain.ShowLines = false;
             tvwDirMain.Size = new Size(226, 423);
             tvwDirMain.TabIndex = 4;
@@ -105,10 +108,8 @@ namespace PiViLity.Controls
             lsvFile.Size = new Size(458, 369);
             lsvFile.Sorting = SortOrder.Ascending;
             lsvFile.TabIndex = 12;
-            lsvFile.View = View.Details;
             lsvFile.TileSize = new Size(320, 240);
             lsvFile.UseCompatibleStateImageBehavior = false;
-
             // 
             // toolStrip
             // 
