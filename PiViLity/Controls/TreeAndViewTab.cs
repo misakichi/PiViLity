@@ -42,7 +42,7 @@ namespace PiViLity.Controls
             //タブページへTreeAndViewを登録
             var newView = new TreeAndView();
             newView.Dock = DockStyle.Fill;
-            newView.DirectoryPath = path;
+            newView.Initialize(path);
             newView.DirectoryChanged += (s, e) =>
             {
                 tabPage.Text = newView.SelectedText;

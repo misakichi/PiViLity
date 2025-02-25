@@ -44,7 +44,7 @@ namespace PiViLityCore.Controls
         /// Selected path
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string SelectedPath
+        public string Path
         {
             get
             {

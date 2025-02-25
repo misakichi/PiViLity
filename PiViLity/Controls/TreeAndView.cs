@@ -17,10 +17,15 @@ namespace PiViLity.Controls
 {
     public partial class TreeAndView : UserControl
     {
-        List<string> directoryRecent_ = new();
-        int currentRecentIndex_ = -1;
+        private List<string> _directoryRecent = new();
+        private int _currentRecentIndex = -1;
+        private bool _isInPathSetter = false;
 
         public event EventHandler? DirectoryChanged;
+
+        private ToolStripButton BackDirectoryBtn = new();
+        private ToolStripButton PreviousDirectoryBtn = new();
+        private ToolStripButton NextDirectoryBtn = new();
 
         public TreeAndView()
         {
@@ -43,22 +48,51 @@ namespace PiViLity.Controls
             }
 
             //ツールストリップの基本機能を追加
+            BackDirectoryBtn.Text = "↑";
+            BackDirectoryBtn.Click += (s, e) =>
             {
-                var upDdir = new ToolStripButton("↑");
-                upDdir.Click += (s, e) =>
+                var path = lsvFile.Path;
+                if (path != null)
                 {
-                    var path = lsvFile.Path;
-                    if (path != null)
+                    var dir = new DirectoryInfo(path);
+                    if (dir.Parent is DirectoryInfo parentDir)
                     {
-                        var dir = new DirectoryInfo(path);
-                        if (dir.Parent is DirectoryInfo parentDir)
-                        {
-                            lsvFile.Path = parentDir.FullName;
-                        }
+                        lsvFile.Path = parentDir.FullName;
                     }
-                };
-                toolStrip.Items.Add(upDdir);
-            }
+                }
+            };
+
+            PreviousDirectoryBtn.Text = "←";
+            PreviousDirectoryBtn.Click += (s, e) =>
+            {
+                if(_currentRecentIndex > 0)
+                {
+                    _currentRecentIndex--;
+                    lsvFile.Path = _directoryRecent[_currentRecentIndex];
+                }
+                if (_currentRecentIndex == 0)
+                {
+                    PreviousDirectoryBtn.Enabled = _currentRecentIndex > 0;
+                    NextDirectoryBtn.Enabled = _currentRecentIndex < _directoryRecent.Count - 1;
+                }
+            };
+            NextDirectoryBtn.Text = "→";
+            NextDirectoryBtn.Click += (s, e) =>
+            {
+                if (_currentRecentIndex < _directoryRecent.Count - 1)
+                {
+                    _currentRecentIndex++;
+                    lsvFile.Path = _directoryRecent[_currentRecentIndex];
+                }
+                if(_currentRecentIndex == _directoryRecent.Count - 1)
+                {
+                    PreviousDirectoryBtn.Enabled = _currentRecentIndex > 0;
+                    NextDirectoryBtn.Enabled = _currentRecentIndex < _directoryRecent.Count - 1;
+                }
+            };
+            toolStrip.Items.Add(BackDirectoryBtn);
+            toolStrip.Items.Add(PreviousDirectoryBtn);
+            toolStrip.Items.Add(NextDirectoryBtn);
         }
 
         /// <summary lang="ja-JP">
@@ -69,25 +103,45 @@ namespace PiViLity.Controls
         /// <exception cref="NotImplementedException"></exception>
         private void OnAfterSelectDir(object? sender, EventArgs e)
         {
-            lsvFile.Path = tvwDirMain.SelectedPath;
+            lsvFile.Path = tvwDirMain.Path;
         }
 
         private void FlvOnDirectoryChanged(object? sender, EventArgs e)
         {
             DirectoryChanged?.Invoke(this, EventArgs.Empty);
-            directoryRecent_.RemoveRange(currentRecentIndex_ + 1, directoryRecent_.Count - currentRecentIndex_ - 1);
-            directoryRecent_.Add(lsvFile.Path);
-            currentRecentIndex_ = directoryRecent_.Count - 1;
+            if (!_isInPathSetter)
+            {
+                AddRecent();
+            }
         }
+
+        private void AddRecent()
+        {
+            _directoryRecent.RemoveRange(_currentRecentIndex + 1, _directoryRecent.Count - _currentRecentIndex - 1);
+            _directoryRecent.Add(lsvFile.Path);
+            _currentRecentIndex = _directoryRecent.Count - 1;
+            PreviousDirectoryBtn.Enabled = _currentRecentIndex > 0;
+            NextDirectoryBtn.Enabled = _currentRecentIndex < _directoryRecent.Count - 1;
+
+        }
+
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string DirectoryPath
         {
-            set { if (tvwDirMain != null) { tvwDirMain.SelectedPath = value; } }
-            get => lsvFile.Path ?? "";
+            set { _isInPathSetter = true;  tvwDirMain.Path = value; _isInPathSetter = false; }
+            get => tvwDirMain.Path;
         }
 
-        public string SelectedText => Path.GetFileName(lsvFile.Path) ?? "";
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string Path
+        {
+            set { _isInPathSetter = true;  lsvFile.Path = value; _isInPathSetter = false; }
+            get => lsvFile.Path;
+        }
+
+
+        public string SelectedText => System.IO.Path.GetFileName(lsvFile.Path) ?? "";
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public View View
@@ -121,6 +175,14 @@ namespace PiViLity.Controls
         private void lsvFile_ColumnClick(object sender, ColumnClickEventArgs e)
         {
 
+        }
+
+        public void Initialize(string path)
+        {
+            DirectoryPath = path;
+            _directoryRecent.Clear();
+            _currentRecentIndex = -1;
+            AddRecent();
         }
     }
 }
