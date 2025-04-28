@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace PiViLity.Setting
 {
-    [Serializable]
+    [Serializable, PiViLityCore.Plugin.Setting(NoOption = true)]
     public class AppSettings : PiViLityCore.Plugin.SettingBase
     {
         static public readonly AppSettings Instance = new();
+
+        public override string Name { get => "PiViLity App"; }
 
         public List<TvLvTabPage> TvLvTabPages { get; set; } = new();
 
@@ -19,9 +21,6 @@ namespace PiViLity.Setting
         public FormWindowState WindowState = FormWindowState.Normal;
         public Point WindowPosition = new();
         public Size WindowSize = new();
-        public Size ThumbnailSize = new(384, 273);
-
-        public override string Name { get; set; } = "PiViLity App";
 
 
     }

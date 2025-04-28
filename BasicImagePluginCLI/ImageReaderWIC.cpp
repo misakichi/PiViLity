@@ -74,7 +74,7 @@ System::Drawing::Image^ ImageReaderWIC::GetImage()
 	}
 
 	// Create a Bitmap from the image data
-	auto bitmap = gcnew System::Drawing::Bitmap(imageData->Width, imageData->Height, imageData->RowPitch, System::Drawing::Imaging::PixelFormat::Format32bppArgb, IntPtr(imageData->Pixels));
+	auto bitmap = gcnew System::Drawing::Bitmap(imageData->Width, imageData->Height, (int)imageData->RowPitch, System::Drawing::Imaging::PixelFormat::Format32bppArgb, IntPtr(imageData->Pixels));
 
 	return bitmap;
 }

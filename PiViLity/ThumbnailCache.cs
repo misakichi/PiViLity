@@ -40,7 +40,7 @@ namespace PiViLity
             if (!fi.Exists)
                 return null;
 
-            var ThumbnailSize = Setting.AppSettings.Instance.ThumbnailSize;
+            var ThumbnailSize = Setting.ShellSettings.Instance.ThumbnailSize;
 
             using (SqliteConnection db = new SqliteConnection($"Filename={_dbFilename}"))
             {

@@ -17,7 +17,25 @@ namespace PiViLity
     {
         public string Name => "PiViLity App";
         public string Description => "";
+
+        public string OptionItemName => "アプリケーション";
+
+        public System.Resources.ResourceManager? ResourceManager { get => Resource.ResourceManager; }
+
     }
+
+    /// <summary>
+    /// プラグイン情報
+    /// </summary>
+    public class PluginInformation
+    {
+        public required Assembly assembly;
+        public required IModuleInformation information;
+        public List<Type> imageReaders = new();
+        public List<SettingBase> settings = new();
+        public string Name = "";
+    }
+    
     /// <summary>
     /// プラグイン管理クラス
     /// </summary>
@@ -26,20 +44,11 @@ namespace PiViLity
         static public PluginManager Instance { get; private set; } = new();
 
         /// <summary>
-        /// プラグイン情報
-        /// </summary>
-        class PluginInformation
-        {
-            public required Assembly assembly;
-            public required IModuleInformation information;
-            public List<Type> imageReaders = new();
-            public List<SettingBase> settings = new();
-        }
-
-        /// <summary>
         /// プラグインリスト
         /// </summary>
         List<PluginInformation> _plugins = new();
+
+        public List<PluginInformation> Plugins => _plugins;
 
         /// <summary>
         /// 画像リーダー情報
@@ -153,6 +162,8 @@ namespace PiViLity
                             }
                         }
                     }
+
+                    //SettingBase継承のクラスはInstanceメソッドがあればそれで得られるインスタンスを取得する
                     if (PiViLityCore.Util.Types.HasParentType(type, typeof(SettingBase)))
                     {
                         if( type.GetField("Instance", BindingFlags.Public | BindingFlags.Static) is FieldInfo getInstanceField)
@@ -214,9 +225,12 @@ namespace PiViLity
                                     }
                                     foreach (PropertyInfo prop in properties)
                                     {
-                                        if (prop.GetValue(setting) is object value)
+                                        if (prop.CanWrite)
                                         {
-                                            prop.SetValue(existingSetting, value);
+                                            if (prop.GetValue(setting) is object value)
+                                            {
+                                                prop.SetValue(existingSetting, value);
+                                            }
                                         }
                                     }
                                 }

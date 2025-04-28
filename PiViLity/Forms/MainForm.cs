@@ -186,5 +186,10 @@ namespace PiViLity.Forms
             SaveSettings();
         }
 
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Option option = new Option();
+            option.ShowDialog();
+        }
     }
 }

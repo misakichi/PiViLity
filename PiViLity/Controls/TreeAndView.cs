@@ -40,11 +40,11 @@ namespace PiViLity.Controls
             tvwDirMain.AfterSelect += OnAfterSelectDir;
             lsvFile.DirectoryChanged += FlvOnDirectoryChanged;
             lsvFile.LabelEdit = true;
-            lsvFile.ThumbnailIconStore = new IconStoreThumbnail(Setting.AppSettings.Instance.ThumbnailSize);
+            lsvFile.ThumbnailIconStore = new IconStoreThumbnail(Setting.ShellSettings.Instance.ThumbnailSize);
 
             if (!DesignMode)
             {
-                lsvFile.TileSize = Setting.AppSettings.Instance.ThumbnailSize;
+                lsvFile.TileSize = Setting.ShellSettings.Instance.ThumbnailSize;
             }
 
             //ツールストリップの基本機能を追加

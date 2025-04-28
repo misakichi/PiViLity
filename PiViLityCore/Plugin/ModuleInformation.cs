@@ -10,5 +10,8 @@ namespace PiViLityCore.Plugin
     {
         public string Name { get; }
         public string Description { get; }
+        public string OptionItemName { get; }
+
+        public System.Resources.ResourceManager? ResourceManager { get; }
     }
 }

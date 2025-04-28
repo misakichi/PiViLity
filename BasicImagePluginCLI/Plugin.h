@@ -24,5 +24,19 @@ namespace BasicImagePluginCLI
 		{
 			String^ get();
 		}
-    };
+		/// <summary>
+		/// プラグイン名称
+		/// </summary>
+		virtual property String^ OptionItemName
+		{
+			String^ get();
+		}
+		/// <summary>
+		/// プラグイン名称
+		/// </summary>
+		virtual property System::Resources::ResourceManager^ ResourceManager
+		{
+			System::Resources::ResourceManager^ get() { return nullptr; }
+		}
+	};
 } // namespace BasicImagePluginCLI
