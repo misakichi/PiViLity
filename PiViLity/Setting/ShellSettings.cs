@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PiViLityCore.Option;
+using PiViLityCore.Plugin;
 
 namespace PiViLity.Setting
 {
-    [Serializable, PiViLityCore.Plugin.Setting(NameTextResouceId= "ShellSetting.Name")]
-    public class ShellSettings : PiViLityCore.Plugin.SettingBase
+    [Serializable, Option(NameTextResouceId= "ShellSetting.Name")]
+    public class ShellSettings : SettingBase
     {
         static public readonly ShellSettings Instance = new();
 
-        [PiViLityCore.Plugin.Setting(NoOption = true)]
+        [OptionItem(NoOption = true)]
         public override string Name { get => "Filter Setting"; }
 
 
-        [PiViLityCore.Plugin.Setting(NameTextResouceId = "ShellSetting.ThumbnailSize", DescriptionTextResouceId ="")]
+        [OptionItemSize(
+        NameTextResouceId = "ShellSetting.ThumbnailSize",
+        DescriptionTextResouceId = "",
+        MinWidth = 32, MinHeight = 32, MaxWidth = 1024, MaxHeight = 1024)]
         public Size ThumbnailSize = new(384, 273);
+
     }
 }

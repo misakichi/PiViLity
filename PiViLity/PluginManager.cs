@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualBasic;
 using PiViLity.Setting;
+using PiViLityCore;
 using PiViLityCore.Plugin;
 using System;
 using System.Collections.Generic;
@@ -182,15 +183,23 @@ namespace PiViLity
         /// </summary>
         public void SaveSettings(string filePath)
         {
-            var settings = _plugins.SelectMany(p => p.settings).ToList();
-            var types = settings.Select(s => s.GetType()).Distinct().ToArray();
-            var serializer = new XmlSerializer(typeof(List<SettingBase>), types);
             using (var writer = new StreamWriter(filePath))
             {
-                serializer.Serialize(writer, settings);
+                SaveSettings(writer);
             }
         }
 
+        /// <summary>
+        /// 指定ストリームに設定を保存
+        /// </summary>
+        /// <param name="writer"></param>
+        public void SaveSettings(StreamWriter writer)
+        {
+            var settings = _plugins.SelectMany(p => p.settings).ToList();
+            var types = settings.Select(s => s.GetType()).Distinct().ToArray();
+            var serializer = new XmlSerializer(typeof(List<SettingBase>), types);
+            serializer.Serialize(writer, settings);
+        }
         /// <summary>
         /// 設定を読み込む
         /// </summary>
@@ -198,40 +207,47 @@ namespace PiViLity
         {
             if (File.Exists(filePath))
             {
-                var settings = _plugins.SelectMany(p => p.settings).ToList();
-                var types = settings.Select(s => s.GetType()).Distinct().ToArray();
-                var serializer = new XmlSerializer(typeof(List<SettingBase>), types);
-
                 using (var reader = new StreamReader(filePath))
                 {
-                    if (serializer.Deserialize(reader) is List<SettingBase> loadedSettings)
+                    LoadSettings(reader);
+                }
+            }
+        }
+        /// <summary>
+        /// 指定ストリームから設定を読み込み
+        /// </summary>
+        /// <param name="writer"></param>
+        public void LoadSettings(StreamReader reader)
+        {
+            var settings = _plugins.SelectMany(p => p.settings).ToList();
+            var types = settings.Select(s => s.GetType()).Distinct().ToArray();
+            var serializer = new XmlSerializer(typeof(List<SettingBase>), types);
+            if (serializer.Deserialize(reader) is List<SettingBase> loadedSettings)
+            {
+                foreach (var setting in loadedSettings)
+                {
+                    var plugin = _plugins.FirstOrDefault(p => p.settings.Any(s => s.Name == setting.Name));
+                    if (plugin != null)
                     {
-                        foreach (var setting in loadedSettings)
+                        var existingSetting = plugin.settings.FirstOrDefault(s => s.Name == setting.Name);
+                        if (existingSetting != null)
                         {
-                            var plugin = _plugins.FirstOrDefault(p => p.settings.Any(s => s.Name == setting.Name));
-                            if (plugin != null)
+                            var fields = existingSetting.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetField);
+                            var properties = existingSetting.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
+                            foreach (FieldInfo field in fields)
                             {
-                                var existingSetting = plugin.settings.FirstOrDefault(s => s.Name == setting.Name);
-                                if (existingSetting != null)
+                                if (field.GetValue(setting) is object value)
                                 {
-                                    var fields = existingSetting.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetField);
-                                    var properties = existingSetting.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
-                                    foreach (FieldInfo field in fields)
+                                    field.SetValue(existingSetting, value);
+                                }
+                            }
+                            foreach (PropertyInfo prop in properties)
+                            {
+                                if (prop.CanWrite)
+                                {
+                                    if (prop.GetValue(setting) is object value)
                                     {
-                                        if (field.GetValue(setting) is object value)
-                                        {
-                                            field.SetValue(existingSetting, value);
-                                        }
-                                    }
-                                    foreach (PropertyInfo prop in properties)
-                                    {
-                                        if (prop.CanWrite)
-                                        {
-                                            if (prop.GetValue(setting) is object value)
-                                            {
-                                                prop.SetValue(existingSetting, value);
-                                            }
-                                        }
+                                        prop.SetValue(existingSetting, value);
                                     }
                                 }
                             }
@@ -240,6 +256,7 @@ namespace PiViLity
                 }
             }
         }
+
     }
 }
 

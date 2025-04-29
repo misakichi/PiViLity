@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Option));
             tvOptions = new TreeView();
             pnlContent = new Panel();
+            btnCancel = new Button();
+            btnOk = new Button();
             SuspendLayout();
             // 
             // tvOptions
@@ -44,14 +46,32 @@
             resources.ApplyResources(pnlContent, "pnlContent");
             pnlContent.Name = "pnlContent";
             // 
+            // btnCancel
+            // 
+            resources.ApplyResources(btnCancel, "btnCancel");
+            btnCancel.Name = "btnCancel";
+            btnCancel.UseVisualStyleBackColor = true;
+            btnCancel.Click += btnCancel_Click;
+            // 
+            // btnOk
+            // 
+            btnOk.DialogResult = DialogResult.OK;
+            resources.ApplyResources(btnOk, "btnOk");
+            btnOk.Name = "btnOk";
+            btnOk.UseVisualStyleBackColor = true;
+            btnOk.Click += btnOk_Click;
+            // 
             // Option
             // 
             resources.ApplyResources(this, "$this");
             AutoScaleMode = AutoScaleMode.Font;
             AutoValidate = AutoValidate.EnableAllowFocusChange;
+            Controls.Add(btnOk);
+            Controls.Add(btnCancel);
             Controls.Add(pnlContent);
             Controls.Add(tvOptions);
             Name = "Option";
+            FormClosed += Option_FormClosed;
             Load += Option_Load;
             ResumeLayout(false);
         }
@@ -60,5 +80,7 @@
 
         private TreeView tvOptions;
         private Panel pnlContent;
+        private Button btnCancel;
+        private Button btnOk;
     }
 }
