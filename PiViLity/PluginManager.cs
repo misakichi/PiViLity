@@ -65,6 +65,9 @@ namespace PiViLity
         /// </summary>
         Dictionary<string, List<ImageReaderInfo>> _imageReadersFromExtension = new();
 
+        List<string> supportImageExtensions = new();
+        public IReadOnlyList<string> SupportImageExtensions { get => supportImageExtensions; }
+
         /// <summary>
         /// 拡張子から画像リーダー情報を取得
         /// </summary>
@@ -159,6 +162,7 @@ namespace PiViLity
                                 else
                                 {
                                     _imageReadersFromExtension.Add(lowerExt, new List<ImageReaderInfo>() { readerInfo });
+                                    supportImageExtensions.Add(lowerExt);
                                 }
                             }
                         }

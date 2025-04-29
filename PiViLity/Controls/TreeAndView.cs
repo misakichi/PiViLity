@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,10 +24,64 @@ namespace PiViLity.Controls
 
         public event EventHandler? DirectoryChanged;
 
-        private ToolStripButton BackDirectoryBtn = new();
+        private ToolStripButton ParentDirectoryBtn = new();
         private ToolStripButton PreviousDirectoryBtn = new();
         private ToolStripButton NextDirectoryBtn = new();
 
+        /// <summary>
+        /// ディレクトリ推移前に戻る
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnPreviousDirectoryBtn_Click(object? sender, EventArgs e)
+        {
+            if (_currentRecentIndex > 0)
+            {
+                _currentRecentIndex--;
+                Path = _directoryRecent[_currentRecentIndex];
+            }
+            PreviousDirectoryBtn.Enabled = _currentRecentIndex > 0;
+            NextDirectoryBtn.Enabled = _currentRecentIndex < _directoryRecent.Count - 1;
+        }
+
+        /// <summary>
+        /// ディレクトリ推移次へ行く
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnNextDirectoryBtn_Click(object? sender, EventArgs e)
+        {
+            if (_currentRecentIndex < _directoryRecent.Count - 1)
+            {
+                _currentRecentIndex++;
+                Path = _directoryRecent[_currentRecentIndex];
+            }
+            PreviousDirectoryBtn.Enabled = _currentRecentIndex > 0;
+            NextDirectoryBtn.Enabled = _currentRecentIndex < _directoryRecent.Count - 1;
+        }
+
+        /// <summary>
+        /// 親ディレクトリへ移動
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnParentDirectoryBtn_Click(object? sender, EventArgs e)
+        {
+            var path = lsvFile.Path;
+            if (path != null)
+            {
+                var dir = new DirectoryInfo(path);
+                if (dir.Parent is DirectoryInfo parentDir)
+                {
+                    lsvFile.Path = parentDir.FullName;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public TreeAndView()
         {
             InitializeComponent();
@@ -41,6 +96,7 @@ namespace PiViLity.Controls
             lsvFile.DirectoryChanged += FlvOnDirectoryChanged;
             lsvFile.LabelEdit = true;
             lsvFile.ThumbnailIconStore = new IconStoreThumbnail(Setting.ShellSettings.Instance.ThumbnailSize);
+            lsvFile.ItemDoubleClick += LsvFile_ItemDoubleClick;
 
             if (!DesignMode)
             {
@@ -48,51 +104,37 @@ namespace PiViLity.Controls
             }
 
             //ツールストリップの基本機能を追加
-            BackDirectoryBtn.Text = "↑";
-            BackDirectoryBtn.Click += (s, e) =>
-            {
-                var path = lsvFile.Path;
-                if (path != null)
-                {
-                    var dir = new DirectoryInfo(path);
-                    if (dir.Parent is DirectoryInfo parentDir)
-                    {
-                        lsvFile.Path = parentDir.FullName;
-                    }
-                }
-            };
+            ParentDirectoryBtn.Text = "↑";
+            ParentDirectoryBtn.Click += OnParentDirectoryBtn_Click;
 
             PreviousDirectoryBtn.Text = "←";
-            PreviousDirectoryBtn.Click += (s, e) =>
-            {
-                if(_currentRecentIndex > 0)
-                {
-                    _currentRecentIndex--;
-                    lsvFile.Path = _directoryRecent[_currentRecentIndex];
-                }
-                if (_currentRecentIndex == 0)
-                {
-                    PreviousDirectoryBtn.Enabled = _currentRecentIndex > 0;
-                    NextDirectoryBtn.Enabled = _currentRecentIndex < _directoryRecent.Count - 1;
-                }
-            };
+            PreviousDirectoryBtn.Click += OnPreviousDirectoryBtn_Click;
             NextDirectoryBtn.Text = "→";
-            NextDirectoryBtn.Click += (s, e) =>
-            {
-                if (_currentRecentIndex < _directoryRecent.Count - 1)
-                {
-                    _currentRecentIndex++;
-                    lsvFile.Path = _directoryRecent[_currentRecentIndex];
-                }
-                if(_currentRecentIndex == _directoryRecent.Count - 1)
-                {
-                    PreviousDirectoryBtn.Enabled = _currentRecentIndex > 0;
-                    NextDirectoryBtn.Enabled = _currentRecentIndex < _directoryRecent.Count - 1;
-                }
-            };
-            toolStrip.Items.Add(BackDirectoryBtn);
+            NextDirectoryBtn.Click += OnNextDirectoryBtn_Click;
+            toolStrip.Items.Add(ParentDirectoryBtn);
             toolStrip.Items.Add(PreviousDirectoryBtn);
             toolStrip.Items.Add(NextDirectoryBtn);
+        }
+
+        private void LsvFile_ItemDoubleClick(FileListViewItemEventArgs item)
+        {
+            if (item.Item.IsFile)
+            {
+                var ext = System.IO.Path.GetExtension(item.Item.FileName).ToLower();
+                if (PluginManager.Instance.SupportImageExtensions.Any(s => ext.CompareTo(s) == 0))
+                {
+                    var viewer = new Forms.ViewerForm();
+                    if (viewer.LoadFile(item.Item.Path))
+                    {
+                        viewer.Show(this);
+                        item.Default = false;
+                    }
+                    else
+                    {
+                        viewer.Dispose();
+                    }
+                }
+            }
         }
 
         /// <summary lang="ja-JP">
@@ -115,6 +157,9 @@ namespace PiViLity.Controls
             }
         }
 
+        /// <summary>
+        /// パス変更推移の追加
+        /// </summary>
         private void AddRecent()
         {
             _directoryRecent.RemoveRange(_currentRecentIndex + 1, _directoryRecent.Count - _currentRecentIndex - 1);
@@ -122,7 +167,6 @@ namespace PiViLity.Controls
             _currentRecentIndex = _directoryRecent.Count - 1;
             PreviousDirectoryBtn.Enabled = _currentRecentIndex > 0;
             NextDirectoryBtn.Enabled = _currentRecentIndex < _directoryRecent.Count - 1;
-
         }
 
 

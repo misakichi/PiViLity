@@ -8,6 +8,9 @@ using PiViLityCore.Plugin;
 
 namespace PiViLity.Setting
 {
+    /// <summary>
+    /// シェル設定クラス
+    /// </summary>
     [Serializable, Option(NameTextResouceId= "ShellSetting.Name")]
     public class ShellSettings : SettingBase
     {
