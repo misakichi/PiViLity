@@ -4,8 +4,15 @@
     <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>x64</Platforms>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <SelfContained>false</SelfContained>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
   </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if not exist $(SolutionDir)\PluginOut mkdir $(SolutionDir)\PluginOut&#xD;&#xA;if not exist $(SolutionDir)\PluginOut\$(Configuration)\ mkdir $(SolutionDir)\PluginOut\$(Configuration)\&#xD;&#xA;copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="DirectXTexNet" Version="1.0.7" />
@@ -14,9 +21,5 @@
   <ItemGroup>
     <ProjectReference Include="..\PiViLityCore\PiViLityCore.csproj" />
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if not exist $(SolutionDir)\PluginOut mkdir $(SolutionDir)\PluginOut&#xD;&#xA;if not exist $(SolutionDir)\PluginOut\$(Configuration)\ mkdir $(SolutionDir)\PluginOut\$(Configuration)\&#xD;&#xA;copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\" />
-  </Target>
 
 </Project>

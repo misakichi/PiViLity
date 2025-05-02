@@ -27,7 +27,7 @@ namespace PiViLityCore.Plugin
     /// <summary>
     /// 画像ファイルを読み込むためのインターフェースです。
     /// </summary>
-    public interface IImageReader
+    public interface IImageReader : IDisposable
     {
         /// <summary>
         /// このプラグインがサポートする拡張子を返します。

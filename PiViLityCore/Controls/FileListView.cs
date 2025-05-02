@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PiViLityCore.Controls
 {
@@ -257,7 +258,7 @@ namespace PiViLityCore.Controls
                 {
                     _fsw?.Dispose();
                     _fsw = new FileSystemWatcher(path);
-                    _fsw.NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.Size;
+                    _fsw.NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.LastWrite | NotifyFilters.Size;
                     _fsw.Changed += FileSystem_OnChanged;
                     _fsw.Renamed += FileSystem_OnRenamed;
                     _fsw.Deleted += FileSystem_OnDeleted;

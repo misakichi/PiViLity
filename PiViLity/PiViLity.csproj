@@ -8,20 +8,27 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-    <Platforms>AnyCPU;x64</Platforms>
+    <SelfContained>false</SelfContained>
+    <VersionPrefix>0.0.2</VersionPrefix>
+    <AssemblyName>PiViLity</AssemblyName>
+    <Authors>misakichi kaminagare(yu kitajima)</Authors>
+
+    <Platforms>x64</Platforms>
+
+    <PackageProjectUrl>https://github.com/misakichi/PiViLity</PackageProjectUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="publish\**" />
+    <EmbeddedResource Remove="publish\**" />
+    <None Remove="publish\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="Setting\TvLvTabPage.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.1" />
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.10" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BasicImagePluginCLI\BasicImagePluginCLI.vcxproj" />
     <ProjectReference Include="..\PiViLityCore\PiViLityCore.csproj" />
   </ItemGroup>
 
@@ -42,6 +49,13 @@
 
   <ItemGroup>
     <Folder Include="Window\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DirectXTexNet" Version="1.0.7" />
+    <PackageReference Include="MetadataExtractor" Version="2.8.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.4" />
+    <PackageReference Include="SQLitePCLRaw.bundle_winsqlite3" Version="2.1.11" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

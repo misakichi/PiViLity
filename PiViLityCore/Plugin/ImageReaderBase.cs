@@ -11,6 +11,7 @@ namespace PiViLityCore.Plugin
 		public virtual ThumbnailQualities ThumbnailQuality { get; set; } = ThumbnailQualities.UseThumbnail;
 		public virtual ThumbnailTypes ThumbnailType { get; set; } = ThumbnailTypes.Centering;
 
+        public abstract void Dispose();
         public abstract Image? GetImage() ;
         public abstract Size GetImageSize();
         public abstract List<string> GetSupportedExtensions();

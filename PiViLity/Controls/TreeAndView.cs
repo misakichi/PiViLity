@@ -1,4 +1,5 @@
-﻿using PiViLityCore.Controls;
+﻿using PiViLity.Setting;
+using PiViLityCore.Controls;
 using PiViLityCore.Shell;
 using System;
 using System.Collections.Generic;
@@ -145,6 +146,8 @@ namespace PiViLity.Controls
         /// <exception cref="NotImplementedException"></exception>
         private void OnAfterSelectDir(object? sender, EventArgs e)
         {
+            lsvFile.TileSize = ShellSettings.Instance.ThumbnailSize;
+
             lsvFile.Path = tvwDirMain.Path;
         }
 

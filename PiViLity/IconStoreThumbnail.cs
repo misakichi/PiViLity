@@ -121,12 +121,12 @@ namespace PiViLity
         {
             try
             {
-                var thumbnail = ThumbnailCache.Instance.GetThumbnail(path);
-                if(thumbnail != null)
-                {
-                    EnqueueRegisterImage(path, thumbnail, postAction);
-                    return;
-                }
+                //var thumbnail = ThumbnailCache.Instance.GetThumbnail(path);
+                //if(thumbnail != null)
+                //{
+                //    EnqueueRegisterImage(path, thumbnail, postAction);
+                //    return;
+                //}
                 if (imageReader != null)
                 {
                     if (imageReader.SetFilePath(path))
@@ -139,6 +139,7 @@ namespace PiViLity
                             return;
                         }
                     }
+                    imageReader.Dispose();
                 }
                 PiViLityCore.Global.InvokeMainThread(() => postAction?.Invoke(-1));
             }

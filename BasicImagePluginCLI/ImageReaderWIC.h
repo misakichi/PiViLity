@@ -5,15 +5,18 @@ using namespace System::Collections::Generic;
 
 namespace BasicImagePluginCLI
 {
-	public ref class ImageReaderWIC : public PiViLityCore::Plugin::ImageReaderBase
+	class ImageReaderWICNativeImpl;
+
+	public ref class ImageReaderWIC : public PiViLityCore::Plugin::ImageReaderBase, System::IDisposable
 	{
 	private:
 		String^ filePath_ = "";
-		//ThumbnailQualities thumbnailQuality_ = ThumbnailQualities::ResizeImage;
-
-		DirectXTexNet::TexMetadata^ metadata_ = nullptr;
 
 	public:
+		ImageReaderWIC();
+		~ImageReaderWIC() override;
+		!ImageReaderWIC();
+
 		List<String^>^ GetSupportedExtensions() override;
 
 		/// <summary>
@@ -31,7 +34,7 @@ namespace BasicImagePluginCLI
 
 		System::Drawing::Size GetImageSize() override;
 
-
+		ImageReaderWICNativeImpl* nativeImpl_ = nullptr;
 	}; // class ImageReaderJpeg
 
 } // namespace BasicImagePluginCLI
