@@ -7,30 +7,99 @@ using Windows.UI.WebUI;
 using Microsoft.Data.Sqlite;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Data.Common;
 namespace PiViLity
 {
     /// <summary>
     /// サムネイル画像のキャッシュ
     /// アルファ付はRgbのJpegとAlphaのPngを組み合わせて保存する
     /// </summary>
-    internal class ThumbnailCache
+    internal class ThumbnailCache : IDisposable
     {
+
         private static ThumbnailCache _incetance = new();
+        private const string DbName = "PVilityIconThumbnailCache.db";
 
         public static ThumbnailCache Instance => _incetance;
         private string _dbFilename = "";
+        private SqliteConnection? appDb;
 
-        public void Initialize(string dbFilename)
+        const string memoryName = "PiVilityIconDbRef";
+        const string mutexName = "PiVilityIconDbRefMutex";
+
+        private static Mutex? mutex = new(false,mutexName);
+        private static System.IO.MemoryMappedFiles.MemoryMappedFile? mmfDbRef= System.IO.MemoryMappedFiles.MemoryMappedFile.CreateOrOpen(memoryName, 4, System.IO.MemoryMappedFiles.MemoryMappedFileAccess.ReadWrite);
+
+        public void Dispose()
         {
-            using (SqliteConnection db = new SqliteConnection($"Filename={dbFilename}"))
+            appDb?.Dispose();
+            appDb = null;
+            mmfDbRef?.Dispose();
+            mmfDbRef = null;
+            mutex?.Dispose();
+            mutex = null;
+        }
+        public static void Initialize(string dbFilename)
+        {
+            _incetance._Initialize(dbFilename);
+        }
+        public static void Terminate()
+        {
+            _incetance.Dispose();
+        }
+        private SqliteConnection openDb()
+        {
+            var db = new SqliteConnection($"Data Source=File:{DbName}?Mode=Memory&Cache=Shared");
+            db.Open();
+            return db;
+        }
+
+        private void _Initialize(string dbFilename)
+        {
+            if (appDb != null)
+                return;
+
+
+            appDb = openDb();
+            using (SqliteConnection db = openDb())
             {
-                db.Open();
+                if (mutex != null)
+                {
+                    mutex.WaitOne();
+                    using (var view = mmfDbRef?.CreateViewAccessor(0, 4, System.IO.MemoryMappedFiles.MemoryMappedFileAccess.ReadWrite))
+                    {
+                        int dbRefCount = 0;
+                        view?.Read<int>(0, out dbRefCount);
+                        if (dbRefCount == 0)
+                        {
+                            using (SqliteConnection backup = new SqliteConnection($"Filename={dbFilename}"))
+                            {
+                                backup.Open();
+                                backup.BackupDatabase(db);
+                            }
+                            view?.Write(0, dbRefCount + 1);
+                        }
+                    }
+                    mutex.ReleaseMutex();
+                }
+
                 using (SqliteCommand cmd = db.CreateCommand())
                 {
                     cmd.CommandText = "CREATE TABLE IF NOT EXISTS ThumbnailCache (Path TEXT PRIMARY KEY, UpdateTime INTEGER, FileSize INTEGER, Width INTEGER, Height INTEGER, Thumbnail BLOB, ThumbnailSub BLOB)";
                     cmd.ExecuteNonQuery();
                 }
                 _dbFilename = dbFilename;
+            }
+        }
+        public void SaveDb(string dbFilename)
+        {
+            using (SqliteConnection db = openDb())
+            {
+                using (SqliteConnection backup = new SqliteConnection($"Filename={dbFilename}"))
+                {
+                    backup.Open();
+                    db.BackupDatabase(backup);
+                }
             }
         }
 
@@ -42,9 +111,8 @@ namespace PiViLity
 
             var ThumbnailSize = Setting.ShellSettings.Instance.ThumbnailSize;
 
-            using (SqliteConnection db = new SqliteConnection($"Filename={_dbFilename}"))
+            using (SqliteConnection db = openDb())
             {
-                db.Open();
                 using (SqliteCommand cmd = db.CreateCommand())
                 {
                     cmd.CommandText = "SELECT UpdateTime, FileSize, Width, Height, Thumbnail, ThumbnailSub FROM ThumbnailCache WHERE Path = @Path";
@@ -116,9 +184,8 @@ namespace PiViLity
             if (!fi.Exists)
                 return;
             var inDbFilename = filename.ToLower();
-            using (SqliteConnection db = new SqliteConnection($"Filename={_dbFilename}"))
+            using (SqliteConnection db = openDb())
             {
-                db.Open();
                 using (var transaction = db.BeginTransaction())
                 {
                     using (MemoryStream ms = new MemoryStream())

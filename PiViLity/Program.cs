@@ -29,7 +29,7 @@ namespace PiViLity
                 PluginManager.Instance.LoadSettings(appDir+"\\settings.xml");
             }
 
-            ThumbnailCache.Instance.Initialize(Setting.AppSettings.Instance.CacheDb);
+            ThumbnailCache.Initialize(Setting.AppSettings.Instance.CacheDb);
 
             ThreadPool.SetMinThreads(32,32);
             ThreadPool.SetMaxThreads(64, 64);
@@ -38,6 +38,8 @@ namespace PiViLity
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new Forms.MainForm());
+
+            ThumbnailCache.Terminate();
 
             if (appDir != null)
             {

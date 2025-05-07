@@ -7,7 +7,7 @@ namespace BasicImagePluginCLI
 {
 	class ImageReaderWICNativeImpl;
 
-	public ref class ImageReaderWIC : public PiViLityCore::Plugin::ImageReaderBase, System::IDisposable
+	public ref class ImageReaderWIC : public PiViLityCore::Plugin::ImageReaderBase
 	{
 	private:
 		String^ filePath_ = "";
@@ -16,6 +16,7 @@ namespace BasicImagePluginCLI
 		ImageReaderWIC();
 		~ImageReaderWIC() override;
 		!ImageReaderWIC();
+
 
 		List<String^>^ GetSupportedExtensions() override;
 

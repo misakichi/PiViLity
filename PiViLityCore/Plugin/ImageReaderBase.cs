@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace PiViLityCore.Plugin
 {
-	public abstract class ImageReaderBase : IImageReader
-	{
+	public abstract class ImageReaderBase : IImageReader, IDisposable
+    {
 		public virtual ThumbnailQualities ThumbnailQuality { get; set; } = ThumbnailQualities.UseThumbnail;
 		public virtual ThumbnailTypes ThumbnailType { get; set; } = ThumbnailTypes.Centering;
 
