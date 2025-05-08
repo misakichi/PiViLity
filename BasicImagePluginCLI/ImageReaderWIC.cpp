@@ -401,6 +401,11 @@ System::Drawing::Image^ ImageReaderWIC::GetThumbnailImage(Drawing::Size size)
     if (!nativeImpl_ || !nativeImpl_->isValidate())
         return nullptr;
 
+#if 1
+	auto thumbnailDrawRect = GetThumbnailDrawRect(System::Drawing::Size(nativeImpl_->width(), nativeImpl_->height()), size);
+    auto thumbnailImage = nativeImpl_->GetThumbnailImage(thumbnailDrawRect.Width, thumbnailDrawRect.Height, size.Width, size.Height, thumbnailDrawRect.X, thumbnailDrawRect.Y);
+    return thumbnailImage ? System::Drawing::Bitmap::FromHbitmap((IntPtr)thumbnailImage) : nullptr;
+#else
     if (ThumbnailType == ThumbnailTypes::KeepAspectRatio)
     {
         float aspectRatio = static_cast<float>(nativeImpl_->width()) / nativeImpl_->height();
@@ -440,7 +445,7 @@ System::Drawing::Image^ ImageReaderWIC::GetThumbnailImage(Drawing::Size size)
 
 
     }
-
+#endif
     return nullptr;
 }
 

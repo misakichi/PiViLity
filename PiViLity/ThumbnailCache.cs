@@ -109,7 +109,7 @@ namespace PiViLity
             if (!fi.Exists)
                 return null;
 
-            var ThumbnailSize = Setting.ShellSettings.Instance.ThumbnailSize;
+            var ThumbnailSize = PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize;
 
             using (SqliteConnection db = openDb())
             {

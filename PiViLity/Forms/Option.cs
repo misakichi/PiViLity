@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -113,6 +114,7 @@ namespace PiViLity.Forms
         {
             bool isShow = false;
             string itemText = member.Name;
+
             OptionItemAttribute? optionItemAttribute = null;
             var attrs = Attribute.GetCustomAttributes(member).Where(attr => attr is OptionItemAttribute);
 
@@ -130,6 +132,8 @@ namespace PiViLity.Forms
                     optionItemAttribute = settingAttr;
                 }
             }
+            if (!isShow)
+                return null;
             if (optionItemAttribute == null)
                 optionItemAttribute = new OptionItemAttribute();
 
@@ -268,6 +272,7 @@ namespace PiViLity.Forms
             var fields = setting.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetField);
             var properties = setting.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
 
+#if true
             settingPanel.PerformLayout();
             List<OptionItemPanel> panels = new();
             foreach (var field in fields)
@@ -293,7 +298,7 @@ namespace PiViLity.Forms
                 settingPanel.Height = Math.Max(settingPanel.Height, panel.Bottom);
             }
             //settingPanel.Width = Math.Max(itemPanel.Width, itemPanel.Width);
-
+#endif
 
             return settingPanel;
         }
@@ -314,7 +319,7 @@ namespace PiViLity.Forms
             settingBackup.Seek(0, SeekOrigin.Begin);
             PluginManager.Instance.SaveSettings(writer);
             writer.Flush();
-
+            List<TreeNode> moduleNodes = new();
             PluginManager.Instance.Plugins.ForEach(plugin =>
             {
                 var moduleItem = new TreeNode(plugin.information.OptionItemName);
@@ -334,7 +339,7 @@ namespace PiViLity.Forms
                 };
 
                 moduleItem.Tag = moduleInfo;
-                tvOptions.Nodes.Add(moduleItem);
+                moduleNodes.Add(moduleItem);
 
                 //プラグイン中の設定情報を捜査
                 plugin.settings.ForEach(setting =>
@@ -352,10 +357,17 @@ namespace PiViLity.Forms
                                 {
                                     name = Global.GetResourceString(plugin.information.ResourceManager, settingAttr.NameTextResouceId);
                                 }
-
                                 var settingItem = new TreeNode(name);
                                 settingItem.Tag = CreateSettingPanel(plugin.information.ResourceManager, setting);
-                                moduleItem.Nodes.Add(settingItem);
+
+                                if (plugin.information.OptionItemName == "")
+                                {
+                                    tvOptions.Nodes.Add(settingItem);
+                                }
+                                else
+                                {
+                                    moduleItem.Nodes.Add(settingItem);
+                                }
                             }
                         }
                     }
@@ -377,12 +389,14 @@ namespace PiViLity.Forms
                     }
                 };
             });
+            tvOptions.Nodes.AddRange(moduleNodes.ToArray());
 
         }
 
         private void btnOk_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
+            PiViLityCore.Event.Option.UpdateSettings();
             Close();
         }
 

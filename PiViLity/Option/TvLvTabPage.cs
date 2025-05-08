@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PiViLity.Setting
+namespace PiViLity.Option
 {
     [Serializable]
     public class TvLvTabPage

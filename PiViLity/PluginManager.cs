@@ -1,9 +1,10 @@
 ﻿using Microsoft.VisualBasic;
-using PiViLity.Setting;
+using PiViLity.Option;
 using PiViLityCore;
 using PiViLityCore.Plugin;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -43,6 +44,10 @@ namespace PiViLity
     internal class PluginManager
     {
         static public PluginManager Instance { get; private set; } = new();
+
+        PluginManager()
+        {
+        }
 
         /// <summary>
         /// プラグインリスト
@@ -89,6 +94,8 @@ namespace PiViLity
         /// <param name="dirPath"></param>
         public void LoadPlugins(string dirPath)
         {
+            AnalyzeAssembly(typeof(PiViLityCore.Plugin.IModuleInformation).Assembly);
+
             if (Directory.Exists(dirPath))
             {
                 var directory = new DirectoryInfo(dirPath);
@@ -140,6 +147,9 @@ namespace PiViLity
             {
                 foreach (var type in assembly.GetTypes())
                 {
+                    if (type.IsAbstract)
+                        continue;
+                    //Debug.WriteLine($"[{assembly.FullName}] {type.FullName}");
                     foreach (var hasInterface in type.GetInterfaces())
                     {
                         /// 画像リーダーの場合

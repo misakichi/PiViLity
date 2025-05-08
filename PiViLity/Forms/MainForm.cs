@@ -5,6 +5,7 @@ using Windows.Devices.Enumeration;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
+using PiViLity.Option;
 
 namespace PiViLity.Forms
 
@@ -33,7 +34,7 @@ namespace PiViLity.Forms
                 btnDetailView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Detail")?.ToBitmap();
                 btnTileView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Thumb")?.ToBitmap();
 
-                if (Setting.AppSettings.Instance.WindowSize.Width <= 0 || Setting.AppSettings.Instance.WindowSize.Height <= 0)
+                if (AppSettings.Instance.WindowSize.Width <= 0 || AppSettings.Instance.WindowSize.Height <= 0)
                 {
                     // フォームのサイズを現在ディスプレイの大きさの半分にしてセンタリングで表示する
                     var screen = Screen.PrimaryScreen?.WorkingArea ?? new Rectangle(0, 0, 800, 600);
@@ -42,10 +43,10 @@ namespace PiViLity.Forms
                 }
                 else
                 {
-                    Size = Setting.AppSettings.Instance.WindowSize;
-                    Left = Setting.AppSettings.Instance.WindowPosition.X;
-                    Top = Setting.AppSettings.Instance.WindowPosition.Y;
-                    WindowState = Setting.AppSettings.Instance.WindowState;
+                    Size = AppSettings.Instance.WindowSize;
+                    Left = AppSettings.Instance.WindowPosition.X;
+                    Top = AppSettings.Instance.WindowPosition.Y;
+                    WindowState = AppSettings.Instance.WindowState;
                 }
 
 
@@ -59,14 +60,14 @@ namespace PiViLity.Forms
         /// <param name="e"></param>
         private void TreeAndViewTab_Load(object sender, EventArgs e)
         {
-            List<Tuple<Setting.TvLvTabPage, Controls.TreeAndView>> loadSettingPair = new();
+            List<Tuple<TvLvTabPage, Controls.TreeAndView>> loadSettingPair = new();
 
             //TreeAndViewTabを追加する
             treeAndViewTab.Dock = DockStyle.Fill;
             panel.Controls.Add(treeAndViewTab);
 
             //設定ファイルを元にタブを追加する
-            Setting.AppSettings.Instance.TvLvTabPages.ForEach(fileViewSetting =>
+            AppSettings.Instance.TvLvTabPages.ForEach(fileViewSetting =>
             {
                 if (!System.IO.Directory.Exists(fileViewSetting.FileListView.Path))
                 {
@@ -80,8 +81,8 @@ namespace PiViLity.Forms
             //タブがない場合新規追加
             if (treeAndViewTab.TabCount == 0)
             {
-                Setting.TvLvTabPage newSetting = new();
-                Setting.AppSettings.Instance.TvLvTabPages.Add(newSetting);
+                TvLvTabPage newSetting = new();
+                AppSettings.Instance.TvLvTabPages.Add(newSetting);
 
                 var newTreeView = treeAndViewTab.AddTab(System.IO.Directory.GetCurrentDirectory());
             }
@@ -96,11 +97,11 @@ namespace PiViLity.Forms
             items.Add(btnTileView);
 
             toolStrip.Items.AddRange(items.ToArray());
-            btnSmallIconView.Click += (s, e) => SetVireType(View.SmallIcon);
-            btnLargeIconView.Click += (s, e) => SetVireType(View.LargeIcon);
-            btnListView.Click += (s, e) => SetVireType(View.List);
-            btnTileView.Click += (s, e) => SetVireType(View.Tile);
-            btnDetailView.Click += (s, e) => SetVireType(View.Details);
+            btnSmallIconView.Click += (s, e) => SetViewType(View.SmallIcon);
+            btnLargeIconView.Click += (s, e) => SetViewType(View.LargeIcon);
+            btnListView.Click += (s, e) => SetViewType(View.List);
+            btnTileView.Click += (s, e) => SetViewType(View.Tile);
+            btnDetailView.Click += (s, e) => SetViewType(View.Details);
 
             treeAndViewTab.TabIndexChanged += TreeAndViewTab_TabIndexChanged;
 
@@ -126,29 +127,28 @@ namespace PiViLity.Forms
 
         public void SaveSettings()
         {
-            Setting.AppSettings.Instance.WindowSize = Size;
-            Setting.AppSettings.Instance.WindowPosition = new Point(Left, Top);
-            Setting.AppSettings.Instance.WindowState = WindowState;
-
-            Setting.AppSettings.Instance.TvLvTabPages.Clear();
+            AppSettings.Instance.WindowSize = Size;
+            AppSettings.Instance.WindowPosition = new Point(Left, Top);
+            AppSettings.Instance.WindowState = WindowState;
+            AppSettings.Instance.TvLvTabPages.Clear();
             for (int tabIndex = 0; tabIndex < treeAndViewTab.TabCount; tabIndex++)
             {
                 var tab = treeAndViewTab.GetTab(tabIndex);
                 if (tab != null)
                 {
-                    Setting.TvLvTabPage fileView = new();
+                    TvLvTabPage fileView = new();
                     tab.SaveSettings(fileView);
-                    Setting.AppSettings.Instance.TvLvTabPages.Add(fileView);
+                    AppSettings.Instance.TvLvTabPages.Add(fileView);
                 }
             }
 
         }
 
-        private void SetVireType(View view)
+        private void SetViewType(View view)
         {
             if (treeAndViewTab.CurrentTreeAndView != null)
             {
-                Setting.AppSettings.Instance.FileListViewStyle = view;
+                PiViLityCore.Option.ShellSettings.Instance.FileListViewStyle = view;
                 RefreshViewTypeBtnChecked();
             }
         }
@@ -161,7 +161,7 @@ namespace PiViLity.Forms
             if (treeAndViewTab.CurrentTreeAndView == null)
                 return;
 
-            treeAndViewTab.CurrentTreeAndView.View = Setting.AppSettings.Instance.FileListViewStyle;
+            treeAndViewTab.CurrentTreeAndView.View = PiViLityCore.Option.ShellSettings.Instance.FileListViewStyle;
             btnListView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.List;
             btnSmallIconView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.SmallIcon;
             btnLargeIconView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.LargeIcon;

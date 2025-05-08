@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Setting\TvLvTabPage.cs" />
+    <None Include="Option\TvLvTabPage.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,6 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Reader\" />
     <Folder Include="Window\" />
   </ItemGroup>
 

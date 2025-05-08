@@ -44,7 +44,7 @@ namespace PiViLityCore.Controls
         //private fields
         private string _path = "C:\\";
         private FileSystemWatcher _fsw = new();
-        private IconStoreSystem _iconStore = new(true, true, true);
+        private IconStoreSystem _iconStore;
         public IIconStore? ThumbnailIconStore = null;
         private List<FileListViewItem> _currentDirectoryItems = new ();
         private List<FileListViewItem> _currentViewItems = new();
@@ -58,6 +58,9 @@ namespace PiViLityCore.Controls
         /// </summary>
         public FileListView()
         {
+            CreateIconStore();
+            _iconStore =new(true,true, true, null, null);
+
             for (int i = 0; i < SubItemColums.Length; i++)
             {
                 var subItemName = ((FileListViewSubItemBit)i).ToString();
@@ -81,6 +84,38 @@ namespace PiViLityCore.Controls
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             UpdateStyles();
 
+            PiViLityCore.Event.Option.ApplySettings += OnApplySettings;
+        }
+
+        void CreateIconStore()
+        {
+            var c = Math.Min(Option.ShellSettings.Instance.ThumbnailSize.Width, Option.ShellSettings.Instance.ThumbnailSize.Height);
+            var tileSize = new Size(c,c);
+            _iconStore = new IconStoreSystem(true, true, true, null, null, tileSize);
+            if (View == View.Tile)
+            {
+                LargeImageList = _iconStore.TileIconList;
+            }
+            else
+            {
+                LargeImageList = _iconStore.LargeIconList;
+            }
+            SmallImageList = _iconStore.SmallIconList;
+        }
+        private void OnApplySettings(object? sender, EventArgs e)
+        {
+            var c = Math.Min(Option.ShellSettings.Instance.ThumbnailSize.Width, Option.ShellSettings.Instance.ThumbnailSize.Height);
+            var tileSize = new Size(c, c);
+            if (_iconStore.TileIconList.ImageSize.Equals(tileSize) == false)
+            {
+                _iconStore.TileIconList.Images.Clear();
+                _iconStore.TileIconList.ImageSize = tileSize;
+                if (View == View.Tile)
+                {
+                    TileSize = Option.ShellSettings.Instance.ThumbnailSize;
+                    RefreshFileList();
+                }
+            }
         }
 
 
@@ -111,21 +146,24 @@ namespace PiViLityCore.Controls
         {
             //設定が変更された場合はサブアイテムを再設定します。
             Columns.Clear();
-            var headColum = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Name]);
-            if (_detailSubItems.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
+            if (View != View.Tile)
             {
-                Columns.Add(SubItemColums[(int)FileListViewSubItemBit.ModifiedDateTime]);
+                var headColum = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Name]);
+                if (_detailSubItems.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
+                {
+                    Columns.Add(SubItemColums[(int)FileListViewSubItemBit.ModifiedDateTime]);
+                }
+                if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Type))
+                {
+                    Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Type]);
+                }
+                if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Size))
+                {
+                    var sub = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Size]);
+                }
             }
-            if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Type))
-            {
-                Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Type]);
-            }
-            if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Size))
-            {
-                var sub = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Size]);
-            }
-
-            _currentDirectoryItems.ForEach(item => item.FileListViewSubItemType = _detailSubItems);
+            
+            _currentDirectoryItems.ForEach(item => item.FileListViewSubItemType = View != View.Tile ? _detailSubItems : FileListViewSubItemTypes.Name);
         }
 
         /// <summary>
@@ -323,6 +361,7 @@ namespace PiViLityCore.Controls
                     OwnerDraw = true;
                 }
                 base.View = value;
+                RefreshSubItems();
             }
         }
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PiViLity.Setting
+namespace PiViLity.Option
 {
     [Serializable, Option(NoOption = true)]
     public class AppSettings : PiViLityCore.Plugin.SettingBase
@@ -17,7 +17,6 @@ namespace PiViLity.Setting
         public List<TvLvTabPage> TvLvTabPages { get; set; } = new();
 
         public string CacheDb = System.IO.Path.GetDirectoryName(Application.ExecutablePath) + "\\thumbnail.db" ?? "";
-        public View FileListViewStyle = View.Tile;
 
         public FormWindowState WindowState = FormWindowState.Normal;
         public Point WindowPosition = new();

@@ -108,7 +108,7 @@ namespace PiViLity.Controls
             lsvFile.Size = new Size(458, 369);
             lsvFile.Sorting = SortOrder.Ascending;
             lsvFile.TabIndex = 12;
-            lsvFile.TileSize = new Size(320, 240);
+            lsvFile.TileSize = new Size(32, 32);
             lsvFile.UseCompatibleStateImageBehavior = false;
             // 
             // toolStrip

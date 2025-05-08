@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PiViLityCore.Option;
 using PiViLityCore.Plugin;
 
-namespace PiViLity.Setting
+namespace PiViLityCore.Option
 {
     /// <summary>
     /// シェル設定クラス
@@ -17,13 +16,15 @@ namespace PiViLity.Setting
         static public readonly ShellSettings Instance = new();
 
         [OptionItem(NoOption = true)]
-        public override string Name { get => "Filter Setting"; }
+        public override string Name { get => "Filer Setting"; }
 
+        [OptionItem(NoOption = true)]
+        public View FileListViewStyle = View.Tile;
 
         [OptionItemSize(
         NameTextResouceId = "ShellSetting.ThumbnailSize",
         DescriptionTextResouceId = "",
-        MinWidth = 32, MinHeight = 32, MaxWidth = 1024, MaxHeight = 1024)]
+        MinWidth = 64, MinHeight = 32, MaxWidth = 1024, MaxHeight = 1024)]
         public Size ThumbnailSize = new(384, 273);
 
     }

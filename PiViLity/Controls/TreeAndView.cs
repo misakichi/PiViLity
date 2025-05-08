@@ -1,4 +1,4 @@
-﻿using PiViLity.Setting;
+﻿using PiViLity.Option;
 using PiViLityCore.Controls;
 using PiViLityCore.Shell;
 using System;
@@ -96,12 +96,12 @@ namespace PiViLity.Controls
             tvwDirMain.AfterSelect += OnAfterSelectDir;
             lsvFile.DirectoryChanged += FlvOnDirectoryChanged;
             lsvFile.LabelEdit = true;
-            lsvFile.ThumbnailIconStore = new IconStoreThumbnail(Setting.ShellSettings.Instance.ThumbnailSize);
+            lsvFile.ThumbnailIconStore = new IconStoreThumbnail(PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize);
             lsvFile.ItemDoubleClick += LsvFile_ItemDoubleClick;
 
             if (!DesignMode)
             {
-                lsvFile.TileSize = Setting.ShellSettings.Instance.ThumbnailSize;
+                lsvFile.TileSize = PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize;
             }
 
             //ツールストリップの基本機能を追加
@@ -146,7 +146,11 @@ namespace PiViLity.Controls
         /// <exception cref="NotImplementedException"></exception>
         private void OnAfterSelectDir(object? sender, EventArgs e)
         {
-            lsvFile.TileSize = ShellSettings.Instance.ThumbnailSize;
+            if (lsvFile.TileSize != PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize)
+            {
+                lsvFile.ThumbnailIconStore = new IconStoreThumbnail(PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize);
+            }
+            lsvFile.TileSize = PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize;
 
             lsvFile.Path = tvwDirMain.Path;
         }
@@ -201,7 +205,7 @@ namespace PiViLity.Controls
         /// 設定を復元する
         /// </summary>
         /// <param name="fileView"></param>
-        public void RestoreSettings(Setting.TvLvTabPage pageSetting)
+        public void RestoreSettings(Option.TvLvTabPage pageSetting)
         {
             splitDirView.SplitPosition = pageSetting.SplitDirWidth;
             splitViewInfo.SplitPosition = pageSetting.SplitListHeight;
@@ -212,7 +216,7 @@ namespace PiViLity.Controls
         /// 設定を保存する
         /// </summary>
         /// <param name="fileView"></param>
-        public void SaveSettings(Setting.TvLvTabPage pageSetting)
+        public void SaveSettings(Option.TvLvTabPage pageSetting)
         {
             pageSetting.SplitDirWidth = splitDirView.SplitPosition;
             pageSetting.SplitListHeight = splitViewInfo.SplitPosition;

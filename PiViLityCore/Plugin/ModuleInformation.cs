@@ -14,4 +14,15 @@ namespace PiViLityCore.Plugin
 
         public System.Resources.ResourceManager? ResourceManager { get; }
     }
+
+    public class ModuleInformation : IModuleInformation
+    {
+        public string Name { get; set; } = "Core";
+        public string Description { get; set; } = "Core Module";
+        public string OptionItemName { get; set; } = "";
+        public System.Resources.ResourceManager? ResourceManager { get; set; } = null;
+        public ModuleInformation()
+        {
+        }
+    }
 }
