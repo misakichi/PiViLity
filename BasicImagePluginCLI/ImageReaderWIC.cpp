@@ -386,9 +386,13 @@ System::Drawing::Image^ ImageReaderWIC::GetImage()
 	if (!nativeImpl_ || !nativeImpl_->isValidate())
 		return nullptr;
 
-    if(auto handle = nativeImpl_->GetImage())
-        return System::Drawing::Bitmap::FromHbitmap((IntPtr)handle);
-	return nullptr;
+    System::Drawing::Image^ img = nullptr;
+    if (auto handle = nativeImpl_->GetImage())
+    {
+        img =  System::Drawing::Bitmap::FromHbitmap((IntPtr)handle);
+        DeleteObject(handle);
+    }
+	return img;
 }
 
 /// <summary>
@@ -404,7 +408,10 @@ System::Drawing::Image^ ImageReaderWIC::GetThumbnailImage(Drawing::Size size)
 #if 1
 	auto thumbnailDrawRect = GetThumbnailDrawRect(System::Drawing::Size(nativeImpl_->width(), nativeImpl_->height()), size);
     auto thumbnailImage = nativeImpl_->GetThumbnailImage(thumbnailDrawRect.Width, thumbnailDrawRect.Height, size.Width, size.Height, thumbnailDrawRect.X, thumbnailDrawRect.Y);
-    return thumbnailImage ? System::Drawing::Bitmap::FromHbitmap((IntPtr)thumbnailImage) : nullptr;
+    auto img =  thumbnailImage ? System::Drawing::Bitmap::FromHbitmap((IntPtr)thumbnailImage) : nullptr;
+    if (thumbnailImage)
+        DeleteObject(thumbnailImage);
+    return img;
 #else
     if (ThumbnailType == ThumbnailTypes::KeepAspectRatio)
     {

@@ -21,5 +21,11 @@ namespace PiViLity.Forms
         {
             return imgViewer.LoadImage(filename);
         }
+
+        private void ViewerForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Dispose();
+            GC.Collect();
+        }
     }
 }

@@ -47,6 +47,7 @@
             Controls.Add(imgViewer);
             Name = "ViewerForm";
             Text = "ViewerForm";
+            FormClosed += ViewerForm_FormClosed;
             ResumeLayout(false);
         }
 

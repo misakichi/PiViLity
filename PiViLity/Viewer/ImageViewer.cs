@@ -22,10 +22,12 @@ namespace PiViLity.Viewer
         public bool LoadImage(string filePath)
         {
             Image? image = null;
-            var imageReader = PluginManager.Instance.GetImageReader(filePath);
-            if (imageReader?.SetFilePath(filePath) ?? false)
+            using (var imageReader = PluginManager.Instance.GetImageReader(filePath))
             {
-                image = imageReader.GetImage();
+                if (imageReader?.SetFilePath(filePath) ?? false)
+                {
+                    image = imageReader.GetImage();
+                }
             }
             SetImage(image);
             return image != null;
