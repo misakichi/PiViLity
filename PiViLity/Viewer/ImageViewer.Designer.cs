@@ -30,8 +30,9 @@
         {
             toolStrip1 = new ToolStrip();
             pnlContainer = new Panel();
-            pnlImage = new Panel();
+            picImage = new PictureBox();
             pnlContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picImage).BeginInit();
             SuspendLayout();
             // 
             // toolStrip1
@@ -45,20 +46,21 @@
             // pnlContainer
             // 
             pnlContainer.AutoScroll = true;
-            pnlContainer.Controls.Add(pnlImage);
+            pnlContainer.Controls.Add(picImage);
             pnlContainer.Dock = DockStyle.Fill;
             pnlContainer.Location = new Point(0, 25);
             pnlContainer.Name = "pnlContainer";
             pnlContainer.Size = new Size(453, 286);
             pnlContainer.TabIndex = 1;
             // 
-            // pnlImage
+            // picImage
             // 
-            pnlImage.Location = new Point(0, 0);
-            pnlImage.Margin = new Padding(0);
-            pnlImage.Name = "pnlImage";
-            pnlImage.Size = new Size(200, 100);
-            pnlImage.TabIndex = 0;
+            picImage.Location = new Point(208, 143);
+            picImage.Name = "picImage";
+            picImage.Size = new Size(100, 50);
+            picImage.TabIndex = 1;
+            picImage.TabStop = false;
+            picImage.SizeChanged += picImage_SizeChanged;
             // 
             // ImageViewer
             // 
@@ -69,6 +71,7 @@
             Name = "ImageViewer";
             Size = new Size(453, 311);
             pnlContainer.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)picImage).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -77,6 +80,6 @@
 
         private ToolStrip toolStrip1;
         private Panel pnlContainer;
-        private Panel pnlImage;
+        private PictureBox picImage;
     }
 }

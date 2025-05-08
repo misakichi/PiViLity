@@ -83,7 +83,7 @@ namespace PiViLityCore.Controls
             SmallImageList = _iconStore.SmallIconList;
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             UpdateStyles();
-
+            DoubleBuffered = true;
             PiViLityCore.Event.Option.ApplySettings += OnApplySettings;
         }
 
@@ -428,7 +428,13 @@ namespace PiViLityCore.Controls
                     }
                 }
 
+                if(e.Item.Selected)
+                {
+                    e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(128, 64, 64, 160)), e.Bounds);
+                }
+
                 e.DrawFocusRectangle();
+                
                 var plateBounds = new Rectangle(e.Bounds.Left, e.Bounds.Bottom-Font.Height, e.Bounds.Width, Font.Height);
                 using (var brush = new SolidBrush(Color.FromArgb(192, 24, 24, 24)))
                 {
@@ -436,7 +442,7 @@ namespace PiViLityCore.Controls
                         e.Graphics.FillRectangle(brush, plateBounds);
                 }
 
-                e.DrawText(TextFormatFlags.Bottom | TextFormatFlags.HorizontalCenter | TextFormatFlags.TextBoxControl);
+                e.DrawText(TextFormatFlags.Bottom | TextFormatFlags.HorizontalCenter | TextFormatFlags.TextBoxControl | TextFormatFlags.EndEllipsis);
                 base.OnDrawItem(e);
                 return;
             }

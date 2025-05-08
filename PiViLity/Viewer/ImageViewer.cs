@@ -14,9 +14,26 @@ namespace PiViLity.Viewer
 {
     public partial class ImageViewer : UserControl, PiViLityCore.Plugin.ImageViewer
     {
+        Image? viewImage = new Bitmap(1, 1);
+
         public ImageViewer()
         {
             InitializeComponent();
+            picImage.Dock = DockStyle.Fill;
+            picImage.Paint += PnlImage_Paint;
+        }
+
+        private void PnlImage_Paint(object? sender, PaintEventArgs e)
+        {
+
+            e.Graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
+            e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
+
+            if (viewImage != null)
+            {
+                e.Graphics.DrawImage(viewImage, new Rectangle(0, 0, picImage.Width, picImage.Height), new Rectangle(0, 0, viewImage.Width, viewImage.Height), GraphicsUnit.Pixel);
+            }
         }
 
         public bool LoadImage(string filePath)
@@ -35,25 +52,31 @@ namespace PiViLity.Viewer
 
         private void SetImage(Image? image)
         {
-            pnlImage.BackgroundImage = image;
-            if(ViewMode== ViewModeStyle.AutoScale)
-            {
-                if (image != null)
-                {
-                    pnlImage.Dock= DockStyle.Fill;
-                    pnlImage.BackgroundImageLayout = ImageLayout.Zoom;
-                }
-            }
-            else
-            {
-                pnlImage.Dock = DockStyle.None;
-                pnlImage.BackgroundImageLayout = ImageLayout.None;
-            }
+            viewImage = image;
+            picImage.Invalidate();
+            //if(ViewMode== ViewModeStyle.AutoScale)
+            //{
+            //    if (image != null)
+            //    {
+            //        pnlImage.Dock= DockStyle.Fill;
+            //        pnlImage.BackgroundImageLayout = ImageLayout.Zoom;
+            //    }
+            //}
+            //else
+            //{
+            //    pnlImage.Dock = DockStyle.None;
+            //    pnlImage.BackgroundImageLayout = ImageLayout.None;
+            //}
         }
         public Control GetViewer()
         {
             // Return the control for displaying the image
             return this;
+        }
+
+        private void picImage_SizeChanged(object sender, EventArgs e)
+        {
+            picImage.Invalidate();
         }
 
         [DefaultValue(ViewModeStyle.AutoScale)]

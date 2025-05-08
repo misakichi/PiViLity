@@ -101,8 +101,8 @@ namespace PiViLity.Controls
             lsvFile.AllowDrop = true;
             lsvFile.BorderStyle = BorderStyle.None;
             lsvFile.Dock = DockStyle.Top;
-            lsvFile.HotTracking = true;
-            lsvFile.HoverSelection = true;
+            lsvFile.HotTracking = false;
+            lsvFile.HoverSelection = false;
             lsvFile.Location = new Point(0, 0);
             lsvFile.Name = "lsvFile";
             lsvFile.Size = new Size(458, 369);
