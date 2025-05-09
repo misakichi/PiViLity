@@ -67,8 +67,14 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Install the .NET SDK workload
-    - name: Install .NET SDK
+    # Install the .NET SDK Core workload
+    - name: Install .NET SDK Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    # Install the .NET SDK Desktop workload
+    - name: Install .NET SDK Desktop
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
