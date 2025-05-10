@@ -5,12 +5,21 @@ using namespace System;
 
 namespace PiVilityNative
 {
+	public ref class CustomMenuItem
+	{
+	public:
+		System::Action^ action = nullptr;
+		String^ name = "";
+		bool isDefault = false;
+	};
+
 	public ref class ShellAPI
 	{
 	public:
 		static String^ GetMyCompute();
 		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd);
-		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, int);
+		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, int y);
+		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, int y, array<CustomMenuItem^>^ customMenus);
 
 		static void FileOperationCopy(Collections::Generic::IEnumerable<String^>^ srcPath, String^ destPath);
 		static void FileOperationMove(Collections::Generic::IEnumerable<String^>^ srcPath, String^ destPath);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using PiViLityCore.Shell;
 using PiViLityCore.Util;
+using PiVilityNative;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -233,7 +234,7 @@ namespace PiViLityCore.Controls
         /// <param name="e"></param>
         private void FileSystem_OnCreated(object sender, FileSystemEventArgs e)
         {
-            var fi = new FileInfo(e.FullPath);
+            var fi = new System.IO.FileInfo(e.FullPath);
             int i;
             for (i = 0; i < _currentDirectoryItems.Count; i++)
             {
@@ -267,7 +268,7 @@ namespace PiViLityCore.Controls
         {
             if (entry!=null && PiViLityCore.Global.settings.IsVisibleEntry(entry))
             {
-                bool isFile = entry is FileInfo;
+                bool isFile = entry is System.IO.FileInfo;
                 var item = new FileListViewItem(entry, DetailSubItems);
 
                 if (!isFile)
@@ -575,9 +576,36 @@ namespace PiViLityCore.Controls
                 }
                 if (list.Count > 0)
                 {
+                    List< CustomMenuItem> menuList = new();
+                    bool hasDirectory = false;
+                    foreach (var path in list)
+                    {
+                        if (System.IO.Directory.Exists(path))
+                        {
+                            hasDirectory = true;
+                        }
+                    }
+                    if (hasDirectory)
+                    {
+                        menuList.Add(new CustomMenuItem()
+                        {
+                            name = "タブで開く",
+                            isDefault = true,
+                            action = () =>
+                            {
+                                var path = list[0];
+                                //var newTab = new FileListView();
+                                //newTab.Path = path;
+                                //newTab.RestoreSettings(new FileListViewSettings());
+                                //PiViLityCore.Global.MainForm.AddTab(newTab);
+                                MessageBox.Show($"タブで開きたい({path})");
+                            }
+                        });
+
+                    }
                     // ファイルの右クリックメニューを表示
                     var screen = PointToScreen(e.Location);
-                    PiVilityNative.ShellAPI.ShowShellContextMenu(list.ToArray(), Handle, screen.X, screen.Y);
+                    PiVilityNative.ShellAPI.ShowShellContextMenu(list.ToArray(), Handle, screen.X, screen.Y, menuList.ToArray());
                 }
             }
             base.OnMouseClick(e);

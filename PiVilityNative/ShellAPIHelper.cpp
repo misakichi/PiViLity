@@ -428,6 +428,11 @@ CComPtr<IShellItemArray> filepathsToShellItemArray(array<String^>^ paths)
 /// <param name="y"></param>
 void ShellAPI::ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, int y)
 {
+	ShowShellContextMenu(paths, hwnd, x, y, nullptr);
+}
+
+void ShellAPI::ShowShellContextMenu(array<String^> ^ paths, IntPtr hwnd, int x, int y, array<CustomMenuItem^> ^ customMenus)
+{
 	auto shellItems = filepathsToShellItemArray(paths);
 
 	if (shellItems)
@@ -442,6 +447,27 @@ void ShellAPI::ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, i
 				hr = contextMenu->QueryContextMenu(hMenu, 0, 1, 0x7FFF, CMF_EXPLORE | CMF_EXTENDEDVERBS);
 				if (SUCCEEDED(hr))
 				{
+					UINT customDefaltMenu = 0xffffffff;
+					int customIdx = 0;
+					if (customMenus)
+					{
+						for each (auto menu in customMenus)
+						{
+							pin_ptr<const wchar_t> wchPath = PtrToStringChars(menu->name);
+							InsertMenu(hMenu, customIdx, MF_BYPOSITION | MF_STRING, customIdx+1, wchPath);
+							if (menu->isDefault)
+							{
+								customDefaltMenu = customIdx;
+							}
+							++customIdx;
+						}
+						InsertMenu(hMenu, customIdx, MF_BYPOSITION | MF_SEPARATOR, 0, NULL);
+					}
+					if (customDefaltMenu != 0xffffffff)
+					{
+						SetMenuDefaultItem(hMenu, customDefaltMenu, MF_BYPOSITION);
+					}
+					
 					if (x == INT_MIN || y == INT_MIN)
 					{
 						POINT point;
@@ -449,19 +475,27 @@ void ShellAPI::ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, i
 						x = point.x;
 						y = point.y;
 					}
+
 					int cmd = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, 0, (HWND)hwnd.ToPointer(), nullptr);
 					if (cmd > 0)
 					{
-						CMINVOKECOMMANDINFOEX info = { 0 };
-						info.cbSize = sizeof(info);
-						info.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
-						info.hwnd = (HWND)hwnd.ToPointer();
-						info.lpVerb = MAKEINTRESOURCEA(cmd - 1);
-						info.lpVerbW = MAKEINTRESOURCEW(cmd - 1);
-						info.nShow = SW_SHOWNORMAL;
-						info.ptInvoke.x = x;
-						info.ptInvoke.y = y;
-						contextMenu->InvokeCommand((LPCMINVOKECOMMANDINFO)&info);
+						if (cmd <= customIdx)
+						{
+							customMenus[cmd-1]->action();
+						}
+						else
+						{
+							CMINVOKECOMMANDINFOEX info = { 0 };
+							info.cbSize = sizeof(info);
+							info.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
+							info.hwnd = (HWND)hwnd.ToPointer();
+							info.lpVerb = MAKEINTRESOURCEA(cmd - 1);
+							info.lpVerbW = MAKEINTRESOURCEW(cmd - 1);
+							info.nShow = SW_SHOWNORMAL;
+							info.ptInvoke.x = x;
+							info.ptInvoke.y = y;
+							contextMenu->InvokeCommand((LPCMINVOKECOMMANDINFO)&info);
+						}
 					}
 				}
 				DestroyMenu(hMenu);
