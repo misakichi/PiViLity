@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PiViLity.Forms
 {
@@ -15,11 +16,23 @@ namespace PiViLity.Forms
         public ViewerForm()
         {
             InitializeComponent();
+            if (!DesignMode)
+            {
+                status.Renderer = new ToolStripProfessionalRenderer();
+
+                status.Items.Add(imgViewer.ResolutionStatus);
+                status.Items.Add(imgViewer.ScaleStatus);
+            }
         }
 
         public bool LoadFile(string filename)
         {
-            return imgViewer.LoadImage(filename);
+            if (imgViewer.LoadImage(filename))
+            {
+                Text = filename;
+                return true;
+            }
+            return false;
         }
 
         private void ViewerForm_FormClosed(object sender, FormClosedEventArgs e)
