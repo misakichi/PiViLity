@@ -352,11 +352,7 @@ namespace PiViLity.Forms
                         {
                             if (settingAttr.NoOption == false)
                             {
-                                string name = setting.Name;
-                                if (settingAttr.NameTextResouceId != "" && plugin.information.ResourceManager != null)
-                                {
-                                    name = Global.GetResourceString(plugin.information.ResourceManager, settingAttr.NameTextResouceId);
-                                }
+                                string name = setting.CategoryText;
                                 var settingItem = new TreeNode(name);
                                 settingItem.Tag = CreateSettingPanel(plugin.information.ResourceManager, setting);
 

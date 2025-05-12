@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic.FileIO;
+using PiViLityCore.Option;
 using PiViLityCore.Shell;
 using PiViLityCore.Util;
 using PiVilityNative;
@@ -147,24 +148,30 @@ namespace PiViLityCore.Controls
         {
             //設定が変更された場合はサブアイテムを再設定します。
             Columns.Clear();
-            if (View != View.Tile)
+
+            var headColum = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Name]);
+            if (_detailSubItems.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
             {
-                var headColum = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Name]);
-                if (_detailSubItems.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
-                {
-                    Columns.Add(SubItemColums[(int)FileListViewSubItemBit.ModifiedDateTime]);
-                }
-                if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Type))
-                {
-                    Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Type]);
-                }
-                if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Size))
-                {
-                    var sub = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Size]);
-                }
+                Columns.Add(SubItemColums[(int)FileListViewSubItemBit.ModifiedDateTime]);
+            }
+            if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Type))
+            {
+                Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Type]);
+            }
+            if (_detailSubItems.HasFlag(FileListViewSubItemTypes.Size))
+            {
+                var sub = Columns.Add(SubItemColums[(int)FileListViewSubItemBit.Size]);
             }
             
             _currentDirectoryItems.ForEach(item => item.FileListViewSubItemType = View != View.Tile ? _detailSubItems : FileListViewSubItemTypes.Name);
+        }
+
+        protected override void DestroyHandle()
+        {
+            _fsw?.Dispose();
+            PiViLityCore.Event.Option.ApplySettings -= OnApplySettings;
+            base.DestroyHandle();
+
         }
 
         /// <summary>
@@ -738,7 +745,10 @@ namespace PiViLityCore.Controls
 
     public class FileListViewSettings
     {
+        [OptionItem]
         public string Path = SpecialDirectories.MyPictures;
+
+        [OptionItem]
         public int[] SubItemWidth = new int[(int)FileListViewSubItemBit.Max];
     }
 

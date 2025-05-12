@@ -20,18 +20,19 @@ namespace PiViLityCore.Plugin
         }
 
         /// <summary>
-        /// 設定名称
+        /// 設定項目の名称（UI上での表示名）
         /// </summary>
-        [Option(NoOption=true)]
-        public virtual string Name { get => ""; }
+        public abstract string CategoryText { get; }
 
-        [Option(NoOption = true)]
+        /// <summary>
+        /// 設定項目の名称（管理用）
+        /// </summary>
+        public abstract string CategoryName { get; }
+
         public virtual bool IsUserOptions { get => false; }
 
-        [Option(NoOption = true)]
         public virtual bool GetHasSettingDialog() => false;
 
-        [Option(NoOption = true)]
         public virtual Form? SettingDialog() => null;
 
     }

@@ -26,7 +26,7 @@ namespace PiViLity
                 var executingAssembly = Assembly.GetExecutingAssembly();
                 PluginManager.Instance.AnalyzeAssembly(executingAssembly);
                 PluginManager.Instance.LoadPlugins(appDir+"\\Plugins");
-                PluginManager.Instance.LoadSettings(appDir+"\\settings.xml");
+                PluginManager.Instance.LoadSettings(appDir+"\\settings.json");
             }
 
             ThumbnailCache.Initialize(Option.AppSettings.Instance.CacheDb);
@@ -43,7 +43,7 @@ namespace PiViLity
 
             if (appDir != null)
             {
-                PluginManager.Instance.SaveSettings(appDir + "\\settings.xml");
+                PluginManager.Instance.SaveSettings(appDir + "\\settings.json");
             }
         }
     }

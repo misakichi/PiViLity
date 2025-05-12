@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,22 +14,40 @@ namespace PiViLityCore.Option
         {
         }
 
-        /// <summary>
-        /// 設定項目の名称を取得するためのリソースID
-        /// </summary>
-        public string NameTextResouceId = "";
-
-        /// <summary>
-        /// 項目の詳細を取得するためのリソースID
-        /// </summary>
-        public string DescriptionTextResouceId = "";
-
         public bool NoOption = false;
 
 
     }
+
     public class OptionItemAttribute : Attribute
     {
+        static public bool MemberIsNoOption(MemberInfo member)
+        {
+            var attrs = member.GetCustomAttributes(typeof(OptionItemAttribute), true);
+            bool noOption = false;
+            foreach(var attr in attrs)
+            {
+                if (attr is OptionItemAttribute optAttr)
+                {
+                    noOption |= optAttr.NoOption;
+                }
+            }
+            return noOption;
+        }
+        static public bool MemberIsSave(MemberInfo member)
+        {
+            var attrs = member.GetCustomAttributes(typeof(OptionItemAttribute), true);
+            bool isSave = true;
+            foreach(var attr in attrs)
+            {
+                if (attr is OptionItemAttribute optAttr)
+                {
+                    isSave &= (optAttr.NoSave==false);
+                }
+            }
+            return isSave;
+        }
+
         public OptionItemAttribute()
         {
         }
@@ -43,6 +63,8 @@ namespace PiViLityCore.Option
         public string DescriptionTextResouceId = "";
 
         public bool NoOption = false;
+
+        public bool NoSave = false;
 
         public int UIOrder = 0;
 
