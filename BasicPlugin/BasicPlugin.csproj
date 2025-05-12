@@ -8,6 +8,8 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <SelfContained>false</SelfContained>
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <VersionPrefix>0.0.0</VersionPrefix>
+    <VersionSuffix>Dev</VersionSuffix>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

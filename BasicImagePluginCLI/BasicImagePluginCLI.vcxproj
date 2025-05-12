@@ -147,11 +147,15 @@ copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\</Command>
   <ItemGroup>
     <ClInclude Include="ImageReaderWIC.h" />
     <ClInclude Include="Plugin.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageReaderWIC.cpp" />
     <ClCompile Include="Plugin.cpp" />
     <ClCompile Include="Wic.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="BasicImagePluginCLI.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
