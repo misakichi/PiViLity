@@ -171,7 +171,7 @@
     <value>95, 29</value>
   </data>
   <data name="btnCancel.TabIndex" type="System.Int32, mscorlib">
-    <value>2</value>
+    <value>10001</value>
   </data>
   <data name="btnCancel.Text" xml:space="preserve">
     <value>Cancel</value>
@@ -199,7 +199,7 @@
     <value>95, 29</value>
   </data>
   <data name="btnOk.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
+    <value>10000</value>
   </data>
   <data name="btnOk.Text" xml:space="preserve">
     <value>OK</value>

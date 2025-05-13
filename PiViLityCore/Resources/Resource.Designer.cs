@@ -104,5 +104,23 @@ namespace PiViLityCore.Resources {
                 return ResourceManager.GetString("DriveTypeRam", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Shell に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ShellSetting_Name {
+            get {
+                return ResourceManager.GetString("ShellSetting.Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Thumbnail size に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ShellSetting_ThumbnailSize {
+            get {
+                return ResourceManager.GetString("ShellSetting.ThumbnailSize", resourceCulture);
+            }
+        }
     }
 }

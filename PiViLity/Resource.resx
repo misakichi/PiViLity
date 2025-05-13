@@ -142,12 +142,6 @@
   <data name="List" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\List.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShellSetting.Name" xml:space="preserve">
-    <value>Shell</value>
-  </data>
-  <data name="ShellSetting.ThumbnailSize" xml:space="preserve">
-    <value>Thumbnail size</value>
-  </data>
   <data name="Thumb" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Thumb.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

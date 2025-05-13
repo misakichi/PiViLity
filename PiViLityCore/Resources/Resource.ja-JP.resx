@@ -132,4 +132,10 @@
   <data name="DriveTypeRam" xml:space="preserve">
     <value>ラムディスク</value>
   </data>
+  <data name="ShellSetting.Name" xml:space="preserve">
+    <value>シェル</value>
+  </data>
+  <data name="ShellSetting.ThumbnailSize" xml:space="preserve">
+    <value>サムネイルサイズ</value>
+  </data>
 </root>

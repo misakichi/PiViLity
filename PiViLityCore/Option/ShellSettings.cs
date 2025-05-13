@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PiViLityCore.Plugin;
+using PiViLityCore.Resources;
 
 namespace PiViLityCore.Option
 {
@@ -16,7 +17,7 @@ namespace PiViLityCore.Option
         static public readonly ShellSettings Instance = new();
 
         public override string CategoryText { 
-            get=>Global.GetResourceString("ShellSetting.Name");
+            get=>Resource.ShellSetting_Name;
         }
 
         public override string CategoryName

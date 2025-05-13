@@ -292,6 +292,28 @@ namespace PiViLity.Forms
             }
             panels.Sort((a, b) => b.OptionAttribute.UIOrder - a.OptionAttribute.UIOrder);
             settingPanel.Controls.AddRange(panels.ToArray());
+
+            int tabIndex = 10;
+            void setTabIndex(Control control)
+            {
+                control.TabIndex = tabIndex;
+                tabIndex++;
+                if(control is OptionItemPanel itemPanel)
+                {
+                    for (int i = (control.Controls.Count) - (1); i >= 0; i--)
+                    {
+                        setTabIndex(control.Controls[i]);
+                    }
+                }
+                else
+                {
+                    foreach (Control child in control.Controls)
+                    {
+                        setTabIndex(child);
+                    }
+                }
+            }
+            setTabIndex(settingPanel);
             settingPanel.PerformLayout();
             foreach (var panel in panels)
             {

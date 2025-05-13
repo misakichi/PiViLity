@@ -137,24 +137,6 @@ namespace PiViLity {
         }
         
         /// <summary>
-        ///   Shell に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string ShellSetting_Name {
-            get {
-                return ResourceManager.GetString("ShellSetting.Name", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Thumbnail size に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string ShellSetting_ThumbnailSize {
-            get {
-                return ResourceManager.GetString("ShellSetting.ThumbnailSize", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   型 System.Byte[] のローカライズされたリソースを検索します。
         /// </summary>
         internal static byte[] Thumb {
