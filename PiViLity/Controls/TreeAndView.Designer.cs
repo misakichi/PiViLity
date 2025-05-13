@@ -35,10 +35,10 @@ namespace PiViLity.Controls
             tvwDirMain = new DirectoryTreeView();
             splitDirView = new Splitter();
             panelViewInfo = new Panel();
-            panelInfo = new Panel();
             splitViewInfo = new Splitter();
-            lsvFile = new FileListView();
+            panelInfo = new Panel();
             toolStrip = new ToolStrip();
+            lsvFile = new FileListView();
             panelViewInfo.SuspendLayout();
             SuspendLayout();
             // 
@@ -62,54 +62,38 @@ namespace PiViLity.Controls
             // 
             splitDirView.Location = new Point(226, 25);
             splitDirView.Name = "splitDirView";
-            splitDirView.Size = new Size(3, 423);
+            splitDirView.Size = new Size(4, 423);
             splitDirView.TabIndex = 6;
             splitDirView.TabStop = false;
             // 
             // panelViewInfo
             // 
-            panelViewInfo.Controls.Add(panelInfo);
-            panelViewInfo.Controls.Add(splitViewInfo);
             panelViewInfo.Controls.Add(lsvFile);
+            panelViewInfo.Controls.Add(splitViewInfo);
+            panelViewInfo.Controls.Add(panelInfo);
             panelViewInfo.Dock = DockStyle.Fill;
-            panelViewInfo.Location = new Point(229, 25);
+            panelViewInfo.Location = new Point(230, 25);
             panelViewInfo.Name = "panelViewInfo";
-            panelViewInfo.Size = new Size(458, 423);
+            panelViewInfo.Size = new Size(457, 423);
             panelViewInfo.TabIndex = 13;
+            // 
+            // splitViewInfo
+            // 
+            splitViewInfo.Dock = DockStyle.Bottom;
+            splitViewInfo.Location = new Point(0, 309);
+            splitViewInfo.Name = "splitViewInfo";
+            splitViewInfo.Size = new Size(457, 4);
+            splitViewInfo.TabIndex = 13;
+            splitViewInfo.TabStop = false;
             // 
             // panelInfo
             // 
             panelInfo.BorderStyle = BorderStyle.Fixed3D;
-            panelInfo.Dock = DockStyle.Fill;
-            panelInfo.Location = new Point(0, 372);
+            panelInfo.Dock = DockStyle.Bottom;
+            panelInfo.Location = new Point(0, 313);
             panelInfo.Name = "panelInfo";
-            panelInfo.Size = new Size(458, 51);
+            panelInfo.Size = new Size(457, 110);
             panelInfo.TabIndex = 15;
-            // 
-            // splitViewInfo
-            // 
-            splitViewInfo.Dock = DockStyle.Top;
-            splitViewInfo.Location = new Point(0, 369);
-            splitViewInfo.Name = "splitViewInfo";
-            splitViewInfo.Size = new Size(458, 3);
-            splitViewInfo.TabIndex = 13;
-            splitViewInfo.TabStop = false;
-            // 
-            // lsvFile
-            // 
-            lsvFile.Activation = ItemActivation.OneClick;
-            lsvFile.AllowDrop = true;
-            lsvFile.BorderStyle = BorderStyle.None;
-            lsvFile.Dock = DockStyle.Top;
-            lsvFile.HotTracking = false;
-            lsvFile.HoverSelection = false;
-            lsvFile.Location = new Point(0, 0);
-            lsvFile.Name = "lsvFile";
-            lsvFile.Size = new Size(458, 369);
-            lsvFile.Sorting = SortOrder.Ascending;
-            lsvFile.TabIndex = 12;
-            lsvFile.TileSize = new Size(32, 32);
-            lsvFile.UseCompatibleStateImageBehavior = false;
             // 
             // toolStrip
             // 
@@ -118,6 +102,15 @@ namespace PiViLity.Controls
             toolStrip.Size = new Size(687, 25);
             toolStrip.TabIndex = 0;
             toolStrip.Text = "toolStrip";
+            // 
+            // lsvFile
+            // 
+            lsvFile.Dock = DockStyle.Fill;
+            lsvFile.Location = new Point(0, 0);
+            lsvFile.Name = "lsvFile";
+            lsvFile.Size = new Size(457, 309);
+            lsvFile.TabIndex = 17;
+            lsvFile.UseCompatibleStateImageBehavior = false;
             // 
             // TreeAndView
             // 
@@ -142,7 +135,7 @@ namespace PiViLity.Controls
         private Panel panelViewInfo;
         private Panel panelInfo;
         private Splitter splitViewInfo;
-        private PiViLityCore.Controls.FileListView lsvFile;
         private ToolStrip toolStrip;
+        private FileListView lsvFile;
     }
 }

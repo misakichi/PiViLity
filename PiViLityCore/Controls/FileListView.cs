@@ -358,18 +358,21 @@ namespace PiViLityCore.Controls
             get => base.View;
             set
             {
-                if(value==View.Tile)
+                if (base.View != value)
                 {
-                    LargeImageList = _iconStore.TileIconList;
-                    OwnerDraw = true;
+                    if (value == View.Tile)
+                    {
+                        LargeImageList = _iconStore.TileIconList;
+                        OwnerDraw = true;
+                    }
+                    else
+                    {
+                        LargeImageList = _iconStore.LargeIconList;
+                        OwnerDraw = true;
+                    }
+                    base.View = value;
+                    RefreshSubItems();
                 }
-                else
-                {
-                    LargeImageList = _iconStore.LargeIconList;
-                    OwnerDraw = true;
-                }
-                base.View = value;
-                RefreshSubItems();
             }
         }
 
