@@ -45,6 +45,7 @@ namespace PiViLity
         }
         public static void Terminate()
         {
+            _incetance.SaveDb(_incetance._dbFilename);
             _incetance.Dispose();
         }
         private SqliteConnection openDb()

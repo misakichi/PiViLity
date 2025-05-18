@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Windows.UI.StartScreen;
+using XmpCore.Impl;
 using static PiViLity.Controls.TreeAndView;
 
 namespace PiViLity.Controls
@@ -121,19 +122,17 @@ namespace PiViLity.Controls
         {
             if (item.Item.IsFile)
             {
-                var ext = System.IO.Path.GetExtension(item.Item.FileName).ToLower();
-                if (PluginManager.Instance.SupportImageExtensions.Any(s => ext.CompareTo(s) == 0))
+                if (PiViLityCore.Util.Forms.ShowFileOnView(item.Item.Path, ParentForm))
                 {
-                    var viewer = new Forms.ViewerForm();
-                    if (viewer.LoadFile(item.Item.Path))
+                    item.Default = false;
+                }
+                else
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        viewer.Show(this);
-                        item.Default = false;
-                    }
-                    else
-                    {
-                        viewer.Dispose();
-                    }
+                        FileName = item.Item.Text,
+                        UseShellExecute = true
+                    });
                 }
             }
         }

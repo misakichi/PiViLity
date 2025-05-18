@@ -17,6 +17,8 @@
     <Platforms>x64</Platforms>
 
     <PackageProjectUrl>https://github.com/misakichi/PiViLity</PackageProjectUrl>
+
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

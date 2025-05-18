@@ -1,4 +1,6 @@
-﻿namespace PiViLity.Forms
+﻿using System.Windows.Forms;
+
+namespace PiViLityCore.Forms
 {
     partial class ViewerForm
     {
@@ -30,7 +32,8 @@
         {
             status = new StatusStrip();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
-            imgViewer = new PiViLity.Viewer.ImageViewer();
+            viewPanel = new Panel();
+            viewToolStrip = new ToolStrip();
             status.SuspendLayout();
             SuspendLayout();
             // 
@@ -49,20 +52,29 @@
             toolStripStatusLabel1.Size = new Size(36, 17);
             toolStripStatusLabel1.Text = "None";
             // 
-            // imgViewer
+            // viewPanel
             // 
-            imgViewer.Dock = DockStyle.Fill;
-            imgViewer.Location = new Point(0, 0);
-            imgViewer.Name = "imgViewer";
-            imgViewer.Size = new Size(800, 428);
-            imgViewer.TabIndex = 2;
+            viewPanel.Dock = DockStyle.Fill;
+            viewPanel.Location = new Point(0, 0);
+            viewPanel.Name = "viewPanel";
+            viewPanel.Size = new Size(800, 428);
+            viewPanel.TabIndex = 2;
+            // 
+            // viewToolStrip
+            // 
+            viewToolStrip.Location = new Point(0, 0);
+            viewToolStrip.Name = "viewToolStrip";
+            viewToolStrip.Size = new Size(800, 25);
+            viewToolStrip.TabIndex = 3;
+            viewToolStrip.Text = "toolStrip1";
             // 
             // ViewerForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(imgViewer);
+            Controls.Add(viewPanel);
+            Controls.Add(viewToolStrip);
             Controls.Add(status);
             Name = "ViewerForm";
             Text = "ViewerForm";
@@ -75,7 +87,8 @@
 
         #endregion
         private StatusStrip status;
-        private Viewer.ImageViewer imgViewer;
+        private Panel viewPanel;
         private ToolStripStatusLabel toolStripStatusLabel1;
+        private ToolStrip viewToolStrip;
     }
 }

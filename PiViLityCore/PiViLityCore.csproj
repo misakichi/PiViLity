@@ -35,6 +35,9 @@
     <Compile Update="Controls\DirectoryTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="Forms\ViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Resource-JA.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

@@ -69,7 +69,7 @@ private:
 };
 static WicFactory s_WicFactory;
 
-#pragma unmanaged
+//#pragma unmanaged
 #include <string>
 namespace BasicImagePluginCLI
 {
@@ -85,7 +85,7 @@ namespace BasicImagePluginCLI
         }
         bool  Initialize(const wchar_t* filePath)
         {
-			ComPtr<IWICBitmapDecoder> decoder = nullptr;
+            ComPtr<IWICBitmapDecoder> decoder = nullptr;
             ComPtr<IWICBitmapFrameDecode> frameDecode_ = nullptr;
             HRESULT hr = s_WicFactory->CreateDecoderFromFilename(
                 filePath,
@@ -97,14 +97,14 @@ namespace BasicImagePluginCLI
             if (FAILED(hr)) {
                 return false;
             }
-            
-			ComPtr<IWICBitmapFrameDecode> frameDecoder = nullptr;
+
+            ComPtr<IWICBitmapFrameDecode> frameDecoder = nullptr;
             hr = decoder->GetFrame(0, frameDecoder.GetAddressOf());
             if (FAILED(hr)) {
                 return false;
             }
-			decoder_ = decoder;
-			frameDecoder_ = frameDecoder;
+            decoder_ = decoder;
+            frameDecoder_ = frameDecoder;
             frameDecoder_->GetSize(&width_, &height_);
 
             path_ = filePath;
@@ -116,15 +116,15 @@ namespace BasicImagePluginCLI
             frameDecoder_ = nullptr;
             decoder_ = nullptr;
         }
-		bool isValidate() const
-		{
-			return (decoder_ != nullptr && frameDecoder_ != nullptr);
-		}
-		bool isInitialized(const wchar_t* filePath) const
-		{
-			return (decoder_ != nullptr && frameDecoder_ != nullptr && _wcsicmp( path_.c_str(), filePath) == 0);
-		}
-        HBITMAP GetImage()
+        bool isValidate() const
+        {
+            return (decoder_ != nullptr && frameDecoder_ != nullptr);
+        }
+        bool isInitialized(const wchar_t* filePath) const
+        {
+            return (decoder_ != nullptr && frameDecoder_ != nullptr && _wcsicmp(path_.c_str(), filePath) == 0);
+        }
+        HBITMAP GetImageGdi()
         {
             ComPtr<IWICFormatConverter> converter;
             if (SUCCEEDED(s_WicFactory->CreateFormatConverter(converter.GetAddressOf())))
@@ -132,23 +132,48 @@ namespace BasicImagePluginCLI
                 if (SUCCEEDED(converter->Initialize(frameDecoder_.Get(), GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
                 {
                     ComPtr<IWICBitmap> bmp;
-					if (SUCCEEDED(s_WicFactory->CreateBitmapFromSource(converter.Get(), WICBitmapCacheOnDemand, bmp.GetAddressOf())))
-					{
-						return wicToGdi(bmp.Get(), width_, height_, 0, 0);
-					}
+                    if (SUCCEEDED(s_WicFactory->CreateBitmapFromSource(converter.Get(), WICBitmapCacheOnDemand, bmp.GetAddressOf())))
+                    {
+                        return wicToGdi(bmp.Get(), width_, height_, 0, 0);
+                    }
                 }
             }
-			return nullptr;
+            return nullptr;
         }
-        HBITMAP GetThumbnailImage(int rqWidth, int rqHeight)
+        Drawing::Bitmap^ GetImage()
+        {
+            ComPtr<IWICFormatConverter> converter;
+            if (SUCCEEDED(s_WicFactory->CreateFormatConverter(converter.GetAddressOf())))
+            {
+                if (SUCCEEDED(converter->Initialize(frameDecoder_.Get(), GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
+                {
+                    ComPtr<IWICBitmap> bmp;
+                    if (SUCCEEDED(s_WicFactory->CreateBitmapFromSource(converter.Get(), WICBitmapCacheOnDemand, bmp.GetAddressOf())))
+                    {
+                        return wicToGdiPlus(bmp.Get(), width_, height_, 0, 0);
+                    }
+                }
+            }
+            return nullptr;
+        }       HBITMAP GetThumbnailImageGdi(int rqWidth, int rqHeight)
+        {
+            return GetThumbnailImageGdi(rqWidth, rqHeight, rqWidth, rqHeight, 0, 0);
+            //auto bmp = getThumbanailBmp(rqWidth, rqHeight);
+            //return wicToGdi(bmp.Get(), rqWidth, rqHeight, 0, 0);
+        }
+        Drawing::Bitmap^ GetThumbnailImage(int rqWidth, int rqHeight)
+        {
+            return GetThumbnailImage(rqWidth, rqHeight, rqWidth, rqHeight, 0, 0);
+        }
+        HBITMAP GetThumbnailImageGdi(int rqWidth, int rqHeight, int destWidth, int destHeight, int destOffsetX, int destOffsetY)
         {
             auto bmp = getThumbanailBmp(rqWidth, rqHeight);
-			return wicToGdi(bmp.Get(), rqWidth, rqHeight, 0, 0);
+            return wicToGdi(bmp.Get(), destWidth, destHeight, destOffsetX, destOffsetY);
         }
-        HBITMAP GetThumbnailImage(int rqWidth, int rqHeight, int destWidth, int destHeight, int destOffsetX, int destOffsetY)
+        Drawing::Bitmap^ GetThumbnailImage(int rqWidth, int rqHeight, int destWidth, int destHeight, int destOffsetX, int destOffsetY)
         {
             auto bmp = getThumbanailBmp(rqWidth, rqHeight);
-			return wicToGdi(bmp.Get(), destWidth, destHeight, destOffsetX, destOffsetY);
+			return wicToGdiPlus(bmp.Get(), destWidth, destHeight, destOffsetX, destOffsetY);
         }
         uint32_t width() const { return width_; }
         uint32_t height() const { return height_; }
@@ -163,14 +188,14 @@ namespace BasicImagePluginCLI
                 {
                     if (SUCCEEDED(converter->Initialize(bmp.Get(), GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
                     {
-						bmp = converter.Get();
+                        bmp = converter.Get();
                     }
                 }
                 ComPtr<IWICBitmapScaler> scaler;
                 s_WicFactory->CreateBitmapScaler(scaler.GetAddressOf());
                 scaler->Initialize(bmp.Get(), rqWidth, rqHeight, WICBitmapInterpolationModeLinear);
                 bmp = scaler.Get();
-			}
+            }
             else
             {
                 ComPtr<IWICBitmapScaler> scaler;
@@ -179,31 +204,37 @@ namespace BasicImagePluginCLI
 
                 bmp = scaler.Get();
             }
-			return bmp;
+            return bmp;
         }
-        HBITMAP wicToGdi(IWICBitmapSource* bitmap, int destWidth, int destHeight, int destOffsetX, int destOffsetY, void** ppDib = nullptr)
-		{
-            if (!bitmap) 
-                return nullptr;
-
+        WICRect calcBitmapSize(IWICBitmapSource* bitmap, int destWidth, int destHeight, int& destOffsetX, int& destOffsetY)
+        {
             UINT width, height;
             bitmap->GetSize(&width, &height);
-
-			WICRect rc = { 0, 0, static_cast<INT>(width), static_cast<INT>(height) };
+            WICRect rc = { 0, 0, static_cast<INT>(width), static_cast<INT>(height) };
             if (destOffsetX < 0)
             {
-				rc.X = -destOffsetX;
+                rc.X = -destOffsetX;
                 rc.Width += destOffsetX;
                 destOffsetX = 0;
             }
             if (destOffsetY < 0)
             {
-				rc.Y = -destOffsetY;
+                rc.Y = -destOffsetY;
                 rc.Height += destOffsetY;
                 destOffsetY = 0;
             }
-			rc.Width = std::min(rc.Width, destWidth - destOffsetX);
-			rc.Height = std::min(rc.Height, destHeight - destOffsetY);
+            rc.Width = std::min(rc.Width, destWidth - destOffsetX);
+            rc.Height = std::min(rc.Height, destHeight - destOffsetY);
+		
+		    return rc;
+		}
+
+        HBITMAP wicToGdi(IWICBitmapSource* bitmap, int destWidth, int destHeight, int destOffsetX, int destOffsetY, void** ppDib = nullptr)
+		{
+            if (!bitmap) 
+                return nullptr;
+
+			WICRect rc = calcBitmapSize(bitmap, destWidth, destHeight, destOffsetX, destOffsetY);
 
             BITMAPINFO bmi = {};
             bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -229,65 +260,34 @@ namespace BasicImagePluginCLI
 			}
             if(ppDib)
 			    *ppDib = pBits;
-#if 0
-            WICRect rect = { 0, 0, static_cast<INT>(width), static_cast<INT>(height) };
-            ComPtr<IWICBitmapLock> lock;
-            if (SUCCEEDED(bitmap->l(&rect, WICBitmapLockRead, &lock))) {
-                UINT bufferSize = 0;
-                BYTE* buffer = nullptr;
-				UINT stride = 0;
-                lock->GetDataPointer(&bufferSize, &buffer);
-                lock->GetStride(&stride);
 
-                if (buffer) {
-					if (destWidth == width && destHeight == height && destOffsetX==0 && destOffsetY==0)
-					{
-						memcpy(pBits, buffer, bufferSize);
-					}
-					else
-					{
-                        int cpWidth = width;
-                        int cpHeight = height;
-                        int srcOffsetX = 0;
-                        int srcOffsetY = 0;
-                        if (destOffsetX < 0)
-                        {
-                            srcOffsetX = -destOffsetX;
-                            destOffsetX = 0;
-                        }
-                        if(destOffsetX<0)
-						    cpWidth += destOffsetX;
-                        else
-							cpWidth = std::min(cpWidth, destWidth - destOffsetX);
-						
-                        if (destOffsetY < 0)
-                        {
-                            srcOffsetY = -destOffsetY;
-                            destOffsetY = 0;
-                        }
-                        if (destOffsetY < 0)
-                            cpHeight += destOffsetY;
-                        else
-                            cpHeight = std::min(cpHeight, destHeight - destOffsetY);
-
-
-                        if (cpHeight > 0 && cpWidth > 0)
-                        {
-							BYTE* src = buffer + (srcOffsetY * stride) + (srcOffsetX * 4);
-                            DWORD* dst = static_cast<DWORD*>(pBits) + destOffsetY + destOffsetX;
-                            BYTE* destBits = static_cast<BYTE*>(pBits) + (destOffsetY * stride) + (destOffsetX * 4);
-                            for (int y = 0; y < cpHeight; ++y)
-                            {
-                                memcpy(dst, src, cpWidth * 4);
-                                src += stride;
-                                dst += destWidth;
-                            }
-                        }
-					}
-                }
-            }
-#endif
             return hBitmap;
+        }
+
+        Drawing::Bitmap^ wicToGdiPlus(IWICBitmapSource* bitmap, int destWidth, int destHeight, int destOffsetX, int destOffsetY)
+        {
+            if (!bitmap)
+                return nullptr;
+
+            WICRect rc = calcBitmapSize(bitmap, destWidth, destHeight, destOffsetX, destOffsetY);
+
+            System::Drawing::Bitmap^ bmp;
+			bmp = gcnew System::Drawing::Bitmap(destWidth, destHeight, System::Drawing::Imaging::PixelFormat::Format32bppArgb);
+			auto mem = bmp->LockBits(System::Drawing::Rectangle(0, 0, destWidth, destHeight), System::Drawing::Imaging::ImageLockMode::WriteOnly, bmp->PixelFormat);
+			auto pBits = (BYTE*)mem->Scan0.ToPointer();
+            auto offset = destOffsetY * mem->Stride + destOffsetX * 4;
+            
+			if (mem->Scan0 != IntPtr::Zero)
+			{
+	            bitmap->CopyPixels(&rc, mem->Stride, destHeight * mem->Stride - offset, pBits + offset);
+			    bmp->UnlockBits(mem);
+			}
+			else
+			{
+				delete bmp;
+				return nullptr;
+			}
+            return bmp;
         }
     private:
         std::wstring path_;
@@ -386,12 +386,7 @@ System::Drawing::Image^ ImageReaderWIC::GetImage()
 	if (!nativeImpl_ || !nativeImpl_->isValidate())
 		return nullptr;
 
-    System::Drawing::Image^ img = nullptr;
-    if (auto handle = nativeImpl_->GetImage())
-    {
-        img =  System::Drawing::Bitmap::FromHbitmap((IntPtr)handle);
-        DeleteObject(handle);
-    }
+    System::Drawing::Image^ img = nativeImpl_->GetImage();
 	return img;
 }
 
@@ -408,9 +403,7 @@ System::Drawing::Image^ ImageReaderWIC::GetThumbnailImage(Drawing::Size size)
 #if 1
 	auto thumbnailDrawRect = GetThumbnailDrawRect(System::Drawing::Size(nativeImpl_->width(), nativeImpl_->height()), size);
     auto thumbnailImage = nativeImpl_->GetThumbnailImage(thumbnailDrawRect.Width, thumbnailDrawRect.Height, size.Width, size.Height, thumbnailDrawRect.X, thumbnailDrawRect.Y);
-    auto img =  thumbnailImage ? System::Drawing::Bitmap::FromHbitmap((IntPtr)thumbnailImage) : nullptr;
-    if (thumbnailImage)
-        DeleteObject(thumbnailImage);
+    auto img =  thumbnailImage;
     return img;
 #else
     if (ThumbnailType == ThumbnailTypes::KeepAspectRatio)

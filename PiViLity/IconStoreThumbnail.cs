@@ -163,6 +163,25 @@ namespace PiViLity
             //ファイルの場合はプラグインからのサムネイルを取得を試みる
             if (isFile)
             {
+
+#if true
+                Task.Run(() =>
+                {
+                    var thumbnail = ThumbnailCache.Instance.GetThumbnail(path);
+                    if (thumbnail != null)
+                    {
+                        EnqueueRegisterImage(path, thumbnail, returnAction);
+                        return;
+                    }
+
+                    var imageReader = PiViLityCore.Plugin.PluginManager.Instance.GetImageReader(path);
+                    if (imageReader != null)
+                    {
+                        GetThumbnailAsync(imageReader, path, returnAction, false);
+                        return;
+                    }
+                });
+#else
                 var thumbnail = ThumbnailCache.Instance.GetThumbnail(path);
                 if (thumbnail != null)
                 {
@@ -170,12 +189,13 @@ namespace PiViLity
                     return;
                 }
 
-                var imageReader = PluginManager.Instance.GetImageReader(path);
+                var imageReader = PiViLityCore.Plugin.PluginManager.Instance.GetImageReader(path);
                 if (imageReader != null)
                 {
                     Task.Run(() => GetThumbnailAsync(imageReader, path, returnAction, false));
                     return;
                 }
+#endif
             }
 
             returnAction?.Invoke(-1);

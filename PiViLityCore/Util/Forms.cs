@@ -1,4 +1,5 @@
-﻿using PiViLityCore.Shell;
+﻿using PiViLityCore.Plugin;
+using PiViLityCore.Shell;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,18 +117,37 @@ namespace PiViLityCore.Util
                 if (c != null)
                 {
                     control.Font = SystemFonts.MessageBoxFont;
-                    //if (PiVilityNative.SystemColor.IsDarkMode())
-                    //{
-                    //    control.BackColor = Color.FromArgb(255, 32, 32, 32);
-                    //    control.ForeColor = Color.FromArgb(255, 0xCC, 0xCC, 0xCC);
-                    //}
-                    //else
-                    //{
-                    //    control.BackColor = SystemColors.Control;
-                    //    control.ForeColor = SystemColors.ControlText;
-                    //}
                 }
             });
+        }
+
+        public static bool ShowFileOnView(string path, ContainerControl? parent)
+        {
+            if (string.IsNullOrEmpty(path))
+                return false;
+            bool ret = false;
+            var fileInfo = new System.IO.FileInfo(path);
+            if (fileInfo.Exists)
+            {
+                var ext = System.IO.Path.GetExtension(path).ToLower();
+                if (PluginManager.Instance.SupportImageExtensions.Any(s => ext.CompareTo(s) == 0))
+                {
+                    var viewer = new PiViLityCore.Forms.ViewerForm();
+                    if (viewer.LoadFile(path))
+                    {
+                        viewer.Owner = parent?.ParentForm;
+                        viewer.StartPosition = FormStartPosition.CenterParent;
+                        viewer.Show(parent?.ParentForm);
+                        ret = true;
+                    }
+                    else
+                    {
+                        viewer.Dispose();
+
+                    }
+                }
+            }
+            return ret;
         }
     }
 }

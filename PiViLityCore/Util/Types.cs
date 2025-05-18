@@ -41,7 +41,7 @@ namespace PiViLityCore.Util
             return array;
         }
 
-        public static void SetMemberValue(object target, MemberInfo memberInfo, object value)
+        public static void SetMemberValue(object target, MemberInfo memberInfo, object? value)
         {
             if (memberInfo is PropertyInfo propertyInfo)
             {

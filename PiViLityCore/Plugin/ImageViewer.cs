@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,23 +12,14 @@ namespace PiViLityCore.Plugin
         Fixed,
         AutoScale,
     }
+
     /// <summary>
-    /// 画像ビューワーのインターフェースです。
+    /// 画像ビューワーの基底クラスです
     /// </summary>
-    public interface ImageViewer
+    public interface IImageViewer: IViewer
     {
-        /// <summary>
-        /// 画像をロード（表示）します
-        /// </summary>
-        /// <param name="filePath"></param>
-        bool LoadImage(string filePath);
 
-        /// <summary>
-        /// ビューアーのコントロールを取得します。
-        /// </summary>
-        /// <returns></returns>
-        Control GetViewer();
+        public ViewModeStyle ViewMode { get; set; }
 
-        ViewModeStyle ViewMode { get; set; }
     }
 }

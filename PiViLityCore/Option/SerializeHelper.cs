@@ -322,6 +322,8 @@ namespace PiViLityCore.Option
                     MemberInfo? targetMember = null;
                     foreach (var target in targets)
                     {
+                        if(target == null)
+                            continue;
                         var members = target.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance).Where(m => m.MemberType == MemberTypes.Property || m.MemberType == MemberTypes.Field);
                         foreach (var member in members)
                         {

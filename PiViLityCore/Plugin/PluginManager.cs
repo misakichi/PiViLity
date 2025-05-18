@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualBasic;
-using PiViLity.Option;
 using PiViLityCore;
 using PiViLityCore.Option;
 using PiViLityCore.Plugin;
@@ -15,19 +14,9 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 
-#if false
-namespace PiViLity
+namespace PiViLityCore.Plugin
 {
-    public class AppModule : IModuleInformation
-    {
-        public string Name => "PiViLity App";
-        public string Description => "";
 
-        public string OptionItemName => "アプリケーション";
-
-        public System.Resources.ResourceManager? ResourceManager { get => Resource.ResourceManager; }
-
-    }
 
     /// <summary>
     /// プラグイン情報
@@ -44,7 +33,7 @@ namespace PiViLity
     /// <summary>
     /// プラグイン管理クラス
     /// </summary>
-    internal class PluginManager
+    public class PluginManager
     {
         static public PluginManager Instance { get; private set; } = new();
 
@@ -58,6 +47,8 @@ namespace PiViLity
         List<PluginInformation> _plugins = new();
 
         public List<PluginInformation> Plugins => _plugins;
+
+        public List<Type> ImageViewers { get; private set; } = new();
 
         /// <summary>
         /// 画像リーダー情報
@@ -122,7 +113,7 @@ namespace PiViLity
             }
         }
 
-        internal void AnalyzeAssembly(Assembly assembly)
+        public void AnalyzeAssembly(Assembly assembly)
         {
             PluginInformation? information = null;
             int moduleInfoCount = 0;
@@ -152,33 +143,37 @@ namespace PiViLity
                 {
                     if (type.IsAbstract)
                         continue;
-                    //Debug.WriteLine($"[{assembly.FullName}] {type.FullName}");
-                    foreach (var hasInterface in type.GetInterfaces())
+                    var interfaces = type.GetInterfaces();
+                    /// 画像リーダーの場合
+                    if (interfaces.Where(t => t == typeof(IImageReader)).Count() > 0 && Activator.CreateInstance(type) is IImageReader reader)
                     {
-                        /// 画像リーダーの場合
-                        if (hasInterface == typeof(IImageReader) && Activator.CreateInstance(type) is IImageReader reader)
-                        {
-                            information.imageReaders.Add(type);
+                        information.imageReaders.Add(type);
 
-                            ImageReaderInfo readerInfo = new()
+                        ImageReaderInfo readerInfo = new()
+                        {
+                            readerClass = type,
+                            plugin = information
+                        };
+                        foreach (var ext in reader.GetSupportedExtensions())
+                        {
+                            var lowerExt = "." + ext.ToLower();
+                            if (_imageReadersFromExtension.TryGetValue(lowerExt, out List<ImageReaderInfo>? imageReaderInformationList))
                             {
-                                readerClass = type,
-                                plugin = information
-                            };
-                            foreach (var ext in reader.GetSupportedExtensions())
+                                imageReaderInformationList.Add(readerInfo);
+                            }
+                            else
                             {
-                                var lowerExt = "." + ext.ToLower();
-                                if (_imageReadersFromExtension.TryGetValue(lowerExt, out List<ImageReaderInfo>? imageReaderInformationList))
-                                {
-                                    imageReaderInformationList.Add(readerInfo);
-                                }
-                                else
-                                {
-                                    _imageReadersFromExtension.Add(lowerExt, new List<ImageReaderInfo>() { readerInfo });
-                                    supportImageExtensions.Add(lowerExt);
-                                }
+                                _imageReadersFromExtension.Add(lowerExt, new List<ImageReaderInfo>() { readerInfo });
+                                supportImageExtensions.Add(lowerExt);
                             }
                         }
+                    }
+
+                    //画像ビューアー
+                    if (interfaces.Where(t => t == typeof(IImageViewer)).Count() > 0 && Activator.CreateInstance(type) is IImageViewer imageViewer)
+                    {
+                        //information.imageReaders.Add(type);
+                        ImageViewers.Add(type);
                     }
 
                     //SettingBase継承のクラスはInstanceメソッドがあればそれで得られるインスタンスを取得する
@@ -213,7 +208,6 @@ namespace PiViLity
         public void SaveSettings(StreamWriter writer)
         {
             var settings = _plugins.SelectMany(p => p.settings);
-#if true
             using (Utf8JsonWriter jsonWriter = new(writer.BaseStream, new JsonWriterOptions()
             {
                 Indented = true,
@@ -237,11 +231,6 @@ namespace PiViLity
                 }
                 jsonWriter.WriteEndObject();
             }
-#else
-            var types = settings.Select(s => s.GetType()).Distinct().ToArray();
-            var serializer = new XmlSerializer(typeof(List<SettingBase>), types);
-            serializer.Serialize(writer, settings);
-#endif
         }
         /// <summary>
         /// 設定を読み込む
@@ -262,7 +251,6 @@ namespace PiViLity
         /// <param name="writer"></param>
         public void LoadSettings(StreamReader reader)
         {
-#if true
             if(reader== null)
                 return;
             string jsonStr = reader.ReadToEnd();
@@ -293,47 +281,8 @@ namespace PiViLity
                     }
                 }
             }
-#else
-            var settings = _plugins.SelectMany(p => p.settings).ToList();
-            var types = settings.Select(s => s.GetType()).Distinct().ToArray();
-            var serializer = new XmlSerializer(typeof(List<SettingBase>), types);
-            if (serializer.Deserialize(reader) is List<SettingBase> loadedSettings)
-            {
-                foreach (var setting in loadedSettings)
-                {
-                    //var plugin = _plugins.FirstOrDefault(p => p.settings.Any(s => s.Name == setting.Name));
-                    //if (plugin != null)
-                    //{
-                    //    var existingSetting = plugin.settings.FirstOrDefault(s => s.Name == setting.Name);
-                    //    if (existingSetting != null)
-                    //    {
-                    //        var fields = existingSetting.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetField);
-                    //        var properties = existingSetting.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
-                    //        foreach (FieldInfo field in fields)
-                    //        {
-                    //            if (field.GetValue(setting) is object value)
-                    //            {
-                    //                field.SetValue(existingSetting, value);
-                    //            }
-                    //        }
-                    //        foreach (PropertyInfo prop in properties)
-                    //        {
-                    //            if (prop.CanWrite)
-                    //            {
-                    //                if (prop.GetValue(setting) is object value)
-                    //                {
-                    //                    prop.SetValue(existingSetting, value);
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //}
-                }
-            }
-#endif
         }
 
     }
 }
 
-#endif

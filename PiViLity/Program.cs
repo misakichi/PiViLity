@@ -1,7 +1,19 @@
+using PiViLityCore.Plugin;
 using System.Reflection;
 
 namespace PiViLity
 {
+    public class AppModule : IModuleInformation
+    {
+        public string Name => "PiViLity App";
+        public string Description => "";
+
+        public string OptionItemName => "アプリケーション";
+
+        public System.Resources.ResourceManager? ResourceManager { get => Resource.ResourceManager; }
+
+    }
+
     internal static class Program
     {
         /// <summary lang="ja">
@@ -20,6 +32,11 @@ namespace PiViLity
             System.Diagnostics.Debug.Assert(Application.RenderWithVisualStyles);
             System.Diagnostics.Debug.WriteLine($"IsDark={PiVilityNative.SystemColor.IsDarkMode()} BackGround={PiVilityNative.SystemColor.BackGroundColor().ToString()}");
 
+            // To customize application configuration such as set high DPI settings or default font,
+            // see https://aka.ms/applicationconfiguration.
+            ApplicationConfiguration.Initialize();
+
+
             var appDir = Path.GetDirectoryName(Application.ExecutablePath);
             if (appDir != null)
             {
@@ -34,9 +51,6 @@ namespace PiViLity
             ThreadPool.SetMinThreads(32,32);
             ThreadPool.SetMaxThreads(64, 64);
 
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
             Application.Run(new Forms.MainForm());
 
             ThumbnailCache.Terminate();
