@@ -80,7 +80,7 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Install MSBuild Tools
-      run: choco install visualstudio2022buildtools --params "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"        
+      run: choco install visualstudio2022buildtools -y --ignore-checksums --params "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"        
 
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
