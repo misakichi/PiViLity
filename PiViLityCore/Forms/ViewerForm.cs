@@ -26,12 +26,13 @@ namespace PiViLityCore.Forms
                 //status.Items.Add(imgViewer.ResolutionStatus);
                 //status.Items.Add(imgViewer.ScaleStatus);
             }
+            KeyPreview = true;
         }
 
         public bool LoadFile(string filename)
         {
             var reader = PluginManager.Instance.GetImageReader(filename);
-            bool ret=false;
+            bool ret = false;
             if (reader is PiViLityCore.Plugin.IImageReader)
             {
                 if (_viewer is not PiViLityCore.Plugin.IViewer)
@@ -46,6 +47,7 @@ namespace PiViLityCore.Forms
                         var type = PluginManager.Instance.ImageViewers[0];
                         if (Activator.CreateInstance(type) is IImageViewer viewer)
                         {
+                            viewer.FileLoaded += Viewer_FileLoaded;
                             _viewer = viewer;
                             status.Items.AddRange(_viewer.StatusBarItems.ToArray());
                             viewToolStrip.Items.AddRange(_viewer.ToolBarItems.ToArray());
@@ -58,17 +60,35 @@ namespace PiViLityCore.Forms
                 }
                 ret = _viewer?.LoadFile(filename) ?? false;
             }
-            if (ret && _viewer!=null)
-            {
-                Text = $"{_viewer.Path} - PiViLity";
-            }
             return ret;
+        }
+
+        private void Viewer_FileLoaded(object? sender, EventArgs e)
+        {
+            Text = $"{_viewer?.Path ?? "no file"} - PiViLity";
         }
 
         private void ViewerForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Dispose();
             GC.Collect();
+        }
+
+        private void ViewerForm_KeyPress(object sender, KeyPressEventArgs e)
+        {
+        }
+
+        private void ViewerForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Right)
+            {
+                _viewer?.NextFile();
+            }
+            else if (e.KeyCode == Keys.Left)
+            {
+                _viewer?.PreviousFile();
+            }
+
         }
     }
 }

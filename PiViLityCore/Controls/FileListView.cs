@@ -80,6 +80,7 @@ namespace PiViLityCore.Controls
             SubItemColums[(int)FileListViewSubItemBit.Size].TextAlign = HorizontalAlignment.Right;
 
             ListViewItemSorter = new FileListViewItemComparerName(this);
+            Sorting = SortOrder.Ascending;
             DetailSubItems = FileListViewSubItemTypes.All;
             LargeImageList = _iconStore.LargeIconList;
             SmallImageList = _iconStore.SmallIconList;
@@ -169,7 +170,10 @@ namespace PiViLityCore.Controls
         protected override void DestroyHandle()
         {
             _fsw?.Dispose();
-            PiViLityCore.Event.Option.ApplySettings -= OnApplySettings;
+            if (PiViLityCore.Event.Option.ApplySettings != null)
+            {
+                PiViLityCore.Event.Option.ApplySettings -= OnApplySettings;
+            }
             base.DestroyHandle();
 
         }
@@ -248,7 +252,7 @@ namespace PiViLityCore.Controls
                 if (_currentDirectoryItems[i].Text.CompareTo(fi.Name) > 0)
                     break;
             }
-            var newItem = makeItem(fi);
+            var newItem = MakeItem(fi);
             if (newItem != null)
             {
                 _currentDirectoryItems.Insert(i, newItem);
@@ -271,7 +275,7 @@ namespace PiViLityCore.Controls
         /// </summary>
         /// <param name="entry"></param>
         /// <returns></returns>
-        private FileListViewItem? makeItem(FileSystemInfo? entry)
+        private FileListViewItem? MakeItem(FileSystemInfo? entry)
         {
             if (entry!=null && PiViLityCore.Global.settings.IsVisibleEntry(entry))
             {
@@ -316,7 +320,7 @@ namespace PiViLityCore.Controls
                     var entries = dirInfo.EnumerateFileSystemInfos();
                     foreach (var entry in entries)
                     {
-                        var item = makeItem(entry);
+                        var item = MakeItem(entry);
                         if (item != null)
                         {
                             list.Add(item);
@@ -427,14 +431,12 @@ namespace PiViLityCore.Controls
                         }
                         else
                         {
-                            using (var image = ThumbnailIconStore.TileIconList.Images[FileListViewItem.LoadTileIconIndex])
-                            {
-                                e.Graphics.SetClip(e.Bounds);
-                                int x = e.Bounds.Left + (e.Bounds.Width - image.Width) / 2;
-                                int y = e.Bounds.Top + (e.Bounds.Height - image.Height) / 2;
-                                e.Graphics.DrawImage(image, x, y, image.Width, image.Height);
-                                e.Graphics.ResetClip();
-                            }
+                            using var image = ThumbnailIconStore.TileIconList.Images[FileListViewItem.LoadTileIconIndex];
+                            e.Graphics.SetClip(e.Bounds);
+                            int x = e.Bounds.Left + (e.Bounds.Width - image.Width) / 2;
+                            int y = e.Bounds.Top + (e.Bounds.Height - image.Height) / 2;
+                            e.Graphics.DrawImage(image, x, y, image.Width, image.Height);
+                            e.Graphics.ResetClip();
                         }
                     }
                 }
@@ -514,19 +516,19 @@ namespace PiViLityCore.Controls
                 if (Sorting == SortOrder.Ascending)
                 {
                     e.Graphics.DrawLines(Pens.Gray, new Point[] {
-                        new Point(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 1),
-                        new Point(e.Bounds.Left + e.Bounds.Width / 2 -10, e.Bounds.Top + 5),
-                        new Point(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 1),
-                        new Point(e.Bounds.Left + e.Bounds.Width / 2 + 10, e.Bounds.Top + 5),
+                        new(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 1),
+                        new(e.Bounds.Left + e.Bounds.Width / 2 -10, e.Bounds.Top + 5),
+                        new(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 1),
+                        new(e.Bounds.Left + e.Bounds.Width / 2 + 10, e.Bounds.Top + 5),
                     });
                 }
                 else
                 {
                     e.Graphics.DrawLines(Pens.Gray, new Point[] {
-                        new Point(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 5),
-                        new Point(e.Bounds.Left + e.Bounds.Width / 2 -10, e.Bounds.Top + 1),
-                        new Point(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 5),
-                        new Point(e.Bounds.Left + e.Bounds.Width / 2 + 10, e.Bounds.Top + 1),
+                        new(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 5),
+                        new(e.Bounds.Left + e.Bounds.Width / 2 -10, e.Bounds.Top + 1),
+                        new(e.Bounds.Left + e.Bounds.Width / 2, e.Bounds.Top + 5),
+                        new(e.Bounds.Left + e.Bounds.Width / 2 + 10, e.Bounds.Top + 1),
                     });
                 }
             }
@@ -719,7 +721,7 @@ namespace PiViLityCore.Controls
         {
             for(int i = 0; i < SubItemColums.Length; i++)
             {
-                if (fileView.SubItemWidth.Count() > i)
+                if (fileView.SubItemWidth.Length > i)
                 {
                     if (fileView.SubItemWidth[i] > 0)
                     {

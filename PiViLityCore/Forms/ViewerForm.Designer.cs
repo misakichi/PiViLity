@@ -39,46 +39,54 @@ namespace PiViLityCore.Forms
             // 
             // status
             // 
+            status.ImageScalingSize = new Size(24, 24);
             status.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1 });
-            status.Location = new Point(0, 428);
+            status.Location = new Point(0, 718);
             status.Name = "status";
-            status.Size = new Size(800, 22);
+            status.Padding = new Padding(1, 0, 20, 0);
+            status.Size = new Size(1143, 32);
             status.TabIndex = 0;
             status.Text = "statusStrip1";
             // 
             // toolStripStatusLabel1
             // 
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(36, 17);
+            toolStripStatusLabel1.Size = new Size(55, 25);
             toolStripStatusLabel1.Text = "None";
             // 
             // viewPanel
             // 
             viewPanel.Dock = DockStyle.Fill;
-            viewPanel.Location = new Point(0, 0);
+            viewPanel.Location = new Point(0, 25);
+            viewPanel.Margin = new Padding(4, 5, 4, 5);
             viewPanel.Name = "viewPanel";
-            viewPanel.Size = new Size(800, 428);
+            viewPanel.Size = new Size(1143, 693);
             viewPanel.TabIndex = 2;
             // 
             // viewToolStrip
             // 
+            viewToolStrip.ImageScalingSize = new Size(24, 24);
             viewToolStrip.Location = new Point(0, 0);
             viewToolStrip.Name = "viewToolStrip";
-            viewToolStrip.Size = new Size(800, 25);
+            viewToolStrip.Padding = new Padding(0, 0, 3, 0);
+            viewToolStrip.Size = new Size(1143, 25);
             viewToolStrip.TabIndex = 3;
             viewToolStrip.Text = "toolStrip1";
             // 
             // ViewerForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1143, 750);
             Controls.Add(viewPanel);
             Controls.Add(viewToolStrip);
             Controls.Add(status);
+            Margin = new Padding(4, 5, 4, 5);
             Name = "ViewerForm";
             Text = "ViewerForm";
             FormClosed += ViewerForm_FormClosed;
+            KeyDown += ViewerForm_KeyDown;
+            KeyPress += ViewerForm_KeyPress;
             status.ResumeLayout(false);
             status.PerformLayout();
             ResumeLayout(false);

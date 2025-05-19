@@ -11,9 +11,9 @@ namespace PiViLityCore.Plugin
     {
 
         bool LoadFile(string filePath);
-        public Control GetViewer(); 
-        
-        
+        public Control GetViewer();
+
+        event EventHandler? FileLoaded;
         
         string Path { get; }
 
@@ -29,15 +29,9 @@ namespace PiViLityCore.Plugin
         IEnumerable<ToolStripItem> ToolBarItems { get; }
         IEnumerable<ToolStripItem> StatusBarItems { get; }
 
-        void NextFile()
-        {
-            // 次のファイルを表示する処理を実装
-        }
 
-        void PreviousFile()
-        {
-            // 次のファイルを表示する処理を実装
-        }
+        void NextFile();
 
+        void PreviousFile();
     }
 }

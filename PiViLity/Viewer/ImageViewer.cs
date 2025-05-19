@@ -1,4 +1,7 @@
-﻿using PiViLityCore.Plugin;
+﻿using PiViLityCore.Option;
+using PiViLityCore.Plugin;
+using PiViLityCore.Shell;
+using Sharpen;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,9 +19,13 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PiViLity.Viewer
 {
+    /// <summary>
+    /// 画像ビューワー
+    /// </summary>
     public partial class ImageViewer :
-        UserControl,
-        PiViLityCore.Plugin.IImageViewer
+        Panel,
+        IImageViewer,
+        IShotcutCommandSupport
     {
         private float _drawScale = 1.0f;
         private Point _drawOffset = new(0, 0);
@@ -26,15 +33,27 @@ namespace PiViLity.Viewer
         private Image? _viewImage = new Bitmap(1, 1);
         private string _filePath = string.Empty;
 
+        public event EventHandler? FileLoaded;
+
+
         [DefaultValue(ViewModeStyle.AutoScale)]
         public ViewModeStyle ViewMode { get; set; } = ViewModeStyle.AutoScale;
 
-        public PiViLityCore.Plugin.IViewer.ViewType SupportViewType => PiViLityCore.Plugin.IViewer.ViewType.Image;
+        public IViewer.ViewType SupportViewType =>IViewer.ViewType.Image;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Path { get => _filePath; protected set => _filePath = value; }
 
+        public string TargetName => "Standard Image Viewer";
+
+        private PiViLityCore.Shell.DirectoryFilesDualterator directoryFilesDualterator = new();
+
         Brush? _backGroundBrush = null;
+
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public ImageViewer()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ImageViewer));
@@ -56,9 +75,21 @@ namespace PiViLity.Viewer
             InitializeComponent();
             InitializeToolStripItems();
 
+
+            directoryFilesDualterator.FilterExtensions=PluginManager.Instance.SupportImageExtensions.ToArray();
+            directoryFilesDualterator.FileChanged += DirectoryFilesDualterator_FileChanged;
+
             picImage.Dock = DockStyle.Fill;
             picImage.Paint += PnlImage_Paint;
 
+        }
+
+        private void DirectoryFilesDualterator_FileChanged(object? sender, FileChangeEventArgs e)
+        {
+            if(File.Exists(e.FullPath))
+            {
+                LoadFile(e.FullPath);
+            }
         }
 
         /// <summary>
@@ -127,8 +158,8 @@ namespace PiViLity.Viewer
             if(_selectRect != Rectangle.Empty)
             {
                 var rc = new Rectangle(
-                    (int)(_selectRect.X * _drawScale),
-                    (int)(_selectRect.Y * _drawScale),
+                    (int)(_selectRect.X * _drawScale * _drawScale) + _drawOffset.X,
+                    (int)(_selectRect.Y * _drawScale * _drawScale) + _drawOffset.Y,
                     (int)(_selectRect.Width * _drawScale),
                     (int)(_selectRect.Height * _drawScale)
                 );
@@ -150,15 +181,6 @@ namespace PiViLity.Viewer
                     e.Graphics.DrawRectangle(Pens.Black, rc);
                     e.Graphics.DrawRectangle(newPen, rc);
                 }
-                
-                //ControlPaint.DrawFocusRectangle(
-                //e.Graphics,
-                //new Rectangle(
-                //(int)(_selectRect.X * _drawScale),
-                //(int)(_selectRect.Y * _drawScale),
-                //(int)(_selectRect.Width * _drawScale),
-                //(int)(_selectRect.Height * _drawScale)
-                //));
             }
         }
 
@@ -173,6 +195,8 @@ namespace PiViLity.Viewer
                 }
             }
             Path = filePath;
+            directoryFilesDualterator.FilePath = filePath;
+            FileLoaded?.Invoke(this, new());
             SetImage(image);
             return image != null;
         }
@@ -321,12 +345,23 @@ namespace PiViLity.Viewer
                 }
                 else if(_dragMode == DragMode.Select)
                 {
-                    _selectRect = new Rectangle(
-                        (int)(Math.Min(_dragStartPosition.X, e.Location.X) / _drawScale) - _drawOffset.X,
-                        (int)(Math.Min(_dragStartPosition.Y, e.Location.Y) / _drawScale) - _drawOffset.Y,
-                        (int)(Math.Abs(_dragStartPosition.X - e.Location.X) / _drawScale) - _drawOffset.X,
-                        (int)(Math.Abs(_dragStartPosition.Y - e.Location.Y) / _drawScale) - _drawOffset.Y
-                    );
+#if true
+                    var sx = (int)((Math.Min(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
+                    var sy = (int)((Math.Min(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
+                    var ex = (int)((Math.Max(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
+                    var ey = (int)((Math.Max(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
+                    sx = Math.Clamp(sx, 0, _viewImage?.Width - 1 ?? 0);
+                    ex = Math.Clamp(ex, 0, _viewImage?.Width - 1 ?? 0);
+                    sy = Math.Clamp(sy, 0, _viewImage?.Height - 1 ?? 0);
+                    ey = Math.Clamp(ey, 0, _viewImage?.Height - 1 ?? 0);
+                    _selectRect = new Rectangle(sx, sy, ex-sx, ey-sy);
+#else
+                    var x = Math.Clamp((int)(Math.Min(_dragStartPosition.X, e.Location.X) / _drawScale) - _drawOffset.X, 0, _viewImage?.Width - 1 ?? 0);
+                    var y = Math.Clamp((int)(Math.Min(_dragStartPosition.Y, e.Location.Y) / _drawScale) - _drawOffset.Y, 0, _viewImage?.Height - 1 ?? 0);
+                    var w = Math.Clamp((int)(Math.Abs(_dragStartPosition.X - e.Location.X) / _drawScale), 0, Math.Max(0, (_viewImage?.Width ?? 1) - x));
+                    var h = Math.Clamp((int)(Math.Abs(_dragStartPosition.Y - e.Location.Y) / _drawScale), 0, Math.Max(0, (_viewImage?.Height ?? 1) - y));
+                    _selectRect = new Rectangle(x,y,w,h);
+#endif
                     picImage.Refresh();
                 }
             }
@@ -454,5 +489,9 @@ namespace PiViLity.Viewer
         {
             return this;
         }
+
+        public void NextFile() => directoryFilesDualterator.MoveNext();
+
+        public void PreviousFile() => directoryFilesDualterator.MovePrevious();
     }
 }
