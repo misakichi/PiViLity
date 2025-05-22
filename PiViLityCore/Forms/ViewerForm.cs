@@ -80,6 +80,8 @@ namespace PiViLityCore.Forms
 
         private void ViewerForm_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode==Keys.ShiftKey || e.KeyCode == Keys.ControlKey)
+                return;
             if (e.KeyCode == Keys.Right)
             {
                 _viewer?.NextFile();
@@ -87,6 +89,10 @@ namespace PiViLityCore.Forms
             else if (e.KeyCode == Keys.Left)
             {
                 _viewer?.PreviousFile();
+            }
+            else if(_viewer is IShotcutCommandSupport commandSupport)
+            {
+                commandSupport.OnKeyDown(e);
             }
 
         }

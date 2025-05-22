@@ -28,7 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Remove="Viewer\ImageViewer.ja-JP.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Option\TvLvTabPage.cs" />
+    <None Include="Viewer\ImageViewer.ja-JP.resx" />
   </ItemGroup>
 
   <ItemGroup>

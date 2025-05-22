@@ -1,4 +1,4 @@
-Ôªø<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,47 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing">
-    <value>170, 17</value>
-  </data>
-  <data name="tbtnFitSize.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wQAADsEBuJFr7QAAAI1JREFUOE9j+Pbt239KMAOIcHJyIgujGPDh/UeSMMkGPL918v+JblMwTZYBJ7pN
-        /h+qlQIbQpYBEBeYEHbBpLOv/i+49BrDAHSM1YCsfS/+Sy98BMaEDMEwAFkzMYagGKDTsBJDMzZDQOzW
-        Ey8xDUDXhI5BGkEYxge5liQDsGGQqykyAISpZwAlmIFSAAAHNfyc4iTN4wAAAABJRU5ErkJggg==
-</value>
-  </data>
-  <data name="tbtnZoomOut.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wQAADsEBuJFr7QAAAI1JREFUOE9j+Pbt239KMAOIcHJyIgujGPDh/UeSMMkGPL918v+JblMwTZYBJ7pN
-        /h+qlQIbQpYBEBeYEHbBpLOv/i+49BrDAHSM1YCsfS/+Sy98BMaEDMEwAFkzMYagGKDTsBJDMzZDQOzW
-        Ey8xDUDXhI5BGkEYxge5liQDsGGQqykyAISpZwAlmIFSAAAHNfyc4iTN4wAAAABJRU5ErkJggg==
-</value>
-  </data>
-  <data name="tbtnZoom100.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wQAADsEBuJFr7QAAAI1JREFUOE9j+Pbt239KMAOIcHJyIgujGPDh/UeSMMkGPL918v+JblMwTZYBJ7pN
-        /h+qlQIbQpYBEBeYEHbBpLOv/i+49BrDAHSM1YCsfS/+Sy98BMaEDMEwAFkzMYagGKDTsBJDMzZDQOzW
-        Ey8xDUDXhI5BGkEYxge5liQDsGGQqykyAISpZwAlmIFSAAAHNfyc4iTN4wAAAABJRU5ErkJggg==
-</value>
-  </data>
-  <data name="tbtnZoomIn.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wQAADsEBuJFr7QAAAI1JREFUOE9j+Pbt239KMAOIcHJyIgujGPDh/UeSMMkGPL918v+JblMwTZYBJ7pN
-        /h+qlQIbQpYBEBeYEHbBpLOv/i+49BrDAHSM1YCsfS/+Sy98BMaEDMEwAFkzMYagGKDTsBJDMzZDQOzW
-        Ey8xDUDXhI5BGkEYxge5liQDsGGQqykyAISpZwAlmIFSAAAHNfyc4iTN4wAAAABJRU5ErkJggg==
-</value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="DefaultBackGround" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>DefaultBackGround.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ViewName" xml:space="preserve">
-    <value>Standard image viewer</value>
+    <value>ïWèÄâÊëúÉrÉÖÅ[ÉAÅ[</value>
   </data>
 </root>

@@ -5,7 +5,6 @@ using Sharpen;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -44,7 +43,12 @@ namespace PiViLity.Viewer
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Path { get => _filePath; protected set => _filePath = value; }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string TargetName => "Standard Image Viewer";
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public List<ShorcutTrigger> ShortCutTriggers { get; set; } = new();
+
 
         private PiViLityCore.Shell.DirectoryFilesDualterator directoryFilesDualterator = new();
 
@@ -69,18 +73,26 @@ namespace PiViLity.Viewer
                         tbrush.WrapMode = System.Drawing.Drawing2D.WrapMode.Tile;
                         _backGroundBrush = tbrush;
                     }
-                }                
+                }
             }
 
             InitializeComponent();
             InitializeToolStripItems();
 
 
-            directoryFilesDualterator.FilterExtensions=PluginManager.Instance.SupportImageExtensions.ToArray();
+            directoryFilesDualterator.FilterExtensions = PluginManager.Instance.SupportImageExtensions.ToArray();
             directoryFilesDualterator.FileChanged += DirectoryFilesDualterator_FileChanged;
 
             picImage.Dock = DockStyle.Fill;
             picImage.Paint += picImage_Paint;
+
+            ShortCutTriggers.Add(new ShorcutTrigger() { Key = Keys.Oemplus, MethodName = "ZoomIn" });
+            ShortCutTriggers.Add(new ShorcutTrigger() { Key = Keys.OemMinus, MethodName = "ZoomOut" });
+            ShortCutTriggers.Add(new ShorcutTrigger() { Key = Keys.Control | Keys.C, MethodName = "CopyImage" });
+
+            (this as IShotcutCommandSupport)?.ResolveCommandMethods();
+
+
 
         }
 
@@ -438,31 +450,25 @@ namespace PiViLity.Viewer
             }
         }
 
-        private void tbtnZoomOut_Click(object? sender, EventArgs e)
-        {
-            ViewMode = ViewModeStyle.Fixed;
-            zoomControl(-1);            
-        }
-
-        private void tbtnZoom100_Click(object? sender, EventArgs e)
-        {
-            ViewMode = ViewModeStyle.Fixed;
-            _drawScale = 1.0f;
-            adjustAutoScale();
-        }
-
-        private void tbtnZoomIn_Click(object? sender, EventArgs e)
+        [ShortCutCommand(NameText="ZoomIn)")]
+        void ZoomIn()
         {
             ViewMode = ViewModeStyle.Fixed;
             zoomControl(1);
         }
-
-        private void tbtnCopy_Click(object? sender, EventArgs e)
+        [ShortCutCommand(NameText = "ZoomOut")]
+        void ZoomOut()
+        {
+            ViewMode = ViewModeStyle.Fixed;
+            zoomControl(-1);
+        }
+        [ShortCutCommand(NameText = "Copy")]
+        void CopyImage()
         {
             if (_viewImage == null)
                 return;
 
-            if (_selectRect!= Rectangle.Empty)
+            if (_selectRect != Rectangle.Empty)
             {
                 using (var bmp = new Bitmap(_selectRect.Width, _selectRect.Height))
                 {
@@ -477,6 +483,28 @@ namespace PiViLity.Viewer
             {
                 Clipboard.SetImage(_viewImage);
             }
+        }
+
+        private void tbtnZoomOut_Click(object? sender, EventArgs e)
+        {
+            ZoomOut();
+        }
+
+        private void tbtnZoom100_Click(object? sender, EventArgs e)
+        {
+            ViewMode = ViewModeStyle.Fixed;
+            _drawScale = 1.0f;
+            adjustAutoScale();
+        }
+
+        private void tbtnZoomIn_Click(object? sender, EventArgs e)
+        {
+            ZoomIn();
+        }
+
+        private void tbtnCopy_Click(object? sender, EventArgs e)
+        {
+            CopyImage();
         }
 
         private void setStatus()
