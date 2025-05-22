@@ -80,7 +80,7 @@ namespace PiViLity.Viewer
             directoryFilesDualterator.FileChanged += DirectoryFilesDualterator_FileChanged;
 
             picImage.Dock = DockStyle.Fill;
-            picImage.Paint += PnlImage_Paint;
+            picImage.Paint += picImage_Paint;
 
         }
 
@@ -97,7 +97,7 @@ namespace PiViLity.Viewer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void PnlImage_Paint(object? sender, PaintEventArgs e)
+        private void picImage_Paint(object? sender, PaintEventArgs e)
         {
 
             //センタリング要求がある場合はスクロール量を中央に合わせる
@@ -158,8 +158,8 @@ namespace PiViLity.Viewer
             if(_selectRect != Rectangle.Empty)
             {
                 var rc = new Rectangle(
-                    (int)(_selectRect.X * _drawScale * _drawScale) + _drawOffset.X,
-                    (int)(_selectRect.Y * _drawScale * _drawScale) + _drawOffset.Y,
+                    (int)(_selectRect.X * _drawScale) + _drawOffset.X,
+                    (int)(_selectRect.Y * _drawScale) + _drawOffset.Y,
                     (int)(_selectRect.Width * _drawScale),
                     (int)(_selectRect.Height * _drawScale)
                 );
