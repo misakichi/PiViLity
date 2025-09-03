@@ -86,7 +86,7 @@ namespace PiViLityCore.Forms
             Text = "ViewerForm";
             FormClosed += ViewerForm_FormClosed;
             KeyDown += ViewerForm_KeyDown;
-            KeyPress += ViewerForm_KeyPress;
+            KeyUp += ViewerForm_KeyUp;
             status.ResumeLayout(false);
             status.PerformLayout();
             ResumeLayout(false);

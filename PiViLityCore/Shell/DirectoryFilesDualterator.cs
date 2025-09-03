@@ -214,5 +214,33 @@ namespace PiViLityCore.Shell
             return false;
         }
 
+        /// <summary>
+        /// 最初のファイルへ移動します
+        /// </summary>
+        public bool MoveFirst()
+        {
+            if (_fileList.Count == 0 || _currentIndex == 0)
+            {
+                return false;
+            }
+            _currentIndex = 0;
+            FileChanged?.Invoke(this, new(FilePath));
+            return true;
+        }
+
+        /// <summary>
+        /// 最後のファイルへ移動します
+        /// </summary>
+        public bool MoveLast()
+        {
+            if (_fileList.Count == 0 || _currentIndex == _fileList.Count - 1)
+            {
+                return false;
+            }
+            _currentIndex = _fileList.Count - 1;
+            FileChanged?.Invoke(this, new(FilePath));
+            return true;
+        }
+
     }
 }

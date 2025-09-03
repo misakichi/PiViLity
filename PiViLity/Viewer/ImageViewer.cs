@@ -86,16 +86,21 @@ namespace PiViLity.Viewer
             picImage.Dock = DockStyle.Fill;
             picImage.Paint += picImage_Paint;
 
+            //register shortcut keys
             ShortCutTriggers.Add(new ShorcutTrigger() { Key = Keys.Oemplus, MethodName = "ZoomIn" });
             ShortCutTriggers.Add(new ShorcutTrigger() { Key = Keys.OemMinus, MethodName = "ZoomOut" });
             ShortCutTriggers.Add(new ShorcutTrigger() { Key = Keys.Control | Keys.C, MethodName = "CopyImage" });
-
+            //resolve methods
             (this as IShotcutCommandSupport)?.ResolveCommandMethods();
-
-
 
         }
 
+        /// <summary>
+        /// if directoryFilesDualterator detects file change, this event is called.
+        /// reload file if it still exists.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DirectoryFilesDualterator_FileChanged(object? sender, FileChangeEventArgs e)
         {
             if(File.Exists(e.FullPath))
@@ -150,6 +155,7 @@ namespace PiViLity.Viewer
                 }
                 if (dst != Rectangle.Empty && src != Rectangle.Empty)
                 {
+                    //範囲に合わせて背景色と画像を描画
                     int y = dst.Y - _drawOffset.Y;
                     int x = dst.X - _drawOffset.X;
                     x = (x & (~31)) + _drawOffset.X; 
@@ -167,14 +173,19 @@ namespace PiViLity.Viewer
                     );
                 }
             }
-            if(_selectRect != Rectangle.Empty)
+
+            //選択範囲がある場合はその部分を描画
+            if (_selectRect != Rectangle.Empty)
             {
+                //選択範囲の描画
                 var rc = new Rectangle(
                     (int)(_selectRect.X * _drawScale) + _drawOffset.X,
                     (int)(_selectRect.Y * _drawScale) + _drawOffset.Y,
                     (int)(_selectRect.Width * _drawScale),
                     (int)(_selectRect.Height * _drawScale)
                 );
+
+                //選択範囲以外を半透明で塗りつぶす
                 using (var path = new GraphicsPath())
                 {
                     path.AddRectangle(e.ClipRectangle);
@@ -185,7 +196,7 @@ namespace PiViLity.Viewer
                         e.Graphics.FillPath(brush, path);
                     }
                 }
-
+                //選択範囲の枠を点線で描画
                 using (var newPen = new Pen(Color.White, 2))
                 {
                     newPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Custom;
@@ -196,8 +207,17 @@ namespace PiViLity.Viewer
             }
         }
 
+        /// <summary>
+        /// Loads an image file from the specified file path and sets it as the current image.
+        /// </summary>
+        /// <remarks>This method attempts to load the image using the appropriate image reader provided by
+        /// the plugin manager. If the image is successfully loaded, the <see cref="FileLoaded"/> event is raised, and
+        /// the image is set as the current image.</remarks>
+        /// <param name="filePath">The full path to the image file to load. This cannot be null or empty.</param>
+        /// <returns><see langword="true"/> if the image was successfully loaded; otherwise, <see langword="false"/>.</returns>
         public bool LoadFile(string filePath)
         {
+            //load image using plugin.
             Image? image = null;
             using (var imageReader = PluginManager.Instance.GetImageReader(filePath))
             {
@@ -206,6 +226,7 @@ namespace PiViLity.Viewer
                     image = imageReader.GetImage();
                 }
             }
+
             Path = filePath;
             directoryFilesDualterator.FilePath = filePath;
             FileLoaded?.Invoke(this, new());
@@ -221,6 +242,7 @@ namespace PiViLity.Viewer
             if (_viewImage == null)
                 return;
 
+            //自動スケールの場合はウィンドウに合わせてスケールを調整
             if (ViewMode == ViewModeStyle.AutoScale)
             {
                 tbtnFitSize.Checked = true;
@@ -240,6 +262,7 @@ namespace PiViLity.Viewer
                     _drawOffset.Y = 0;
                 }
             }
+            //固定サイズの場合はスクロール可能にして画像サイズを設定
             else
             {
                 tbtnFitSize.Checked = false;
@@ -387,7 +410,7 @@ namespace PiViLity.Viewer
             if (_viewImage is Bitmap bmp)
             {
                 var color = bmp.GetPixel(px, py);
-                pixelInfo = $"({px}, {py}) R={color.R,3} G={color.G,3} B={color.B,3} A={color.A,3}";
+                pixelInfo = $"({px}, {py}) ARGB:{color.A,3},{color.R,3},{color.G,3},{color.B,3} (#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2})";
                 tlblPixelColor.ForeColor = Color.FromArgb(255, color.R, color.G, color.B);
             }
             else
@@ -416,7 +439,11 @@ namespace PiViLity.Viewer
             ViewMode = ViewModeStyle.AutoScale;
             adjustAutoScale();
         }
-
+        
+        /// <summary>
+        /// ズーム制御
+        /// </summary>
+        /// <param name="move"></param>
         private void zoomControl(int move)
         {
             float[] zoomTable  = [0.1f, 0.333f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 4.0f, 8.0f];
@@ -507,6 +534,9 @@ namespace PiViLity.Viewer
             CopyImage();
         }
 
+        /// <summary>
+        /// ステータスバーの更新
+        /// </summary>
         private void setStatus()
         {
             tlblResolutionStatus.Text = $"{_viewImage?.Width} x {_viewImage?.Height}";
@@ -518,8 +548,26 @@ namespace PiViLity.Viewer
             return this;
         }
 
-        public void NextFile() => directoryFilesDualterator.MoveNext();
+        /// <summary>
+        /// 次のファイルへ
+        /// </summary>
+        public bool NextFile() => directoryFilesDualterator.MoveNext();
 
-        public void PreviousFile() => directoryFilesDualterator.MovePrevious();
+        /// <summary>
+        /// 前のファイルへ
+        /// </summary>
+        /// <returns></returns>
+        public bool PreviousFile() => directoryFilesDualterator.MovePrevious();
+
+        /// <summary>
+        /// 最初ののファイルへ
+        /// </summary>
+        public bool FirstFile() => directoryFilesDualterator.MoveFirst();
+
+        /// <summary>
+        /// 最後のファイルへ
+        /// </summary>
+        /// <returns></returns>
+        public bool LastFile() => directoryFilesDualterator.MoveLast();
     }
 }

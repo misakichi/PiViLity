@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "SystemColor.h"
-
+#pragma comment(lib, "runtimeobject.lib")
 static inline bool _IsColorLight(const winrt::Windows::UI::Color& clr)
 {
     return (((5 * clr.G) + (2 * clr.R) + clr.B) > (8 * 128));

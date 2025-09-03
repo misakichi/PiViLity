@@ -74,27 +74,48 @@ namespace PiViLityCore.Forms
             GC.Collect();
         }
 
-        private void ViewerForm_KeyPress(object sender, KeyPressEventArgs e)
-        {
-        }
+        private bool _onRightKeyDown = false;
+        private bool _onLeftKeyDown = false;
 
         private void ViewerForm_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode==Keys.ShiftKey || e.KeyCode == Keys.ControlKey)
                 return;
+
+            //次のファイルへ
             if (e.KeyCode == Keys.Right)
             {
-                _viewer?.NextFile();
+                //移動できなかった場合、最初のファイルへ
+                if (_viewer?.NextFile() != true && _onRightKeyDown==false)
+                {
+                    _viewer?.FirstFile();
+                }
+                _onRightKeyDown = true;
             }
+            //前のファイルへ
             else if (e.KeyCode == Keys.Left)
             {
-                _viewer?.PreviousFile();
+                //移動できなかった場合、最後のファイルへ
+                if (_viewer?.PreviousFile()!=true && _onLeftKeyDown==false)
+                {
+                    _viewer?.LastFile();
+                }
+                _onLeftKeyDown = true;
             }
-            else if(_viewer is IShotcutCommandSupport commandSupport)
+            //ショートカットキーの処理
+            else if (_viewer is IShotcutCommandSupport commandSupport)
             {
                 commandSupport.OnKeyDown(e);
             }
 
+        }
+
+        private void ViewerForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.ControlKey)
+                return;
+            _onRightKeyDown = e.KeyCode == Keys.Right ? false : _onRightKeyDown;
+            _onLeftKeyDown = e.KeyCode == Keys.Left ? false : _onLeftKeyDown;
         }
     }
 }

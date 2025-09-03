@@ -30,8 +30,10 @@ namespace PiViLityCore.Plugin
         IEnumerable<ToolStripItem> StatusBarItems { get; }
 
 
-        void NextFile();
+        bool NextFile();
 
-        void PreviousFile();
+        bool PreviousFile();
+        bool FirstFile();
+        bool LastFile();
     }
 }
