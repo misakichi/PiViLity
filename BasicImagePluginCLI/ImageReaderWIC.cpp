@@ -178,32 +178,35 @@ namespace BasicImagePluginCLI
         uint32_t width() const { return width_; }
         uint32_t height() const { return height_; }
     private:
+        /// <summary>
+        /// 指定された幅と高さでサムネイル画像を取得します。
+        /// </summary>
+        /// <param name="rqWidth">要求されるサムネイル画像の幅（ピクセル単位）。</param>
+        /// <param name="rqHeight">要求されるサムネイル画像の高さ（ピクセル単位）。</param>
+        /// <returns>指定されたサイズにスケーリングされた IWICBitmapSource の ComPtr オブジェクト。</returns>
         ComPtr<IWICBitmapSource> getThumbanailBmp(int rqWidth, int rqHeight)
         {
             ComPtr<IWICBitmapSource> bmp;
-            if (SUCCEEDED(frameDecoder_->GetThumbnail(bmp.GetAddressOf())))
-            {
-                ComPtr<IWICFormatConverter> converter;
-                if (SUCCEEDED(s_WicFactory->CreateFormatConverter(converter.GetAddressOf())))
-                {
-                    if (SUCCEEDED(converter->Initialize(bmp.Get(), GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
-                    {
-                        bmp = converter.Get();
-                    }
-                }
-                ComPtr<IWICBitmapScaler> scaler;
-                s_WicFactory->CreateBitmapScaler(scaler.GetAddressOf());
-                scaler->Initialize(bmp.Get(), rqWidth, rqHeight, WICBitmapInterpolationModeLinear);
-                bmp = scaler.Get();
-            }
-            else
-            {
-                ComPtr<IWICBitmapScaler> scaler;
-                s_WicFactory->CreateBitmapScaler(scaler.GetAddressOf());
-                scaler->Initialize(frameDecoder_.Get(), rqWidth, rqHeight, WICBitmapInterpolationModeLinear);
 
-                bmp = scaler.Get();
-            }
+			if (FAILED(frameDecoder_->GetThumbnail(bmp.GetAddressOf())))
+			{
+				bmp = frameDecoder_.Get();
+			}
+			ComPtr<IWICFormatConverter> converter;
+			if (SUCCEEDED(s_WicFactory->CreateFormatConverter(converter.GetAddressOf())))
+			{
+				if (SUCCEEDED(converter->Initialize(bmp.Get(), GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
+				{
+					bmp = converter.Get();
+				}
+			}
+
+            ComPtr<IWICBitmapScaler> scaler;
+            s_WicFactory->CreateBitmapScaler(scaler.GetAddressOf());
+            scaler->Initialize(bmp.Get(), rqWidth, rqHeight, WICBitmapInterpolationModeLinear);
+
+            bmp = scaler.Get();
+
             return bmp;
         }
         WICRect calcBitmapSize(IWICBitmapSource* bitmap, int destWidth, int destHeight, int& destOffsetX, int& destOffsetY)
