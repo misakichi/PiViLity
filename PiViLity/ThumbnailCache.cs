@@ -51,6 +51,7 @@ namespace PiViLity
         public static void Terminate()
         {
             _incetance.SaveDb(_incetance._dbFilename);
+            _incetance._terminate();
             _incetance.Dispose();
         }
         private SqliteConnection openDb()
@@ -96,6 +97,11 @@ namespace PiViLity
 
             }
         }
+
+        /// <summary>
+        /// トランザクションスレッドへのコマンドアクション追加
+        /// </summary>
+        /// <param name="cmd">トランザクションスレッドによる実行を行う処理</param>
         void AddTransactionCommand(Action<SqliteConnection,SqliteCommand> cmd)
         {
             transactionCommandMutex?.WaitOne();
@@ -145,6 +151,38 @@ namespace PiViLity
             transactionThread.IsBackground = true;
             transactionThread.Start();
         }
+        private void _terminate()
+        {
+            transactionExit = true;
+            transactionEvent.Set();
+            transactionThread?.Join();
+            transactionThread = null;
+            if (appDb != null)
+            {
+                appDb.Close();
+                appDb.Dispose();
+                appDb = null;
+            }
+            if (mutex != null)
+            {
+                mutex.WaitOne();
+                using (var view = mmfDbRef?.CreateViewAccessor(0, 4, System.IO.MemoryMappedFiles.MemoryMappedFileAccess.ReadWrite))
+                {
+                    int dbRefCount = 0;
+                    view?.Read<int>(0, out dbRefCount);
+                    if (dbRefCount > 0)
+                    {
+                        view?.Write(0, dbRefCount - 1);
+                    }
+                }
+                mutex.ReleaseMutex();
+            }
+        }
+
+        /// <summary>
+        /// データベースをファイルに書き出す
+        /// </summary>
+        /// <param name="dbFilename"></param>
         public void SaveDb(string dbFilename)
         {
             using (SqliteConnection db = openDb())
@@ -157,6 +195,11 @@ namespace PiViLity
             }
         }
 
+        /// <summary>
+        /// データベースに保存されているサムネイルを取得する
+        /// </summary>
+        /// <param name="filename">ファイルパス</param>
+        /// <returns></returns>
         public Image? GetThumbnail(string filename)
         {
             var fi = new FileInfo(filename);

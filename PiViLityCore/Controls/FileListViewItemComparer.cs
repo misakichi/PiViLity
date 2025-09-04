@@ -17,6 +17,17 @@ namespace PiViLityCore.Controls
         {
             _listView = listView;
         }
+        public static FileListViewItemComparerBase CreateComparer(FileListView listView, FileListViewSubItemTypes type)
+        {
+            return type switch
+            {
+                FileListViewSubItemTypes.Name => new FileListViewItemComparerName(listView),
+                FileListViewSubItemTypes.Size => new FileListViewItemComparerSize(listView),
+                FileListViewSubItemTypes.ModifiedDateTime => new FileListViewItemComparerModifiedDateTime(listView),
+                FileListViewSubItemTypes.Type => new FileListViewItemComparerType(listView),
+                _ => new FileListViewItemComparerName(listView),
+            };
+        }
 
         public virtual int Compare(object? x, object? y)
         {
@@ -54,7 +65,6 @@ namespace PiViLityCore.Controls
             return ret * (_listView.Sorting == SortOrder.Ascending ? 1 : -1);
         }
     }
-
     /// <summary>
     /// ファイルリスト用ListView(FileListView)のアイテムコンパレータ(サイズ)
     /// </summary>
@@ -73,7 +83,6 @@ namespace PiViLityCore.Controls
             return ret * (_listView.Sorting == SortOrder.Ascending ? 1 : -1);
         }
     }
-
     /// <summary>
     /// ファイルリスト用ListView(FileListView)のアイテムコンパレータ(更新日時)
     /// </summary>

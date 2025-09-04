@@ -66,13 +66,12 @@ namespace PiViLityCore.Controls
             for (int i = 0; i < SubItemColums.Length; i++)
             {
                 var subItemName = ((FileListViewSubItemBit)i).ToString();
-                var cmpType = Type.GetType($"PiViLity.Controls.FileListViewItemComparer{subItemName}");
                 SubItemColums[i] = new()
                 {
                     Name = subItemName,
                     Text = PiViLityCore.Global.GetResourceString($"FileListDetailSubItem.{subItemName}"),
                     SubItemBit = (FileListViewSubItemBit)i,
-                    Comparer = cmpType!=null ? Activator.CreateInstance(cmpType, [this]) as System.Collections.IComparer : null,
+                    Comparer = FileListViewItemComparerBase.CreateComparer(this, (FileListViewSubItemTypes)(1 << i)),
                     Width = DefaultSubItemWidth,
                     TextAlign = HorizontalAlignment.Left
                 };
