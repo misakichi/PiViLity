@@ -35,10 +35,10 @@ namespace PiViLity.Controls
             tvwDirMain = new DirectoryTreeView();
             splitDirView = new Splitter();
             panelViewInfo = new Panel();
+            lsvFile = new FileListView();
             splitViewInfo = new Splitter();
             panelInfo = new Panel();
             toolStrip = new ToolStrip();
-            lsvFile = new FileListView();
             panelViewInfo.SuspendLayout();
             SuspendLayout();
             // 
@@ -77,10 +77,20 @@ namespace PiViLity.Controls
             panelViewInfo.Size = new Size(457, 423);
             panelViewInfo.TabIndex = 13;
             // 
+            // lsvFile
+            // 
+            lsvFile.Dock = DockStyle.Fill;
+            lsvFile.Location = new Point(0, 0);
+            lsvFile.Name = "lsvFile";
+            lsvFile.Size = new Size(457, 252);
+            lsvFile.Sorting = SortOrder.Ascending;
+            lsvFile.TabIndex = 17;
+            lsvFile.UseCompatibleStateImageBehavior = false;
+            // 
             // splitViewInfo
             // 
             splitViewInfo.Dock = DockStyle.Bottom;
-            splitViewInfo.Location = new Point(0, 309);
+            splitViewInfo.Location = new Point(0, 252);
             splitViewInfo.Name = "splitViewInfo";
             splitViewInfo.Size = new Size(457, 4);
             splitViewInfo.TabIndex = 13;
@@ -90,9 +100,9 @@ namespace PiViLity.Controls
             // 
             panelInfo.BorderStyle = BorderStyle.Fixed3D;
             panelInfo.Dock = DockStyle.Bottom;
-            panelInfo.Location = new Point(0, 313);
+            panelInfo.Location = new Point(0, 256);
             panelInfo.Name = "panelInfo";
-            panelInfo.Size = new Size(457, 110);
+            panelInfo.Size = new Size(457, 167);
             panelInfo.TabIndex = 15;
             // 
             // toolStrip
@@ -102,15 +112,6 @@ namespace PiViLity.Controls
             toolStrip.Size = new Size(687, 25);
             toolStrip.TabIndex = 0;
             toolStrip.Text = "toolStrip";
-            // 
-            // lsvFile
-            // 
-            lsvFile.Dock = DockStyle.Fill;
-            lsvFile.Location = new Point(0, 0);
-            lsvFile.Name = "lsvFile";
-            lsvFile.Size = new Size(457, 309);
-            lsvFile.TabIndex = 17;
-            lsvFile.UseCompatibleStateImageBehavior = false;
             // 
             // TreeAndView
             // 
