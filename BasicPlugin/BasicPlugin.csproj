@@ -12,6 +12,14 @@
     <VersionSuffix>Dev</VersionSuffix>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="if not exist $(SolutionDir)\PluginOut mkdir $(SolutionDir)\PluginOut&#xD;&#xA;if not exist $(SolutionDir)\PluginOut\$(Configuration)\ mkdir $(SolutionDir)\PluginOut\$(Configuration)\&#xD;&#xA;copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\" />
   </Target>

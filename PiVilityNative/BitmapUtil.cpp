@@ -4,6 +4,7 @@
 using namespace System::Drawing;
 using namespace System::Drawing::Imaging;
 
+#pragma warning(disable : 4642)
 /// <summary>
 /// source‚ğrgbBitmap(24bppRgb‚Æ‚µ‚Ä)‚ÆalphaBitmap(Format32bppArgb‚Æ‚µ‚Ä)‚É•ªŠ„‚µ‚Ü‚·B
 /// </summary>
@@ -67,6 +68,7 @@ void PiVilityNative::BitmapUtil::BitmapDivineRgbAndAlpha(Bitmap^ source, Bitmap^
     rgbBitmap->UnlockBits(rgbData);
     alphaBitmap->UnlockBits(alphaData);
 }
+#pragma warning(default : 4642)
 
 
 /// <summary>

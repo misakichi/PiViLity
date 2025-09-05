@@ -21,6 +21,14 @@
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="publish\**" />
     <EmbeddedResource Remove="publish\**" />
@@ -67,7 +75,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if not exist $(TargetDir)\Plugin mkdir $(TargetDir)\Plugins&#xD;&#xA;copy $(SolutionDir)PluginOut\$(Configuration)\*.dll $(TargetDir)\Plugins\" />
+    <Exec Command="if not exist $(TargetDir)\Plugin mkdir $(TargetDir)\Plugins&#xD;&#xA;copy $(SolutionDir)PluginOut\$(Configuration)\*.dll $(TargetDir)\Plugins\&#xD;&#xA;copy $(SolutionDir)DllOut\$(Configuration)\*.dll $(TargetDir)\" />
   </Target>
 
 </Project>

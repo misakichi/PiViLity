@@ -275,7 +275,9 @@ namespace BasicImagePluginCLI
             WICRect rc = calcBitmapSize(bitmap, destWidth, destHeight, destOffsetX, destOffsetY);
 
             System::Drawing::Bitmap^ bmp;
+#pragma warning(suppress : 4642) 
 			bmp = gcnew System::Drawing::Bitmap(destWidth, destHeight, System::Drawing::Imaging::PixelFormat::Format32bppArgb);
+#pragma warning(default : 4642) 
 			auto mem = bmp->LockBits(System::Drawing::Rectangle(0, 0, destWidth, destHeight), System::Drawing::Imaging::ImageLockMode::WriteOnly, bmp->PixelFormat);
 			auto pBits = (BYTE*)mem->Scan0.ToPointer();
             auto offset = destOffsetY * mem->Stride + destOffsetX * 4;

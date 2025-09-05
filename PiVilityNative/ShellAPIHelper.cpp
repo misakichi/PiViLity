@@ -7,6 +7,9 @@
 #include <string>
 #include <vector>
 #include <atlbase.h>
+
+#include "../PiVilityCRT/SysImageList.h"
+
 using namespace System;
 
 static wchar_t* GetKnownFolderPath(const GUID& folderId)
@@ -35,47 +38,12 @@ String^ ShellAPI::GetMyCompute()
 	return "";
 }
 
-#if 0
-IntPtr FileInfo::GetLargeImageList()
-{
-	HIMAGELIST hImageList;
-	if (SHGetImageList(SHIL_SMALL, IID_IImageList, (PVOID*)&hImageList) == S_OK)
-	{
-		return IntPtr(hImageList);
-	}
-	else
-	{
-		return IntPtr(0);
-	}
-}
-
-IntPtr FileInfo::GetSmallImageList()
-{
-	HIMAGELIST hImageList;
-	if (SHGetImageList(SHIL_LARGE, IID_IImageList, (PVOID*)&hImageList) == S_OK)
-	{
-		return IntPtr(hImageList);
-	}
-	else
-	{
-		return IntPtr(0);
-	}
-}
-#endif
-
 /// <summary>
 /// 静的コンストラクタから呼ばれる初期化処理。
 /// システムイメージリストのハンドルを取得しておく。
 /// </summary>
 void FileInfo::StaticConstruct()
 {
-	HIMAGELIST hImageList;
-	SHGetImageList(SHIL_SYSSMALL, IID_IImageList, (PVOID*)&hImageList);
-	systemSmallImageList_ = hImageList;
-	SHGetImageList(SHIL_EXTRALARGE, IID_IImageList, (PVOID*)&hImageList);
-	systemLargeImageList_ = hImageList;
-	SHGetImageList(SHIL_JUMBO, IID_IImageList, (PVOID*)&hImageList);
-	systemJumboImageList_ = hImageList;
 }
 
 
@@ -230,6 +198,14 @@ int FileInfo::GetFileIconIndex(String^ path)
 	return info.iIcon;
 }
 
+static System::Drawing::Icon^ iconFromHandle(HICON hIcon)
+{
+#pragma warning(suppress : 4642) // 4642: 'System::Drawing::Icon::FromHandle': This method may leak a handle. Consider using the Icon(IntPtr, Boolean) constructor overload instead.
+	auto mngIcon = System::Drawing::Icon::FromHandle(IntPtr(hIcon));
+#pragma warning(default : 4642)
+	return mngIcon;
+
+}
 /// <summary>
 /// システムイメージリストのインデックスからアイコン（大）を取得します。
 /// </summary>
@@ -237,14 +213,14 @@ int FileInfo::GetFileIconIndex(String^ path)
 /// <returns></returns>
 System::Drawing::Icon^ FileInfo::GetFileLargeIconFromIndex(int index)
 {
-	auto icon = ImageList_GetIcon(systemLargeImageList_, index, ILD_TRANSPARENT);
+	auto icon = GetSysImageListLargeIcon(index);// ImageList_GetIcon(systemLargeImageList_, index, ILD_TRANSPARENT);
 	if (icon == nullptr)
 	{
 		auto  err = GetLastError();
 		Diagnostics::Debug::Print("ImageList_GetIcon: " + err);
 		return nullptr;
 	}
-	return System::Drawing::Icon::FromHandle(IntPtr(icon));
+	return iconFromHandle(icon);
 }
 
 /// <summary>
@@ -254,14 +230,14 @@ System::Drawing::Icon^ FileInfo::GetFileLargeIconFromIndex(int index)
 /// <returns></returns>
 System::Drawing::Icon^ FileInfo::GetFileSmallIconFromIndex(int index)
 {
-	auto icon = ImageList_GetIcon(systemSmallImageList_, index, ILD_TRANSPARENT);
+	auto icon = GetSysImageListSmallIcon(index);// ImageList_GetIcon(systemSmallImageList_, index, ILD_TRANSPARENT);
 	if (icon == nullptr)
 	{
 		auto  err = GetLastError();
 		Diagnostics::Debug::Print("ImageList_GetIcon: " + err);
 		return nullptr;
 	}
-	return System::Drawing::Icon::FromHandle(IntPtr(icon));
+	return iconFromHandle(icon);
 }
 
 /// <summary>
@@ -271,14 +247,14 @@ System::Drawing::Icon^ FileInfo::GetFileSmallIconFromIndex(int index)
 /// <returns></returns>
 System::Drawing::Icon^ FileInfo::GetFileJumboIconFromIndex(int index)
 {
-	auto icon = ImageList_GetIcon(systemJumboImageList_, index, ILD_TRANSPARENT);
+	auto icon = GetSysImageListJumboIcon(index);// ImageList_GetIcon(systemJumboImageList_, index, ILD_TRANSPARENT);
 	if (icon == nullptr)
 	{
 		auto  err = GetLastError();
 		Diagnostics::Debug::Print("ImageList_GetIcon: " + err);
 		return nullptr;
 	}
-	return System::Drawing::Icon::FromHandle(IntPtr(icon));
+	return iconFromHandle(icon);
 }
 
 /// <summary>
@@ -291,7 +267,7 @@ System::Drawing::Icon^ FileInfo::GetFileLargeIcon(String^ path)
 	SHFILEINFO info = {};
 	SHGetFileInfo(wcharPath,0,&info, sizeof(info), SHGFI_ICON | SHGFI_LARGEICON);
 
-	return System::Drawing::Icon::FromHandle(IntPtr(info.hIcon));
+	return iconFromHandle(info.hIcon);
 }
 
 /// <summary>
@@ -305,7 +281,7 @@ System::Drawing::Icon^ FileInfo::GetFileSmallIcon(String^ path)
 	SHFILEINFO info = {};
 	SHGetFileInfo(wcharPath, 0, &info, sizeof(info), SHGFI_ICON | SHGFI_SMALLICON);
 
-	return System::Drawing::Icon::FromHandle(IntPtr(info.hIcon));
+	return iconFromHandle(info.hIcon);
 }
 
 /// <summary>
@@ -319,8 +295,8 @@ System::Drawing::Icon^ FileInfo::GetFileJumboIcon(String^ path)
 	SHFILEINFO info = {};
 	SHGetFileInfo(wcharPath, 0, &info, sizeof(info), SHGFI_ICON |  SHGFI_SYSICONINDEX);
 
-	auto icon = ImageList_GetIcon(systemJumboImageList_, info.iIcon, ILD_TRANSPARENT);
-	return System::Drawing::Icon::FromHandle(IntPtr(icon));
+	auto icon = GetSysImageListJumboIcon(info.iIcon);// ImageList_GetIcon(systemJumboImageList_, info.iIcon, ILD_TRANSPARENT);
+	return iconFromHandle(icon);
 }
 
 
@@ -350,7 +326,7 @@ CComPtr<IShellItemArray> filepathsToShellItemArray(std::vector<std::wstring>& pa
 	if (pidls.empty())
 		return nullptr;
 	auto list = (LPCITEMIDLIST*)pidls.data();
-	SHCreateShellItemArrayFromIDLists(pidls.size(), list, &shellItemArray);
+	SHCreateShellItemArrayFromIDLists((UINT)pidls.size(), list, &shellItemArray);
 	for (auto pidl : pidls)
 	{
 		CoTaskMemFree(pidl);
@@ -382,7 +358,7 @@ CComPtr<IShellItemArray> filepathsToShellItemArray(array<String^>^ paths)
 	if (pidls.empty())
 		return nullptr;
 	auto list = (LPCITEMIDLIST*)pidls.data();
-	SHCreateShellItemArrayFromIDLists(pidls.size(), list, &shellItemArray);
+	SHCreateShellItemArrayFromIDLists((UINT)pidls.size(), list, &shellItemArray);
 	for (auto pidl : pidls)
 	{
 		CoTaskMemFree(pidl);

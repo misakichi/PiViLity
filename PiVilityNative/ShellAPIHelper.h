@@ -51,9 +51,6 @@ namespace PiVilityNative
 
 	private:
 		static void StaticConstruct();
-		static HIMAGELIST systemSmallImageList_;
-		static HIMAGELIST systemLargeImageList_;
-		static HIMAGELIST systemJumboImageList_;
 	};
 
 

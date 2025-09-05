@@ -171,7 +171,9 @@ namespace PiViLityCore.Controls
             _fsw?.Dispose();
             if (PiViLityCore.Event.Option.ApplySettings != null)
             {
+#pragma warning disable CS8601
                 PiViLityCore.Event.Option.ApplySettings -= OnApplySettings;
+#pragma warning restore CS8601
             }
             base.DestroyHandle();
 

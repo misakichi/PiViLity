@@ -7,10 +7,8 @@
 #ifndef PCH_H
 #define PCH_H
 
-#define WIN32_LEAN_AND_MEAN 
-#include <windows.h>
-
-#include <shlobj.h>
-#include <shellapi.h>
+#define DLL_DCECLSPEC __declspec(dllexport)
+// プリコンパイルするヘッダーをここに追加します
+#include "framework.h"
 
 #endif //PCH_H
