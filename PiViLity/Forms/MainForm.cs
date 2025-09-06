@@ -1,23 +1,188 @@
+using PiViLity.Controls;
+using PiViLity.Option;
 using PiViLityCore;
+using PiViLityCore.Controls;
 using System.Drawing;
 using System.Windows.Forms;
+using WeifenLuo.WinFormsUI.Docking;
 using Windows.Devices.Enumeration;
+using Windows.UI.StartScreen;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
-using PiViLity.Option;
 
 namespace PiViLity.Forms
 
 {
     public partial class MainForm : Form
     {
-        Controls.TreeAndViewTab treeAndViewTab = new();
-        ToolStripButton btnSmallIconView = new();
-        ToolStripButton btnLargeIconView = new();
-        ToolStripButton btnListView = new();
-        ToolStripButton btnDetailView = new();
-        ToolStripButton btnTileView = new();
+        private ToolStripButton _btnSmallIconView = new();
+        private ToolStripButton _btnLargeIconView = new();
+        private ToolStripButton _btnListView = new();
+        private ToolStripButton _btnDetailView = new();
+        private ToolStripButton _btnTileView = new();
+        private ToolStripButton _parentDirectoryBtn = new();
+        private ToolStripButton _previousDirectoryBtn = new();
+        private ToolStripButton _nextDirectoryBtn = new();
+
+
+        class FileListViewContent : DockContent
+        {
+            public FileListViewContent()
+            {
+                Icon = null;
+                DockAreas = DockAreas.Document | DockAreas.Float;
+                DockStateChanged += OnDockStateChanged;
+
+            }
+
+            private void OnDockStateChanged(object? sender, EventArgs e)
+            {
+
+            }
+
+        }
+        class FileListAddContent : DockContent
+        {
+            public FileListAddContent()
+            {
+                CloseButton = false;           // 閉じる操作を無効化
+                CloseButtonVisible = false;    // タブの×ボタンを非表示
+            }
+            protected override void OnFormClosing(FormClosingEventArgs e)
+            {
+                if(CloseButtonVisible)
+                    e.Cancel = true;
+
+                base.OnFormClosing(e);
+            }
+        }
+
+
+        class DirectoryTab : IDisposable
+        {
+            public DirectoryTab()
+            {
+                var rootNode = new DirectoryTreeNode(FolderTreeView);
+                rootNode.SetType(DirTreeNodeType.SpecialFolderMyComputer, null);
+                FolderTreeView.Nodes.Add(rootNode);
+
+                FileListContent.Controls.Clear();
+                FileListContent.Controls.Add(FileListView);
+                FileListContent.IsFloat = false;
+                FileListContent.DockAreas = DockAreas.Document | DockAreas.Float;
+
+                FileListView.Dock = DockStyle.Fill;
+                FolderTreeView.Dock = DockStyle.Fill;
+
+                FileListContent.Icon = null;
+
+           }
+
+            public DirectoryTab(string path) : this()
+            {
+                FileListView.Path = path;
+                FolderTreeView.Path = path;
+                FileListContent.Text = System.IO.Path.GetFileName(path);
+                FileListContent.Icon = PiVilityNative.FileInfo.GetFileSmallIcon(path);
+            }
+
+            public FileListViewApp FileListView { get; set; } = new();
+            public DirectoryTreeViewApp FolderTreeView { get; set; } = new();
+
+            public FileListViewContent FileListContent = new();
+
+            public void Dispose()
+            {
+                FileListContent.Hide();
+                FileListView.Dispose();
+                FolderTreeView.Dispose();
+                FileListContent.Dispose();
+            }
+        }
+
+        DirectoryTab? _currentTab = null;
+        List<DirectoryTab> _directoryTabs = new();
+
+        DockContent _directoryTreeDock = new();
+        DockContent _previewoDock = new();
+
+        private DirectoryTab CreateTab(string path)
+        {
+            DirectoryTab tab = new(path);
+            tab.FileListView.ItemDoubleClick += LsvFile_ItemDoubleClick;
+            tab.FileListView.DirectoryChanged += (s, e) =>
+            {
+                tab.FileListContent.Text = System.IO.Path.GetFileName(tab.FileListView.Path);
+                tab.FileListContent.Icon = PiVilityNative.FileInfo.GetFileSmallIcon(tab.FileListView.Path);
+            };
+            tab.FolderTreeView.AfterSelect += OnAfterSelectDir;
+            tab.FileListContent.FormClosed += OnFileListViewClosed;
+
+            _directoryTabs.Add(tab);
+            return tab;
+        }
+
+        bool _isInCreateAddTab = false;
+        private void CreateAddTab()
+        {
+            if(_isInCreateAddTab)
+                return;
+            _isInCreateAddTab = true;
+            FileListAddContent addTab = new();
+            var prepareActive = dockPanel.ActiveDocument as DockContent;
+            addTab.AllowEndUserDocking = false;
+            addTab.Text = "+";
+            addTab.Show(dockPanel.ActiveDocumentPane, null);
+            prepareActive?.Activate();
+            _isInCreateAddTab = false;
+        }
+
+
+        private void ApplyActiveTab()
+        {
+            var it = _directoryTabs.FindIndex(it => it.FileListContent == dockPanel.ActiveDocument);
+            if (it >= 0)
+            {
+                setTabContent(it);
+            }
+        }
+
+        private void OnFileListViewClosed(object? sender, FormClosedEventArgs e)
+        {
+            if (sender is DockContent dc)
+            {
+                var it = _directoryTabs.FindIndex(it => it.FileListContent == dc);
+                if (it >= 0)
+                {
+                    var tab = _directoryTabs[it];
+                    _directoryTabs.RemoveAt(it);
+                    tab.Dispose();
+
+                    ApplyActiveTab();
+                }
+            }
+        }
+
+        void setTabContent(int index)
+        {
+            if (index < 0 || index >= _directoryTabs.Count)
+                return;
+            var tab = _directoryTabs[index];
+            _directoryTreeDock.Controls.Clear();
+            _directoryTreeDock.Controls.Add(tab.FolderTreeView);
+            
+
+            _currentTab?.FileListView?.ToDisable();
+            _currentTab = tab;
+            _currentTab?.FileListView?.ToEnable((s, e) =>
+            {
+                _parentDirectoryBtn.Enabled = _currentTab.FileListView.IsParentDirectoryEnabled;
+                _previousDirectoryBtn.Enabled = _currentTab.FileListView.IsPreviousDirectoryEnabled;
+                _nextDirectoryBtn.Enabled = _currentTab.FileListView.IsNextDirectoryEnabled;
+            });
+            RefreshViewTypeBtnChecked();
+        }
 
         public MainForm()
         {
@@ -28,11 +193,25 @@ namespace PiViLity.Forms
                 toolStrip.Renderer = new ToolStripProfessionalRenderer();
                 stsStrip.Renderer = new ToolStripProfessionalRenderer();
 
-                btnSmallIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Icon")?.ToBitmap();
-                btnLargeIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "LargeIcon")?.ToBitmap();
-                btnListView.Image = Global.GetResourceIcon(Resource.ResourceManager, "List")?.ToBitmap();
-                btnDetailView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Detail")?.ToBitmap();
-                btnTileView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Thumb")?.ToBitmap();
+                _btnSmallIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Icon")?.ToBitmap();
+                _btnLargeIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "LargeIcon")?.ToBitmap();
+                _btnListView.Image = Global.GetResourceIcon(Resource.ResourceManager, "List")?.ToBitmap();
+                _btnDetailView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Detail")?.ToBitmap();
+                _btnTileView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Thumb")?.ToBitmap();
+
+                //ディレクトリ操作ツールストリップアイテム
+                _parentDirectoryBtn.Text = "↑";
+                _parentDirectoryBtn.Click += (s,e)=> _currentTab?.FileListView.MoveParentDirectory();
+
+                _previousDirectoryBtn.Text = "←";
+                _previousDirectoryBtn.Click += (s,e)=>_currentTab?.FileListView.MovePreviousDirectory();
+                _nextDirectoryBtn.Text = "→";
+                _nextDirectoryBtn.Click += (s,e) =>_currentTab?.FileListView.MoveNextDirectory();
+                toolStrip.Items.Insert(0,_parentDirectoryBtn);
+                toolStrip.Items.Insert(1, _previousDirectoryBtn);
+                toolStrip.Items.Insert(2, _nextDirectoryBtn);
+                toolStrip.Items.Insert(3, new ToolStripSeparator());
+
 
                 if (AppSettings.Instance.WindowSize.Width <= 0 || AppSettings.Instance.WindowSize.Height <= 0)
                 {
@@ -54,56 +233,81 @@ namespace PiViLity.Forms
 
         }
 
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            if (!DesignMode)
+            {
+                TreeAndViewTab_Load(sender, e);
+            }
+        }
+
         /// <summary>
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void TreeAndViewTab_Load(object sender, EventArgs e)
         {
-            List<Tuple<TvLvTabPage, Controls.TreeAndView>> loadSettingPair = new();
+            List<Tuple<TvLvTabPage, DirectoryTab>> loadSettingPair = new();
 
-            //TreeAndViewTabを追加する
-            treeAndViewTab.Dock = DockStyle.Fill;
-            panel.Controls.Add(treeAndViewTab);
+            dockPanel.Theme = new WeifenLuo.WinFormsUI.Docking.VS2015DarkTheme(); // 例：テーマを設定
+            dockPanel.DocumentStyle = DocumentStyle.DockingWindow;
+            dockPanel.ActiveDocumentChanged += DockPanel_ActiveDocumentChanged;
+            dockPanel.ActivePaneChanged += DockPanel_ActivePaneChanged;
 
-            //設定ファイルを元にタブを追加する
+            //設定ファイルを元にファイルリストビューを追加する
             AppSettings.Instance.TvLvTabPages.ForEach(fileViewSetting =>
             {
-                if (!System.IO.Directory.Exists(fileViewSetting.FileListView.Path))
+                if (System.IO.Directory.Exists(fileViewSetting.FileListView.Path))
                 {
-                    return;
+                    var newTreeView = CreateTab(fileViewSetting.FileListView.Path);
+                    newTreeView.FileListView.RestoreSettings(fileViewSetting.FileListView);
+                    loadSettingPair.Add(new(fileViewSetting, newTreeView));
                 }
-
-                var newTreeView = treeAndViewTab.AddTab(fileViewSetting.FileListView.Path);
-                loadSettingPair.Add(new(fileViewSetting, newTreeView));
             });
 
             //タブがない場合新規追加
-            if (treeAndViewTab.TabCount == 0)
+            if (loadSettingPair.Count == 0)
             {
                 TvLvTabPage newSetting = new();
                 AppSettings.Instance.TvLvTabPages.Add(newSetting);
 
-                var newTreeView = treeAndViewTab.AddTab(System.IO.Directory.GetCurrentDirectory());
+                CreateTab(System.IO.Directory.GetCurrentDirectory());
             }
-            treeAndViewTab.SelectedIndex = 0;
+
+            //各ドックコンテントを追加
+            foreach (var tab in _directoryTabs)
+            {
+                tab.FileListContent.Show(dockPanel, DockState.Document);
+            }
+            ApplyActiveTab();
+
+            //追加用タブを追加
+            CreateAddTab();
+
+
+            _directoryTreeDock.Text = "Explorer";
+            _directoryTreeDock.DockAreas = DockAreas.DockLeft | DockAreas.DockRight | DockAreas.DockTop | DockAreas.DockBottom |  DockAreas.Float;
+            _directoryTreeDock.Show(dockPanel, DockState.DockLeft);
+
+            _previewoDock.Text = "Preview";
+            _previewoDock.DockAreas = DockAreas.DockLeft | DockAreas.DockRight | DockAreas.DockTop | DockAreas.DockBottom | DockAreas.Float;
+            _previewoDock.Show(dockPanel, DockState.DockBottom);
+
 
             ////リストビュー表示タイプ切り替えボタン
             List<ToolStripItem> items = new List<ToolStripItem>();
-            items.Add(btnSmallIconView);
-            items.Add(btnLargeIconView);
-            items.Add(btnListView);
-            items.Add(btnDetailView);
-            items.Add(btnTileView);
+            items.Add(_btnSmallIconView);
+            items.Add(_btnLargeIconView);
+            items.Add(_btnListView);
+            items.Add(_btnDetailView);
+            items.Add(_btnTileView);
 
             toolStrip.Items.AddRange(items.ToArray());
-            btnSmallIconView.Click += (s, e) => SetViewType(View.SmallIcon);
-            btnLargeIconView.Click += (s, e) => SetViewType(View.LargeIcon);
-            btnListView.Click += (s, e) => SetViewType(View.List);
-            btnTileView.Click += (s, e) => SetViewType(View.Tile);
-            btnDetailView.Click += (s, e) => SetViewType(View.Details);
-
-            treeAndViewTab.TabIndexChanged += TreeAndViewTab_TabIndexChanged;
+            _btnSmallIconView.Click += (s, e) => SetViewType(View.SmallIcon);
+            _btnLargeIconView.Click += (s, e) => SetViewType(View.LargeIcon);
+            _btnListView.Click += (s, e) => SetViewType(View.List);
+            _btnTileView.Click += (s, e) => SetViewType(View.Tile);
+            _btnDetailView.Click += (s, e) => SetViewType(View.Details);
 
             Show();
             RefreshViewTypeBtnChecked();
@@ -114,39 +318,152 @@ namespace PiViLity.Forms
 
             //各コントロールのフォントをSystem準拠にする
             PiViLityCore.Util.Forms.FormInitializeSystemTheme(this);
-            //設定ファイルを元に各タブの設定を復元する
-            BeginInvoke(new Action(() =>
+            ////設定ファイルを元に各タブの設定を復元する
+            //BeginInvoke(new Action(() =>
+            //{
+            //    loadSettingPair.ForEach(pair =>
+            //    {
+            //        pair.Item2.RestoreSettings(pair.Item1);
+            //    });
+            //}));
+        }
+
+        private void DockPanel_ActivePaneChanged(object? sender, EventArgs e)
+        {
+            if (sender is DockPanel dp)
             {
-                loadSettingPair.ForEach(pair =>
+                if (dp.ActiveDocument is DockContent dc)
                 {
-                    pair.Item2.RestoreSettings(pair.Item1);
-                });
-            }));
+                    if (dc.DockState == DockState.Document)
+                    {
+                        //追加用タブがない場合に追加用タブを作成する
+                        bool foundAddTab = false;
+                        for (int i = dp.ActiveDocumentPane.Contents.Count - 1; i >= 0; i--)
+                        {
+                            var item = dp.ActiveDocumentPane.Contents[i];
+                            {
+                                if (item is FileListAddContent)
+                                {
+                                    foundAddTab = true;
+                                    break;
+                                }
+                            }
+                            if (!foundAddTab)
+                            {
+                                CreateAddTab();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DockPanel_ActiveDocumentChanged(object? sender, EventArgs e)
+        {
+            if(_isInCreateAddTab)
+                return;
+
+            if (sender is DockPanel dp)
+            {
+                if(dp.ActiveDocument is FileListAddContent dc)
+                {
+                    //追加用タブがアクティブになった場合新規タブを追加する
+                    if (dp.ActiveDocumentPane.Contents.Count == 1)
+                    {
+                        bool foundOtherTab = false;
+
+                        foreach (var pane in dp.Panes)
+                        {
+                            if(pane.DockState== DockState.Document && pane.Contents.Count > 1)
+                            {
+                                foundOtherTab = true;
+                                break;
+                            }
+                        }
+
+                        if (foundOtherTab)
+                        {
+                            dc.Hide();
+                        return;
+                        }
+                    }
+
+                    var addTab = CreateTab(_currentTab?.FolderTreeView.Path ?? "");
+                    var activePane = dp.ActiveDocumentPane;
+                    addTab.FileListContent.Show(activePane, dc);
+                }
+            }
+            ApplyActiveTab();
         }
 
 
+        /// <summary lang="ja-JP">
+        /// ツリーの選択されたノードが変更されたとき、ファイルの一覧を変更する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        private void OnAfterSelectDir(object? sender, EventArgs e)
+        {
+            if (sender is DirectoryTreeView dtv)
+            {
+                if (_currentTab?.FolderTreeView == dtv)
+                {
+                    var flvFile = _currentTab.FileListView;
+                    if (flvFile.TileSize != PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize)
+                    {
+                        flvFile.ThumbnailIconStore = new IconStoreThumbnail(PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize);
+                    }
+                    flvFile.TileSize = PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize;
+
+                    flvFile.Path = dtv.Path;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles the double-click event for a file item in the file list view.
+        /// </summary>
+        /// <remarks>If the double-clicked item represents a file, this method attempts to display the
+        /// file in a viewer. If the file cannot be displayed, it is opened using the default application associated
+        /// with its type.</remarks>
+        /// <param name="item">The event arguments containing information about the double-clicked file item. The <see
+        /// cref="FileListViewItemEventArgs.Item"/> property provides details about the file.</param>
+        private void LsvFile_ItemDoubleClick(FileListViewItemEventArgs item)
+        {
+            if (item.Item.IsFile)
+            {
+                if (PiViLityCore.Util.Forms.ShowFileOnView(item.Item.Path, this))
+                {
+                    item.Default = false;
+                }
+                else
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = item.Item.Text,
+                        UseShellExecute = true
+                    });
+                }
+            }
+        }
         public void SaveSettings()
         {
             AppSettings.Instance.WindowSize = Size;
             AppSettings.Instance.WindowPosition = new Point(Left, Top);
             AppSettings.Instance.WindowState = WindowState;
             AppSettings.Instance.TvLvTabPages.Clear();
-            for (int tabIndex = 0; tabIndex < treeAndViewTab.TabCount; tabIndex++)
+            foreach(var tab in _directoryTabs)
             {
-                var tab = treeAndViewTab.GetTab(tabIndex);
-                if (tab != null)
-                {
-                    TvLvTabPage fileView = new();
-                    tab.SaveSettings(fileView);
-                    AppSettings.Instance.TvLvTabPages.Add(fileView);
-                }
+                TvLvTabPage fileView = new();
+                tab.FileListView.SaveSettings(fileView.FileListView);
+                AppSettings.Instance.TvLvTabPages.Add(fileView);
             }
-
         }
 
         private void SetViewType(View view)
         {
-            if (treeAndViewTab.CurrentTreeAndView != null)
+            if (_currentTab != null)
             {
                 PiViLityCore.Option.ShellSettings.Instance.FileListViewStyle = view;
                 RefreshViewTypeBtnChecked();
@@ -158,26 +475,15 @@ namespace PiViLity.Forms
         /// </summary>
         private void RefreshViewTypeBtnChecked()
         {
-            if (treeAndViewTab.CurrentTreeAndView == null)
+            if (_currentTab == null)
                 return;
 
-            treeAndViewTab.CurrentTreeAndView.View = PiViLityCore.Option.ShellSettings.Instance.FileListViewStyle;
-            btnListView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.List;
-            btnSmallIconView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.SmallIcon;
-            btnLargeIconView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.LargeIcon;
-            btnTileView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.Tile;
-            btnDetailView.Checked = treeAndViewTab.CurrentTreeAndView.View == View.Details;
-
-        }
-
-        /// <summary lang="ja-JP">
-        /// タブが切り替わったときの動作
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void TreeAndViewTab_TabIndexChanged(object? sender, EventArgs e)
-        {
-            RefreshViewTypeBtnChecked();
+            var viewType = _currentTab.FileListView.View = PiViLityCore.Option.ShellSettings.Instance.FileListViewStyle;
+            _btnListView.Checked = viewType == View.List;
+            _btnSmallIconView.Checked = viewType == View.SmallIcon;
+            _btnLargeIconView.Checked = viewType == View.LargeIcon;
+            _btnTileView.Checked = viewType == View.Tile;
+            _btnDetailView.Checked = viewType == View.Details;
 
         }
 

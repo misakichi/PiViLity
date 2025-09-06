@@ -22,10 +22,6 @@ namespace PiViLity.Option
         public PiViLityCore.Controls.FileListViewSettings FileListView = new();
 
 
-        //タブ内容全体の設定
-        [OptionItem]
-        public int SplitDirWidth = 200;
-        [OptionItem]
-        public int SplitListHeight = 400;
+
     }
 }

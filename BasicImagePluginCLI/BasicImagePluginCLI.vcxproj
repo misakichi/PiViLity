@@ -102,7 +102,6 @@ copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <AdditionalDependencies />
@@ -117,7 +116,6 @@ copy $(TargetPath) $(SolutionDir)\PluginOut$(Configuration)\</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <AdditionalDependencies />

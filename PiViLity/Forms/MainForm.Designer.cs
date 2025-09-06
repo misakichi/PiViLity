@@ -37,7 +37,8 @@
             quitToolStripMenuItem = new ToolStripMenuItem();
             toolToolStripMenuItem = new ToolStripMenuItem();
             optionsToolStripMenuItem = new ToolStripMenuItem();
-            panel = new Panel();
+            tabPanel = new Panel();
+            dockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             stsStrip.SuspendLayout();
             mnuForm.SuspendLayout();
             SuspendLayout();
@@ -87,24 +88,30 @@
             resources.ApplyResources(optionsToolStripMenuItem, "optionsToolStripMenuItem");
             optionsToolStripMenuItem.Click += optionsToolStripMenuItem_Click;
             // 
-            // panel
+            // tabPanel
             // 
-            resources.ApplyResources(panel, "panel");
-            panel.Name = "panel";
+            resources.ApplyResources(tabPanel, "tabPanel");
+            tabPanel.Name = "tabPanel";
+            // 
+            // dockPanel
+            // 
+            resources.ApplyResources(dockPanel, "dockPanel");
+            dockPanel.Name = "dockPanel";
+            dockPanel.ShowDocumentIcon = true;
             // 
             // MainForm
             // 
             resources.ApplyResources(this, "$this");
             AutoScaleMode = AutoScaleMode.Dpi;
-            Controls.Add(panel);
+            Controls.Add(dockPanel);
+            Controls.Add(tabPanel);
             Controls.Add(stsStrip);
             Controls.Add(toolStrip);
             Controls.Add(mnuForm);
             MainMenuStrip = mnuForm;
             Name = "MainForm";
             FormClosing += MainForm_FormClosing;
-            Load += TreeAndViewTab_Load;
-            SizeChanged += TreeAndViewTab_TabIndexChanged;
+            Load += MainForm_Load;
             stsStrip.ResumeLayout(false);
             stsStrip.PerformLayout();
             mnuForm.ResumeLayout(false);
@@ -119,10 +126,11 @@
         private StatusStrip stsStrip;
         private MenuStrip mnuForm;
         private ToolStripStatusLabel toolStripStatusLabel1;
-        private Panel panel;
         private ToolStripMenuItem fileToolStripMenuItem;
         private ToolStripMenuItem quitToolStripMenuItem;
         private ToolStripMenuItem toolToolStripMenuItem;
         private ToolStripMenuItem optionsToolStripMenuItem;
+        private Panel tabPanel;
+        private WeifenLuo.WinFormsUI.Docking.DockPanel dockPanel;
     }
 }

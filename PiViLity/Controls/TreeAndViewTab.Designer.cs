@@ -1,5 +1,6 @@
 ﻿namespace PiViLity.Controls
 {
+#if false
     partial class TreeAndViewTab
     {
         /// <summary>
@@ -55,4 +56,5 @@
 
         private TabControl tabView;
     }
+#endif
 }

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+#if false
 namespace PiViLity.Controls
 {
     public partial class TreeAndViewTab : UserControl
@@ -42,12 +43,12 @@ namespace PiViLity.Controls
             //タブページへTreeAndViewを登録
             var newView = new TreeAndView();
             newView.Dock = DockStyle.Fill;
-            newView.Initialize(path);
-            newView.DirectoryChanged += (s, e) =>
-            {
-                tabPage.Text = newView.SelectedText;
-            };
-            tabPage.Text = newView.SelectedText;
+            //newView.Initialize(path);
+            //newView.DirectoryChanged += (s, e) =>
+            //{
+            //    tabPage.Text = newView.SelectedText;
+            //};
+            //tabPage.Text = newView.SelectedText;
             tabPage.Controls.Add(newView);
             tabPage.Tag = newView;
             newView.Size = tabPage.ClientSize;
@@ -97,3 +98,4 @@ namespace PiViLity.Controls
 #endif
     }
 }
+#endif

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <metadata name="toolStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
+    <value>153, 17</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="toolStrip.Location" type="System.Drawing.Point, System.Drawing">
@@ -144,17 +144,11 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;toolStrip.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
   </data>
   <metadata name="stsStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>155, 17</value>
+    <value>281, 17</value>
   </metadata>
-  <data name="toolStripStatusLabel1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>39, 17</value>
-  </data>
-  <data name="toolStripStatusLabel1.Text" xml:space="preserve">
-    <value>Ready</value>
-  </data>
   <data name="stsStrip.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 428</value>
   </data>
@@ -177,35 +171,17 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;stsStrip.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
+  </data>
+  <data name="toolStripStatusLabel1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>39, 17</value>
+  </data>
+  <data name="toolStripStatusLabel1.Text" xml:space="preserve">
+    <value>Ready</value>
   </data>
   <metadata name="mnuForm.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>0, 0</value>
+    <value>17, 17</value>
   </metadata>
-  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>97, 22</value>
-  </data>
-  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Quit</value>
-  </data>
-  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>37, 20</value>
-  </data>
-  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;File</value>
-  </data>
-  <data name="optionsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
-  </data>
-  <data name="optionsToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Options...</value>
-  </data>
-  <data name="toolToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>41, 20</value>
-  </data>
-  <data name="toolToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Tool</value>
-  </data>
   <data name="mnuForm.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
@@ -228,35 +204,86 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;mnuForm.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>4</value>
+  </data>
+  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>37, 20</value>
+  </data>
+  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;File</value>
+  </data>
+  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>97, 22</value>
+  </data>
+  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Quit</value>
+  </data>
+  <data name="toolToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>41, 20</value>
+  </data>
+  <data name="toolToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Tool</value>
+  </data>
+  <data name="optionsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>125, 22</value>
+  </data>
+  <data name="optionsToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Options...</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="panel.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Fill</value>
+  <data name="tabPanel.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Top</value>
   </data>
-  <data name="panel.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="tabPanel.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 49</value>
   </data>
-  <data name="panel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>800, 379</value>
+  <data name="tabPanel.Size" type="System.Drawing.Size, System.Drawing">
+    <value>800, 27</value>
   </data>
-  <data name="panel.TabIndex" type="System.Int32, mscorlib">
-    <value>6</value>
+  <data name="tabPanel.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
   </data>
-  <data name="&gt;&gt;panel.Name" xml:space="preserve">
-    <value>panel</value>
+  <data name="&gt;&gt;tabPanel.Name" xml:space="preserve">
+    <value>tabPanel</value>
   </data>
-  <data name="&gt;&gt;panel.Type" xml:space="preserve">
+  <data name="&gt;&gt;tabPanel.Type" xml:space="preserve">
     <value>System.Windows.Forms.Panel, System.Windows.Forms, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;panel.Parent" xml:space="preserve">
+  <data name="&gt;&gt;tabPanel.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="&gt;&gt;panel.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;tabPanel.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="dockPanel.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Fill</value>
+  </data>
+  <data name="dockPanel.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 76</value>
+  </data>
+  <data name="dockPanel.Size" type="System.Drawing.Size, System.Drawing">
+    <value>800, 352</value>
+  </data>
+  <data name="dockPanel.TabIndex" type="System.Int32, mscorlib">
+    <value>8</value>
+  </data>
+  <data name="&gt;&gt;dockPanel.Name" xml:space="preserve">
+    <value>dockPanel</value>
+  </data>
+  <data name="&gt;&gt;dockPanel.Type" xml:space="preserve">
+    <value>WeifenLuo.WinFormsUI.Docking.DockPanel, WeifenLuo.WinFormsUI.Docking, Culture=neutral, PublicKeyToken=5cded1a1a0a7b481</value>
+  </data>
+  <data name="&gt;&gt;dockPanel.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;dockPanel.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
+  </metadata>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>167</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>96, 96</value>

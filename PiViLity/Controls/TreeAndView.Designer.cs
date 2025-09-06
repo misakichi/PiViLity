@@ -3,7 +3,8 @@ using PiViLityCore.Controls;
 
 namespace PiViLity.Controls
 {
-    partial class TreeAndView
+  #if false
+  partial class TreeAndView
     {
         /// <summary>
         /// Required designer variable.
@@ -139,4 +140,5 @@ namespace PiViLity.Controls
         private ToolStrip toolStrip;
         private FileListView lsvFile;
     }
+#endif
 }
