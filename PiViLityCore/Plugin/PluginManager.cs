@@ -49,6 +49,7 @@ namespace PiViLityCore.Plugin
         public List<PluginInformation> Plugins => _plugins;
 
         public List<Type> ImageViewers { get; private set; } = new();
+        public List<Type> PreViewers { get; private set; } = new();
 
         /// <summary>
         /// 画像リーダー情報
@@ -172,8 +173,12 @@ namespace PiViLityCore.Plugin
                     //画像ビューアー
                     if (interfaces.Where(t => t == typeof(IImageViewer)).Count() > 0 && Activator.CreateInstance(type) is IImageViewer imageViewer)
                     {
-                        //information.imageReaders.Add(type);
                         ImageViewers.Add(type);
+                    }
+                    //プレビュー
+                    if (interfaces.Where(t => t == typeof(IPreViewer)).Count() > 0 && Activator.CreateInstance(type) is IPreViewer previewer)
+                    {
+                        PreViewers.Add(type);
                     }
 
                     //SettingBase継承のクラスはInstanceメソッドがあればそれで得られるインスタンスを取得する

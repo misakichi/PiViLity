@@ -13,6 +13,8 @@ namespace PiViLityCore.Plugin
 
         public abstract void Dispose();
         public abstract Image? GetImage() ;
+        public virtual Image? GetPreviewImage()=> GetImage();
+
         public abstract Size GetImageSize();
         public abstract List<string> GetSupportedExtensions();
         public abstract Image? GetThumbnailImage(Size size);

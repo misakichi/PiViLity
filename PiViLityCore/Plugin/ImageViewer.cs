@@ -7,11 +7,7 @@ using System.Threading.Tasks;
 
 namespace PiViLityCore.Plugin
 {
-    public enum ViewModeStyle
-    {
-        Fixed,
-        AutoScale,
-    }
+
 
     /// <summary>
     /// 画像ビューワーの基底クラスです

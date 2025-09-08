@@ -26,6 +26,9 @@ namespace PiViLityCore.Option
         }
 
 
+        /// <summary>
+        /// デフォルト値として記憶されるファイルリストの表示形式
+        /// </summary>
         [OptionItem(NoOption = true)]
         public View FileListViewStyle = View.Tile;
 

@@ -36,11 +36,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Remove="PreViewer\ImageViewer.ja-JP.resx" />
     <EmbeddedResource Remove="Viewer\ImageViewer.ja-JP.resx" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Option\TvLvTabPage.cs" />
+    <None Include="PreViewer\ImagePreViewer.ja-JP.resx" />
     <None Include="Viewer\ImageViewer.ja-JP.resx" />
   </ItemGroup>
 
@@ -49,6 +51,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="PreViewer\ImagePreViewer.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="Resource.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

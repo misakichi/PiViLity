@@ -23,13 +23,25 @@ namespace PiViLityCore.Controls
             Item = item;
         }
     }
+    public class FileListViewItemsEventArgs : EventArgs
+    {
+        public List<FileListViewItem> Items { get; }
+        public bool Default { get; set; } = true;
+
+        public FileListViewItemsEventArgs(List<FileListViewItem> items) : base()
+        {
+            Items = items;
+        }
+    }
     /// <summary>
     /// ファイル一覧用ListView
     /// </summary>
     public class FileListView : ListView
     {
         public delegate void FileListViewItemEventHandler(FileListViewItemEventArgs item);
-        public event FileListViewItemEventHandler? ItemDoubleClick;
+        public delegate void FileListViewItemsEventHandler(FileListViewItemsEventArgs item);
+        public event FileListViewItemEventHandler ItemDoubleClick = delegate { };
+        public event FileListViewItemsEventHandler SelectItemsChanged = delegate { };
         public event EventHandler? DirectoryChanged;
         /// <summary>
         /// ファイルリストのサブアイテムの種類
@@ -554,7 +566,7 @@ namespace PiViLityCore.Controls
                 if (SelectedItems[0] is FileListViewItem item)
                 {
                     FileListViewItemEventArgs args = new(item);
-                    ItemDoubleClick?.Invoke(args);
+                    ItemDoubleClick.Invoke(args);
                     if (args.Default)
                     {
                         if (item.IsFile)
@@ -568,6 +580,21 @@ namespace PiViLityCore.Controls
                     }
                 }
             }
+        }
+
+        protected override void OnSelectedIndexChanged(EventArgs e)
+        {
+            base.OnSelectedIndexChanged(e);
+            List<FileListViewItem> list = new();
+            foreach (ListViewItem? item in SelectedItems)
+            {
+                if (item is FileListViewItem data)
+                {
+                    list.Add(data);
+                }
+            }
+            FileListViewItemsEventArgs args = new(list);
+            SelectItemsChanged.Invoke(args);
         }
 
         /// <summary>
@@ -731,6 +758,7 @@ namespace PiViLityCore.Controls
                 }
             }
             Path = fileView.Path;
+            View = fileView.FileListViewStyle;
         }
 
         /// <summary>
@@ -746,6 +774,7 @@ namespace PiViLityCore.Controls
                 fileView.SubItemWidth[i] = SubItemColums[i].Width;
             }
             fileView.Path = Path;
+            fileView.FileListViewStyle = View;
         }
     }
 
@@ -756,6 +785,10 @@ namespace PiViLityCore.Controls
 
         [OptionItem]
         public int[] SubItemWidth = new int[(int)FileListViewSubItemBit.Max];
+
+        [OptionItem]
+        public View FileListViewStyle = View.Tile;
+
     }
 
 

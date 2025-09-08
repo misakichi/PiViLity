@@ -66,6 +66,13 @@ namespace PiViLityCore.Plugin
         public System.Drawing.Image? GetImage();
 
         /// <summary>
+        /// 画像イメージを取得します
+        /// =GetImageという実装でもよいです。
+        /// </summary>
+        /// <returns></returns>
+        public System.Drawing.Image? GetPreviewImage() => GetImage();
+
+        /// <summary>
         /// 画像ファイルのサムネイルを取得します。
         /// </summary>
         /// <param name="size"></param>

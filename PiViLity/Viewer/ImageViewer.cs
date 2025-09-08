@@ -38,7 +38,7 @@ namespace PiViLity.Viewer
         [DefaultValue(ViewModeStyle.AutoScale)]
         public ViewModeStyle ViewMode { get; set; } = ViewModeStyle.AutoScale;
 
-        public IViewer.ViewType SupportViewType =>IViewer.ViewType.Image;
+        public ViewType SupportViewType => ViewType.Image;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Path { get => _filePath; protected set => _filePath = value; }

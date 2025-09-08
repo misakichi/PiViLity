@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,11 +16,15 @@ namespace PiViLity.Option
         public override string CategoryText { get => "PiViLity App"; }
         public override string CategoryName { get => "PiViLity App"; }
 
+        public string ApplicationDirectory = System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? "";
+
+        public string DockLayoutFile = (System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? "") + "\\layout.config";
+
         [OptionItem]
         public List<TvLvTabPage> TvLvTabPages { get; set; } = new();
 
         [OptionItem]
-        public string CacheDb = System.IO.Path.GetDirectoryName(Application.ExecutablePath) + "\\thumbnail.db" ?? "";
+        public string CacheDb = System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? "" + "\\thumbnail.db";
 
         [OptionItem]
         public FormWindowState WindowState = FormWindowState.Normal;

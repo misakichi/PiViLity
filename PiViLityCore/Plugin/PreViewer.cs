@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PiViLityCore.Plugin
 {
-    public interface IViewer : IDisposable
+    /// <summary>
+    /// プレビュープラグインインターフェース
+    /// </summary>
+    public interface IPreViewer : IDisposable
     {
-
         bool LoadFile(string filePath);
-        public Control GetViewer();
+        public Control GetPreViewer();
 
         event EventHandler? FileLoaded;
-        
-        string Path { get; }
 
+        string Path { get; }
 
 
         ViewType SupportViewType { get; }
@@ -24,11 +24,5 @@ namespace PiViLityCore.Plugin
 
         IEnumerable<ToolStripItem> ToolBarItems { get; }
         IEnumerable<ToolStripItem> StatusBarItems { get; }
-
-
-        bool NextFile();
-        bool PreviousFile();
-        bool FirstFile();
-        bool LastFile();
     }
 }

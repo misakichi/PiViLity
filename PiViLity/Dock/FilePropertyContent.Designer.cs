@@ -1,7 +1,6 @@
-﻿namespace PiViLity.Controls
+﻿namespace PiViLity.Dock
 {
-#if false
-    partial class TreeAndViewTab
+    partial class FilePropertyContent
     {
         /// <summary>
         /// Required designer variable.
@@ -29,32 +28,31 @@
         /// </summary>
         private void InitializeComponent()
         {
-            tabView = new TabControl();
+            tree = new TreeView();
             SuspendLayout();
             // 
-            // tabView
+            // tree
             // 
-            tabView.Dock = DockStyle.Fill;
-            tabView.Location = new Point(0, 0);
-            tabView.Name = "tabView";
-            tabView.SelectedIndex = 0;
-            tabView.Size = new Size(800, 450);
-            tabView.TabIndex = 7;
+            tree.Dock = DockStyle.Fill;
+            tree.Location = new Point(0, 0);
+            tree.Name = "tree";
+            tree.ShowLines = false;
+            tree.Size = new Size(800, 450);
+            tree.TabIndex = 0;
             // 
-            // TreeAndViewTab
+            // FilePropertyContent
             // 
-            AutoScaleDimensions = new SizeF(96F, 96F);
-            AutoScaleMode = AutoScaleMode.Dpi;
-            AutoSize = true;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(tabView);
-            Name = "TreeAndViewTab";
+            Controls.Add(tree);
+            Name = "FilePropertyContent";
+            Text = "FilePropertyContent";
             ResumeLayout(false);
         }
 
         #endregion
 
-        private TabControl tabView;
+        private TreeView tree;
     }
-#endif
 }
