@@ -36,6 +36,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Controls\TreeAndView.cs" />
+    <Compile Remove="Controls\TreeAndView.Designer.cs" />
+    <Compile Remove="Controls\TreeAndViewTab.cs" />
+    <Compile Remove="Controls\TreeAndViewTab.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Controls\TreeAndView.resx" />
+    <EmbeddedResource Remove="Controls\TreeAndViewTab.resx" />
     <EmbeddedResource Remove="PreViewer\ImageViewer.ja-JP.resx" />
     <EmbeddedResource Remove="Viewer\ImageViewer.ja-JP.resx" />
   </ItemGroup>
