@@ -1,5 +1,10 @@
 # PiViLity
-image view and management environment tool.
+Pivility is image viewer with explorer style filer.\
+
+We found many free image viewers. bud there was don't has plugin or not free for consume used.\
+this softwere object consume free used and to has plugin system.
+
+
 
 本ソフトウェアは、ツリー型ファイラー付き画像ビューアーです。
 
