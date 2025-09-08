@@ -2,7 +2,7 @@
 **PiViLity** is an image viewer featuring an explorer-style file browser.
 
 While many image viewers exist, most either lack plugin support or are not freely available for non-commercial use.  
-PiViLity is designed to be both extensible through plugins and freely usable for personal or educational purposes.
+PiViLity is designed to be both extensible through plugins and freely usable for all.
 <hr>
 
 本ソフトウェアは、ツリー型ファイラー付き画像ビューアーです。
