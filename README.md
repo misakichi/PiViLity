@@ -8,7 +8,7 @@ PiViLity is designed to be both extensible through plugins and completely free f
 本ソフトウェアは、エクスプローラー風ファイラー付画像ビューアーです。
 
 昨今、プラグイン機能付きファイラー付き画像ビューアーが、商用利用フリーでとなるとなかなか見つかりません。\
-PViLityはその両方を兼ね備えたソフトウェアであることを大切にします。
+PViLityはその両方を兼ね備えたソフトウェアであることを大切にします。\
 つまり、商用利用でも無料で、自由で、そしてプラグイン機能を有します。
 
 ソフトウェアの名称は「Picture Viewer」と「Utility」がくっついている造語ですが、\
