@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PiViLityCore.Util
 {
@@ -17,7 +18,7 @@ namespace PiViLityCore.Util
         public static string GetEasyReadFileSize(long size, bool dontUseByte = true)
         {
             if(size<1024 && !dontUseByte)
-                return $"{size} B";
+                return $"{size} {PiViLityCore.Global.GetResourceString($"BytesStr")}";
             else if (size < 1024 * 1024)
                 return $"{size/1024} KB";
             else if (size < 1024 * 1024 * 1024)
@@ -29,8 +30,8 @@ namespace PiViLityCore.Util
         }
         public static string GetEasyReadFileSizeF(long size, bool dontUseByte = true)
         {
-            if(size<256 && !dontUseByte)
-                return $"{size} B";
+            if (size<256 && !dontUseByte)
+                return $"{size} {PiViLityCore.Global.GetResourceString($"BytesStr")}";
             if (size < 1024 * 1024)
                 return $"{size/1024.0f:N2} KB";
             else if (size < 1024.0f * 1024 * 1024)

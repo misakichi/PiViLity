@@ -61,6 +61,15 @@ namespace PiViLityCore.Resources {
         }
         
         /// <summary>
+        ///   Bytes に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string BytesStr {
+            get {
+                return ResourceManager.GetString("BytesStr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Removable に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string DeriveTypeRemovable {

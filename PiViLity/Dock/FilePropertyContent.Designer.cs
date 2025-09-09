@@ -28,31 +28,27 @@
         /// </summary>
         private void InitializeComponent()
         {
-            tree = new TreeView();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FilePropertyContent));
+            treeProp = new TreeView();
             SuspendLayout();
             // 
-            // tree
+            // treeProp
             // 
-            tree.Dock = DockStyle.Fill;
-            tree.Location = new Point(0, 0);
-            tree.Name = "tree";
-            tree.ShowLines = false;
-            tree.Size = new Size(800, 450);
-            tree.TabIndex = 0;
+            resources.ApplyResources(treeProp, "treeProp");
+            treeProp.Name = "treeProp";
+            treeProp.ShowLines = false;
             // 
             // FilePropertyContent
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            resources.ApplyResources(this, "$this");
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
-            Controls.Add(tree);
+            Controls.Add(treeProp);
             Name = "FilePropertyContent";
-            Text = "FilePropertyContent";
             ResumeLayout(false);
         }
 
         #endregion
 
-        private TreeView tree;
+        private TreeView treeProp;
     }
 }

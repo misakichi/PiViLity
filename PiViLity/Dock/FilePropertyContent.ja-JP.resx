@@ -117,28 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BytesStr" xml:space="preserve">
-    <value>バイト</value>
+  <data name="$this.Text" xml:space="preserve">
+    <value>プロパティ</value>
   </data>
-  <data name="DeriveTypeRemovable" xml:space="preserve">
-    <value>リムーバブルディスク</value>
+  <data name="FileInfo.Head" xml:space="preserve">
+    <value>ファイル</value>
   </data>
-  <data name="DriveTypeCDRom" xml:space="preserve">
-    <value>光学ドライブ</value>
+  <data name="FileInfo.Name" xml:space="preserve">
+    <value>名前</value>
   </data>
-  <data name="DriveTypeFixed" xml:space="preserve">
-    <value>ローカルディスク</value>
+  <data name="FileInfo.Size" xml:space="preserve">
+    <value>サイズ</value>
   </data>
-  <data name="DriveTypeNetwork" xml:space="preserve">
-    <value>ネットワーク</value>
+  <data name="FileInfo.Path" xml:space="preserve">
+    <value>パス</value>
   </data>
-  <data name="DriveTypeRam" xml:space="preserve">
-    <value>ラムディスク</value>
+  <data name="FileInfo.CreatedDate" xml:space="preserve">
+    <value>作成日時</value>
   </data>
-  <data name="ShellSetting.Name" xml:space="preserve">
-    <value>シェル</value>
+  <data name="FileInfo.UpdatedDate" xml:space="preserve">
+    <value>更新日時</value>
   </data>
-  <data name="ShellSetting.ThumbnailSize" xml:space="preserve">
-    <value>サムネイルサイズ</value>
+  <data name="FileInfo.AccessedDate" xml:space="preserve">
+    <value>アクセス日時</value>
+  </data>
+  <data name="FileInfo.Type" xml:space="preserve">
+    <value>種別</value>
   </data>
 </root>

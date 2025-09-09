@@ -82,6 +82,7 @@ namespace PiViLity.Forms
 
         DireectoryTreeViewContent _directoryTreeDock = new();
         FilePreviewContent _previewDock = new();
+        FilePropertyContent _filePropertyContent = new();
 
         private DirectoryTab CreateTab(string path)
         {
@@ -255,10 +256,12 @@ namespace PiViLity.Forms
             });
 
             _previewDock.HideOnClose = true;
+            _filePropertyContent.HideOnClose = true;
             _directoryTreeDock.HideOnClose = true;
 
             //ドックコンテントが表示されたときの動作
             _previewDock.VisibleChanged += previeweDock_VisibleChanged;
+            _filePropertyContent.VisibleChanged += property_VisibleChanged;
             _directoryTreeDock.Shown += (s, e) =>
             {
                 mnuExplorer.Checked = !_directoryTreeDock.IsHidden;
@@ -292,9 +295,7 @@ namespace PiViLity.Forms
                     }
                     else if (s == "FilePropertyContent")
                     {
-                        //将来実装
-                        //return null;
-                        throw new System.NotImplementedException("FilePropertyContent is not implemented yet.");
+                        return _filePropertyContent;
                     }
                     //????
                     throw new System.ArgumentOutOfRangeException("Unknown DockContent");
@@ -305,6 +306,7 @@ namespace PiViLity.Forms
                 //ドックコンテントを標準位置に表示する
                 _directoryTreeDock.Show(dockPanel, DockState.DockLeft);
                 _previewDock.Show(dockPanel, DockState.DockBottom);
+                _filePropertyContent.Show(dockPanel, DockState.DockBottom);
             }
 
             //タブがない場合新規追加
@@ -535,16 +537,27 @@ namespace PiViLity.Forms
         }
         private void LsvFile_SelectIItemsChanged(FileListViewItemsEventArgs item)
         {
-            if (_previewDock.IsHidden)
-                return;
-
-            if (item.Items.Count > 0)
+            if (!_previewDock.IsHidden)
             {
-                _previewDock.SetFile(item.Items[0].Path);
+                if (item.Items.Count > 0)
+                {
+                    _previewDock.SetFile(item.Items[0].Path);
+                }
+                else
+                {
+                    _previewDock.SetFile("");
+                }
             }
-            else
+            if(!_filePropertyContent.IsHidden)
             {
-                _previewDock.SetFile("");
+                if (item.Items.Count > 0)
+                {
+                    _filePropertyContent.SetFile(item.Items[0].Path);
+                }
+                else
+                {
+                    _filePropertyContent.SetFile("");
+                }
             }
         }
 
@@ -588,7 +601,6 @@ namespace PiViLity.Forms
                 _directoryTreeDock.Show(dockPanel, DockState.DockLeft);
             else
                 _directoryTreeDock.Hide();
-
             mnuExplorer.Checked = !_directoryTreeDock.IsHidden;
         }
 
@@ -604,13 +616,11 @@ namespace PiViLity.Forms
 
         private void mnuProperty_Click(object sender, EventArgs e)
         {
-            //将来実装
-            MessageBox.Show("File Property is not implemented yet.");
-            //if (_propertyDock.IsHidden)
-            //    _propertyDock.Show(dockPanel, DockState.DockRight);
-            //else
-            //    _propertyDock.Hide();
-            //mnuProperty.Checked = !_propertyDock.IsHidden;
+            if (_filePropertyContent.IsHidden)
+                _filePropertyContent.Show(dockPanel, DockState.DockBottom);
+            else
+                _filePropertyContent.Hide();
+            mnuProperty.Checked = !_filePropertyContent.IsHidden;
 
         }
 
@@ -634,5 +644,24 @@ namespace PiViLity.Forms
                 }
             }
         }
-    }
+        private void property_VisibleChanged(object? sender, EventArgs e)
+        {
+            var visible = !_filePropertyContent.IsHidden;
+            mnuProperty.Checked = visible;
+
+
+            if (visible && dockPanel.ActiveDocument is FileListViewContent dock)
+            {
+                var it = _directoryTabs.Find(it => it.FileListContent == dock);
+                if (it != null)
+                {
+                    var selected = it.FileListView.SelectedItems;
+                    if (selected.Count > 0)
+                        _filePropertyContent.SetFile((selected[0] as FileListViewItem)?.Path ?? "");
+                    else
+                        _filePropertyContent.SetFile("");
+
+                }
+            }
+        }    }
 }
