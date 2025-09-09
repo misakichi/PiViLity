@@ -9,7 +9,7 @@
     <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <SelfContained>false</SelfContained>
-    <VersionPrefix>0.0.3</VersionPrefix>
+    <VersionPrefix>0.0.5</VersionPrefix>
     <VersionSuffix>Dev</VersionSuffix>
     <AssemblyName>PiViLity</AssemblyName>
     <Authors>misakichi kaminagare(yu kitajima)</Authors>

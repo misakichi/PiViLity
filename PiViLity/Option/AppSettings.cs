@@ -24,7 +24,7 @@ namespace PiViLity.Option
         public List<TvLvTabPage> TvLvTabPages { get; set; } = new();
 
         [OptionItem]
-        public string CacheDb = System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? "" + "\\thumbnail.db";
+        public string CacheDb = (System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? "") + "\\thumbnail.db";
 
         [OptionItem]
         public FormWindowState WindowState = FormWindowState.Normal;
