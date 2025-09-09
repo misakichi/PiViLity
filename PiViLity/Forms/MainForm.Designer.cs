@@ -39,6 +39,10 @@
             optionsToolStripMenuItem = new ToolStripMenuItem();
             tabPanel = new Panel();
             dockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
+            windowToolStripMenuItem = new ToolStripMenuItem();
+            mnuExplorer = new ToolStripMenuItem();
+            mnuPreview = new ToolStripMenuItem();
+            mnuProperty = new ToolStripMenuItem();
             stsStrip.SuspendLayout();
             mnuForm.SuspendLayout();
             SuspendLayout();
@@ -61,7 +65,7 @@
             // 
             // mnuForm
             // 
-            mnuForm.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, toolToolStripMenuItem });
+            mnuForm.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, toolToolStripMenuItem, windowToolStripMenuItem });
             resources.ApplyResources(mnuForm, "mnuForm");
             mnuForm.Name = "mnuForm";
             // 
@@ -99,6 +103,30 @@
             dockPanel.Name = "dockPanel";
             dockPanel.ShowDocumentIcon = true;
             // 
+            // windowToolStripMenuItem
+            // 
+            windowToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mnuExplorer, mnuPreview, mnuProperty });
+            windowToolStripMenuItem.Name = "windowToolStripMenuItem";
+            resources.ApplyResources(windowToolStripMenuItem, "windowToolStripMenuItem");
+            // 
+            // mnuExplorer
+            // 
+            mnuExplorer.Name = "mnuExplorer";
+            resources.ApplyResources(mnuExplorer, "mnuExplorer");
+            mnuExplorer.Click += mnuExplorer_Click;
+            // 
+            // mnuPreview
+            // 
+            mnuPreview.Name = "mnuPreview";
+            resources.ApplyResources(mnuPreview, "mnuPreview");
+            mnuPreview.Click += mnuPreview_Click;
+            // 
+            // mnuProperty
+            // 
+            mnuProperty.Name = "mnuProperty";
+            resources.ApplyResources(mnuProperty, "mnuProperty");
+            mnuProperty.Click += mnuProperty_Click;
+            // 
             // MainForm
             // 
             resources.ApplyResources(this, "$this");
@@ -132,5 +160,9 @@
         private ToolStripMenuItem optionsToolStripMenuItem;
         private Panel tabPanel;
         private WeifenLuo.WinFormsUI.Docking.DockPanel dockPanel;
+        private ToolStripMenuItem windowToolStripMenuItem;
+        private ToolStripMenuItem mnuExplorer;
+        private ToolStripMenuItem mnuPreview;
+        private ToolStripMenuItem mnuProperty;
     }
 }

@@ -68,6 +68,7 @@ namespace PiViLity.Controls
         public void ToEnable(EventHandler directoryNavigatorButtonStatusChangedFunction)
         {
             DirectoryNavigatorButtonStatusChanged = directoryNavigatorButtonStatusChangedFunction;
+            DirectoryNavigatorButtonStatusChanged?.Invoke(this, EventArgs.Empty);
         }
 
 
@@ -109,7 +110,7 @@ namespace PiViLity.Controls
                 bool preIsParentEnabled = IsParentDirectoryEnabled;
 
                 _currentRecentIndex--;
-                Path = _directoryRecent[_currentRecentIndex];
+                _Path = _directoryRecent[_currentRecentIndex];
 
                 //ボタンの有効無効を更新
                 if (preIsPreviousEnabled != IsPreviousDirectoryEnabled || preIsNextEnabled != IsNextDirectoryEnabled || preIsParentEnabled != IsParentDirectoryEnabled)
@@ -134,7 +135,7 @@ namespace PiViLity.Controls
                 bool preIsParentEnabled = IsParentDirectoryEnabled;
 
                 _currentRecentIndex++;
-                Path = _directoryRecent[_currentRecentIndex];
+                _Path = _directoryRecent[_currentRecentIndex];
 
                 //ボタンの有効無効を更新
                 if (preIsPreviousEnabled != IsPreviousDirectoryEnabled || preIsNextEnabled != IsNextDirectoryEnabled || preIsParentEnabled != IsParentDirectoryEnabled)
@@ -185,8 +186,15 @@ namespace PiViLity.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new string Path
         {
-            set { _isInPathSetter = true; base.Path = value; _isInPathSetter = false; }
+            set { base.Path = value; }
             get => base.Path;
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        private string _Path
+        {
+            set { _isInPathSetter = true; Path = value; _isInPathSetter = false; }
+            get => Path;
         }
 
     }
