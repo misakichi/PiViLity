@@ -22,3 +22,4 @@ System::String^ BasicImagePluginCLI::PluginInformation::OptionItemName::get()
 {
 	return "Default Plugin";
 }
+

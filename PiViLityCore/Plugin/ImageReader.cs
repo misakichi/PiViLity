@@ -27,14 +27,8 @@ namespace PiViLityCore.Plugin
     /// <summary>
     /// 画像ファイルを読み込むためのインターフェースです。
     /// </summary>
-    public interface IImageReader : IDisposable
+    public interface IImageReader : IReader
     {
-        /// <summary>
-        /// このプラグインがサポートする拡張子を返します。
-        /// </summary>
-        /// <returns></returns>
-        public List<string> GetSupportedExtensions();
-
         /// <summary>
         /// サムネイルの品質を指定します。
         /// </summary>
@@ -44,20 +38,6 @@ namespace PiViLityCore.Plugin
         /// サムネイルの種類を指定します。
         /// </summary>
         public ThumbnailTypes ThumbnailType { get; set; }
-
-        /// <summary>
-        /// このプラグインが指定したファイルをサポートするかどうかを返します。
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public bool IsSupported();
-
-        /// <summary>
-        /// 画像ファイルのパスを設定します。
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public bool SetFilePath(string filePath);
 
         /// <summary>
         /// 画像イメージを取得します

@@ -159,6 +159,15 @@ copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\</Command>
   <ItemGroup>
     <ResourceCompile Include="BasicImagePluginCLI.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CliResource.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="CliResource.ja-JP.resx">
+      <WithCulture>true</WithCulture>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

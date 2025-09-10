@@ -24,6 +24,7 @@
     <ProjectGuid>{45ec6e7e-64d0-48e3-bddf-9288d0666c81}</ProjectGuid>
     <RootNamespace>PiVilityCRT</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>PiViLityCRT</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

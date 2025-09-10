@@ -7,7 +7,7 @@ namespace BasicImagePluginCLI
 {
 	class ImageReaderWICNativeImpl;
 
-	public ref class ImageReaderWIC : public PiViLityCore::Plugin::ImageReaderBase
+	public ref class ImageReaderWIC : public PiViLityCore::Plugin::ImageReaderBase, public PiViLityCore::Plugin::IPropertyReader
 	{
 	private:
 		String^ filePath_ = "";
@@ -36,6 +36,9 @@ namespace BasicImagePluginCLI
 		System::Drawing::Size GetImageSize() override;
 
 		ImageReaderWICNativeImpl* nativeImpl_ = nullptr;
+
+		virtual List<PiViLityCore::Plugin::Property^>^ ReadProperties();
+
 	}; // class ImageReaderJpeg
 
 } // namespace BasicImagePluginCLI

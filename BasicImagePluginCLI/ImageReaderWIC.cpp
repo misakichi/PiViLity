@@ -2,6 +2,7 @@
 #pragma unmanaged
 #include <algorithm>
 #include <wincodec.h>
+
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "gdi32.lib")
@@ -106,6 +107,96 @@ namespace BasicImagePluginCLI
             decoder_ = decoder;
             frameDecoder_ = frameDecoder;
             frameDecoder_->GetSize(&width_, &height_);
+			WICPixelFormatGUID format;
+			frameDecoder_->GetPixelFormat(&format);	
+			if (format == GUID_WICPixelFormat1bppIndexed)
+				formatStr_ = L"1bpp Indexed";
+			else if (format == GUID_WICPixelFormat2bppIndexed)
+				formatStr_ = L"2bpp Indexed";
+			else if (format == GUID_WICPixelFormat4bppIndexed)
+				formatStr_ = L"4bpp Indexed";
+			else if (format == GUID_WICPixelFormat8bppIndexed)
+				formatStr_ = L"8bpp Indexed";
+			else if (format == GUID_WICPixelFormatBlackWhite)
+				formatStr_ = L"BlackWhite";
+			else if (format == GUID_WICPixelFormat2bppGray)
+				formatStr_ = L"2bpp Gray";
+			else if (format == GUID_WICPixelFormat4bppGray)
+				formatStr_ = L"4bpp Gray";
+			else if (format == GUID_WICPixelFormat8bppGray)
+				formatStr_ = L"8bpp Gray";
+			else if (format == GUID_WICPixelFormat8bppAlpha)
+				formatStr_ = L"8bpp Alpha";
+			else if (format == GUID_WICPixelFormat16bppBGR555)
+				formatStr_ = L"16bpp BGR555";
+			else if (format == GUID_WICPixelFormat16bppBGR565)
+				formatStr_ = L"16bpp BGR565";
+			else if (format == GUID_WICPixelFormat16bppBGRA5551)
+				formatStr_ = L"16bpp BGRA5551";
+			else if (format == GUID_WICPixelFormat16bppGray)
+				formatStr_ = L"16bpp Gray";
+			else if (format == GUID_WICPixelFormat24bppBGR)
+				formatStr_ = L"24bpp BGR";
+			else if (format == GUID_WICPixelFormat24bppRGB)
+				formatStr_ = L"24bpp RGB";
+			else if (format == GUID_WICPixelFormat32bppBGR)
+				formatStr_ = L"32bpp BGR";
+			else if (format == GUID_WICPixelFormat32bppBGRA)
+				formatStr_ = L"32bpp BGRA";
+			else if (format == GUID_WICPixelFormat32bppPBGRA)
+				formatStr_ = L"32bpp PBGRA";
+			else if (format == GUID_WICPixelFormat32bppRGBA)
+				formatStr_ = L"32bpp RGBA";
+			else if (format == GUID_WICPixelFormat32bppPRGBA)
+				formatStr_ = L"32bpp PRGBA";
+			else if (format == GUID_WICPixelFormat48bppRGB)
+				formatStr_ = L"48bpp RGB";
+			else if (format == GUID_WICPixelFormat64bppBGRA)
+				formatStr_ = L"64bpp BGRA";
+			else if (format == GUID_WICPixelFormat64bppPRGBA)
+				formatStr_ = L"64bpp PRGBA";
+			else if (format == GUID_WICPixelFormat64bppRGBA)
+				formatStr_ = L"64bpp RGBA";
+			else if (format == GUID_WICPixelFormat48bppBGR)
+				formatStr_ = L"48bpp BGR";
+			else if (format == GUID_WICPixelFormat48bppRGBFixedPoint)
+				formatStr_ = L"48bpp RGB Fixed Point";
+			else if (format == GUID_WICPixelFormat64bppRGBAFixedPoint)
+				formatStr_ = L"64bpp RGBA Fixed Point";
+			else if (format == GUID_WICPixelFormat64bppBGRAFixedPoint)
+				formatStr_ = L"64bpp BGRA Fixed Point";
+			else if (format == GUID_WICPixelFormat64bppRGBFixedPoint)
+				formatStr_ = L"64bpp RGB Fixed Point";
+			else if (format == GUID_WICPixelFormat128bppRGBAFloat)
+				formatStr_ = L"128bpp RGBA Float";
+			else if (format == GUID_WICPixelFormat128bppPRGBAFloat)
+				formatStr_ = L"128bpp PRGBA Float";
+			else if (format == GUID_WICPixelFormat128bppRGBFloat)
+				formatStr_ = L"128bpp RGB Float";
+			else if (format == GUID_WICPixelFormat32bppCMYK)
+				formatStr_ = L"32bpp CMYK";
+			else if (format == GUID_WICPixelFormat64bppCMYK)
+				formatStr_ = L"64bpp CMYK";
+			else if (format == GUID_WICPixelFormat40bppCMYKAlpha)
+				formatStr_ = L"40bpp CMYK Alpha";
+			else if (format == GUID_WICPixelFormat80bppCMYKAlpha)
+				formatStr_ = L"80bpp CMYK Alpha";
+			else if (format== GUID_WICPixelFormat8bppY)
+				formatStr_ = L"8bpp Y";
+			else if (format == GUID_WICPixelFormat8bppCb)
+				formatStr_ = L"8bpp Cb";
+			else if (format == GUID_WICPixelFormat8bppCr)
+				formatStr_ = L"8bpp Cr";
+			else if (format == GUID_WICPixelFormat16bppGrayHalf)
+				formatStr_ = L"16bpp Gray Half";
+			else if (format == GUID_WICPixelFormat32bppGrayFixedPoint)
+				formatStr_ = L"32bpp Gray Fixed Point";
+			else if (format == GUID_WICPixelFormat32bppGrayFloat)
+				formatStr_ = L"32bpp Gray Float";
+			else
+				formatStr_ = L"Unknown Format";
+			
+
 
             path_ = filePath;
 
@@ -177,6 +268,7 @@ namespace BasicImagePluginCLI
         }
         uint32_t width() const { return width_; }
         uint32_t height() const { return height_; }
+        const wchar_t* formatStr() const { return formatStr_; }
     private:
         /// <summary>
         /// 指定された幅と高さでサムネイル画像を取得します。
@@ -298,6 +390,7 @@ namespace BasicImagePluginCLI
         std::wstring path_;
         uint32_t width_ = 0;
         uint32_t height_ = 0;
+		const wchar_t* formatStr_ = nullptr;
         ComPtr<IWICBitmapDecoder> decoder_ = nullptr;
         ComPtr<IWICBitmapFrameDecode> frameDecoder_ = nullptr;
         //IWICMetadataQueryReader* metadataQueryReader_ = nullptr;
@@ -465,3 +558,32 @@ System::Drawing::Size ImageReaderWIC::GetImageSize()
 	return System::Drawing::Size(nativeImpl_->width(), nativeImpl_->height());
 }
 
+#include "Plugin.h"
+
+List<PiViLityCore::Plugin::Property^>^ ImageReaderWIC::ReadProperties()
+{
+	auto propertoes = gcnew List<PiViLityCore::Plugin::Property^>();
+	if (!nativeImpl_ || !nativeImpl_->isValidate())
+		return propertoes;
+
+	auto propWidth = gcnew Property();
+	propWidth->Group = PropertyGroup::Image;
+	propWidth->Name = ResourceHolder::GetString("PropertyName.Width");// "Width";
+	propWidth->Value = nativeImpl_->width().ToString();
+	propertoes->Add(propWidth);
+
+	auto propHeight = gcnew Property();
+	propHeight->Group = PropertyGroup::Image;
+	propHeight->Name = ResourceHolder::GetString("PropertyName.Height");// "Height";
+	propHeight->Value = nativeImpl_->height().ToString();
+	propertoes->Add(propHeight);
+
+	auto propFormat = gcnew Property();
+	propFormat->Group = PropertyGroup::Image;
+	propFormat->Name = ResourceHolder::GetString("PropertyName.Format");// "Format";
+	propFormat->Value = gcnew System::String(nativeImpl_->formatStr());
+	propertoes->Add(propFormat);
+
+
+	return propertoes;
+}

@@ -297,6 +297,22 @@ namespace PiViLity.Forms
                     {
                         return _filePropertyContent;
                     }
+                    else if (s.IndexOf("FileListAddContent")>=0)
+                    {
+                        return new FileListAddContent();
+                    }
+                    else if (s.IndexOf("DireectoryTreeViewContent") >= 0)
+                    {
+                        return _directoryTreeDock;
+                    }
+                    else if (s.IndexOf("FilePreviewContent") >= 0)
+                    {
+                        return _previewDock;
+                    }
+                    else if (s.IndexOf("FilePropertyContent") >= 0)
+                    {
+                        return _filePropertyContent;
+                    }
                     //????
                     throw new System.ArgumentOutOfRangeException("Unknown DockContent");
                 }));
