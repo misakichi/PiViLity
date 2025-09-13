@@ -35,5 +35,13 @@ namespace PiViLityCore.Plugin
 
         public virtual Form? SettingDialog() => null;
 
+        /// <summary>
+        /// カテゴリ表示順ソート
+        /// また、同一カテゴリ内でのクラス単位ソートに用いる
+        /// </summary>
+        public abstract UInt16 GroupUIOrder { get; }
+
+        public abstract Resource.Manager SettingResource { get; }
+
     }
 }

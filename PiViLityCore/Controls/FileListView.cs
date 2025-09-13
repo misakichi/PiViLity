@@ -81,7 +81,7 @@ namespace PiViLityCore.Controls
                 SubItemColums[i] = new()
                 {
                     Name = subItemName,
-                    Text = PiViLityCore.Global.GetResourceString($"FileListDetailSubItem.{subItemName}"),
+                    Text = Global.Resource.GetString($"FileListDetailSubItem.{subItemName}"),
                     SubItemBit = (FileListViewSubItemBit)i,
                     Comparer = FileListViewItemComparerBase.CreateComparer(this, (FileListViewSubItemTypes)(1 << i)),
                     Width = DefaultSubItemWidth,
@@ -103,7 +103,7 @@ namespace PiViLityCore.Controls
 
         void CreateIconStore()
         {
-            var c = Math.Min(Option.ShellSettings.Instance.ThumbnailSize.Width, Option.ShellSettings.Instance.ThumbnailSize.Height);
+            var c = Math.Min(Option.ThumbnailSettings.Instance.ThumbnailSize.Width, Option.ThumbnailSettings.Instance.ThumbnailSize.Height);
             var tileSize = new Size(c,c);
             _iconStore = new IconStoreSystem(true, true, true, null, null, tileSize);
             if (View == View.Tile)
@@ -118,7 +118,7 @@ namespace PiViLityCore.Controls
         }
         private void OnApplySettings(object? sender, EventArgs e)
         {
-            var c = Math.Min(Option.ShellSettings.Instance.ThumbnailSize.Width, Option.ShellSettings.Instance.ThumbnailSize.Height);
+            var c = Math.Min(Option.ThumbnailSettings.Instance.ThumbnailSize.Width, Option.ThumbnailSettings.Instance.ThumbnailSize.Height);
             var tileSize = new Size(c, c);
             if (_iconStore.TileIconList.ImageSize.Equals(tileSize) == false)
             {
@@ -126,7 +126,7 @@ namespace PiViLityCore.Controls
                 _iconStore.TileIconList.ImageSize = tileSize;
                 if (View == View.Tile)
                 {
-                    TileSize = Option.ShellSettings.Instance.ThumbnailSize;
+                    TileSize = Option.ThumbnailSettings.Instance.ThumbnailSize;
                     RefreshFileList();
                 }
             }

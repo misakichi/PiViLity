@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PiViLityCore.Resources;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -13,8 +14,7 @@ namespace PiViLityCore
 {
     static public class Global
     {
-        static ResourceManager resourceMgr = new ("PiViLityCore.Resources.Resource", Assembly.GetExecutingAssembly());
-        static CultureInfo culture = new CultureInfo(CultureInfo.CurrentCulture.Name);
+        internal static Resource.Manager Resource = new (Resources.Resource.ResourceManager);
         private static SynchronizationContext? _syncContext;
 
         static Global()
@@ -25,33 +25,6 @@ namespace PiViLityCore
         public static void InvokeMainThread(Action action)
         {
             _syncContext?.Post((o) => action(), null);
-        }
-
-        public static void SetResourceLanguage(string language)
-        {
-            culture = new CultureInfo(language);            
-        }
-
-        public static string GetResourceString(ResourceManager rm, string name)
-        {
-            return rm.GetString(name,culture)??"";
-        }
-        public static Icon? GetResourceIcon(ResourceManager rm, string name)
-        {
-            var data = rm.GetObject(name) as byte[];
-            return data != null ? new Icon(new MemoryStream(data)) : null;
-        }
-        public static object? GetResourceObject(ResourceManager rm, string name)
-        {
-            return rm.GetObject(name, culture);
-        }
-        public static UnmanagedMemoryStream? GetResourceStream(ResourceManager rm, string name)
-        {
-            return rm.GetStream(name, culture);
-        }
-        public static string GetResourceString(string name)
-        {
-            return GetResourceString(resourceMgr,name);
         }
 
         public static EnvironmentSettings settings = new();

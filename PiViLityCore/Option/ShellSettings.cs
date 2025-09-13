@@ -3,43 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PiViLityCore.Plugin;
-using PiViLityCore.Resources;
 
 namespace PiViLityCore.Option
 {
-    /// <summary>
-    /// シェル設定クラス
-    /// </summary>
     [Serializable, Option]
-    public class ShellSettings : SettingBase
+    public class ShellSettings : PiViLityCore.Plugin.SettingBase
     {
-        static public readonly ShellSettings Instance = new();
-
-        public override string CategoryText { 
-            get=>Resource.ShellSetting_Name;
+        public static readonly ShellSettings Instance = new();
+        private static PiViLityCore.Resource.Manager _resource = new(Option.Resource.ResourceManager);
+        public override string CategoryText
+        {
+            get => Option.Resource.ShellSetting_Name;
         }
-
         public override string CategoryName
         {
             get => "ShellSetting";
         }
-
-
-        /// <summary>
-        /// デフォルト値として記憶されるファイルリストの表示形式
-        /// </summary>
-        [OptionItem(NoOption = true)]
-        public View FileListViewStyle = View.Tile;
-
-        [OptionItemSize
-            (
-                NameTextResouceId = "ShellSetting.ThumbnailSize",
-                DescriptionTextResouceId = "",
-                MinWidth = 64, MinHeight = 32, MaxWidth = 1024, MaxHeight = 1024
-            )
-        ]
-        public Size ThumbnailSize = new(384, 273);
-
+        public override PiViLityCore.Resource.Manager SettingResource => _resource;
+        public override ushort GroupUIOrder => 10;
     }
 }

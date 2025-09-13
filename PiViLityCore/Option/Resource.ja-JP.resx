@@ -117,22 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BytesStr" xml:space="preserve">
-    <value>バイト</value>
+  <data name="ShellSetting.Name" xml:space="preserve">
+    <value>シェル</value>
   </data>
-  <data name="DeriveTypeRemovable" xml:space="preserve">
-    <value>リムーバブルディスク</value>
+  <data name="ThumbnailSetting.ThumbnailSize" xml:space="preserve">
+    <value>サムネイルサイズ</value>
   </data>
-  <data name="DriveTypeCDRom" xml:space="preserve">
-    <value>光学ドライブ</value>
-  </data>
-  <data name="DriveTypeFixed" xml:space="preserve">
-    <value>ローカルディスク</value>
-  </data>
-  <data name="DriveTypeNetwork" xml:space="preserve">
-    <value>ネットワーク</value>
-  </data>
-  <data name="DriveTypeRam" xml:space="preserve">
-    <value>ラムディスク</value>
+  <data name="ThumbnailSetting.Name" xml:space="preserve">
+    <value>サムネイル</value>
   </data>
 </root>

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PiViLityCore.Resources {
+namespace PiViLityCore.Option {
     using System;
     
     
@@ -22,7 +22,7 @@ namespace PiViLityCore.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Resource {
+    internal class Resource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,10 +36,10 @@ namespace PiViLityCore.Resources {
         ///   このクラスで使用されているキャッシュされた ResourceManager インスタンスを返します。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PiViLityCore.Resources.Resource", typeof(Resource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PiViLityCore.Option.Resource", typeof(Resource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -51,7 +51,7 @@ namespace PiViLityCore.Resources {
         ///   現在のスレッドの CurrentUICulture プロパティをオーバーライドします。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -61,56 +61,29 @@ namespace PiViLityCore.Resources {
         }
         
         /// <summary>
-        ///   Bytes に類似しているローカライズされた文字列を検索します。
+        ///   Shell に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        public static string BytesStr {
+        internal static string ShellSetting_Name {
             get {
-                return ResourceManager.GetString("BytesStr", resourceCulture);
+                return ResourceManager.GetString("ShellSetting.Name", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Removable に類似しているローカライズされた文字列を検索します。
+        ///   Thumbnail に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        public static string DeriveTypeRemovable {
+        internal static string ThumbnailSetting_Name {
             get {
-                return ResourceManager.GetString("DeriveTypeRemovable", resourceCulture);
+                return ResourceManager.GetString("ThumbnailSetting.Name", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   CD-ROM に類似しているローカライズされた文字列を検索します。
+        ///   Thumbnail size に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        public static string DriveTypeCDRom {
+        internal static string ThumbnailSetting_ThumbnailSize {
             get {
-                return ResourceManager.GetString("DriveTypeCDRom", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Fixed に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        public static string DriveTypeFixed {
-            get {
-                return ResourceManager.GetString("DriveTypeFixed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Network に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        public static string DriveTypeNetwork {
-            get {
-                return ResourceManager.GetString("DriveTypeNetwork", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   RamDisk に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        public static string DriveTypeRam {
-            get {
-                return ResourceManager.GetString("DriveTypeRam", resourceCulture);
+                return ResourceManager.GetString("ThumbnailSetting.ThumbnailSize", resourceCulture);
             }
         }
     }

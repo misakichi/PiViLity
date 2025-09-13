@@ -18,7 +18,7 @@ namespace PiViLityCore.Util
         public static string GetEasyReadFileSize(long size, bool dontUseByte = true)
         {
             if(size<1024 && !dontUseByte)
-                return $"{size} {PiViLityCore.Global.GetResourceString($"BytesStr")}";
+                return $"{size} {Global.Resource.GetString($"BytesStr")}";
             else if (size < 1024 * 1024)
                 return $"{size/1024} KB";
             else if (size < 1024 * 1024 * 1024)
@@ -31,7 +31,7 @@ namespace PiViLityCore.Util
         public static string GetEasyReadFileSizeF(long size, bool dontUseByte = true)
         {
             if (size<256 && !dontUseByte)
-                return $"{size} {PiViLityCore.Global.GetResourceString($"BytesStr")}";
+                return $"{size} {Global.Resource.GetString($"BytesStr")}";
             if (size < 1024 * 1024)
                 return $"{size/1024.0f:N2} KB";
             else if (size < 1024.0f * 1024 * 1024)

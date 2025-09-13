@@ -92,7 +92,7 @@ namespace PiViLity.Forms
             tab.FileListView.DirectoryChanged += (s, e) => tab.UpdateTabCaption();
             tab.FolderTreeView.AfterSelect += OnAfterSelectDir;
             tab.FileListContent.FormClosed += OnFileListViewClosed;
-            tab.FileListView.View = PiViLityCore.Option.ShellSettings.Instance.FileListViewStyle;
+            tab.FileListView.View = PiViLityCore.Option.ThumbnailSettings.Instance.FileListViewStyle;
 
             _directoryTabs.Add(tab);
             return tab;
@@ -182,11 +182,11 @@ namespace PiViLity.Forms
                 toolStrip.Renderer = new ToolStripProfessionalRenderer();
                 stsStrip.Renderer = new ToolStripProfessionalRenderer();
 
-                _btnSmallIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Icon")?.ToBitmap();
-                _btnLargeIconView.Image = Global.GetResourceIcon(Resource.ResourceManager, "LargeIcon")?.ToBitmap();
-                _btnListView.Image = Global.GetResourceIcon(Resource.ResourceManager, "List")?.ToBitmap();
-                _btnDetailView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Detail")?.ToBitmap();
-                _btnTileView.Image = Global.GetResourceIcon(Resource.ResourceManager, "Thumb")?.ToBitmap();
+                _btnSmallIconView.Image = App.AppResource.GetIcon("Icon")?.ToBitmap();
+                _btnLargeIconView.Image = App.AppResource.GetIcon("LargeIcon")?.ToBitmap();
+                _btnListView.Image = App.AppResource.GetIcon("List")?.ToBitmap();
+                _btnDetailView.Image = App.AppResource.GetIcon("Detail")?.ToBitmap();
+                _btnTileView.Image = App.AppResource.GetIcon("Thumb")?.ToBitmap();
 
                 //ディレクトリ操作ツールストリップアイテム
                 _parentDirectoryBtn.Text = "↑";
@@ -514,11 +514,11 @@ namespace PiViLity.Forms
                 if (_currentTab?.FolderTreeView == dtv)
                 {
                     var flvFile = _currentTab.FileListView;
-                    if (flvFile.TileSize != PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize)
+                    if (flvFile.TileSize != PiViLityCore.Option.ThumbnailSettings.Instance.ThumbnailSize)
                     {
-                        flvFile.ThumbnailIconStore = new IconStoreThumbnail(PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize);
+                        flvFile.ThumbnailIconStore = new IconStoreThumbnail(PiViLityCore.Option.ThumbnailSettings.Instance.ThumbnailSize);
                     }
-                    flvFile.TileSize = PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize;
+                    flvFile.TileSize = PiViLityCore.Option.ThumbnailSettings.Instance.ThumbnailSize;
 
                     flvFile.Path = dtv.Path;
                 }
@@ -581,7 +581,7 @@ namespace PiViLity.Forms
         {
             if (_currentTab != null)
             {
-                PiViLityCore.Option.ShellSettings.Instance.FileListViewStyle = view;
+                PiViLityCore.Option.ThumbnailSettings.Instance.FileListViewStyle = view;
                 _currentTab.FileListView.View = view;
                 RefreshViewTypeBtnChecked();
             }

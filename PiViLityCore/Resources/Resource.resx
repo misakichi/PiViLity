@@ -135,10 +135,4 @@
   <data name="DriveTypeRam" xml:space="preserve">
     <value>RamDisk</value>
   </data>
-  <data name="ShellSetting.Name" xml:space="preserve">
-    <value>Shell</value>
-  </data>
-  <data name="ShellSetting.ThumbnailSize" xml:space="preserve">
-    <value>Thumbnail size</value>
-  </data>
 </root>

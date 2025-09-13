@@ -82,11 +82,11 @@ namespace PiViLityCore.Util
                 case DriveType.NoRootDirectory:
                     return "";
                 case DriveType.Removable:
-                    return Global.GetResourceString("DriveTypeRemovable");
+                    return Global.Resource.GetString("DriveTypeRemovable");
                 case DriveType.Fixed:
-                    return Global.GetResourceString("DriveTypeFixed");
+                    return Global.Resource.GetString("DriveTypeFixed");
                 case DriveType.Network:
-                    return Global.GetResourceString("Network");
+                    return Global.Resource.GetString("Network");
                 case DriveType.CDRom:
                     return "光学ドライブ";
                 case DriveType.Ram:

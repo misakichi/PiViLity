@@ -26,11 +26,11 @@ namespace PiViLity.Controls
         {
             DirectoryChanged += FlvOnDirectoryChanged;
             LabelEdit = true;
-            ThumbnailIconStore = new IconStoreThumbnail(PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize);
+            ThumbnailIconStore = new IconStoreThumbnail(PiViLityCore.Option.ThumbnailSettings.Instance.ThumbnailSize);
 
             if (!DesignMode)
             {
-                TileSize = PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize;
+                TileSize = PiViLityCore.Option.ThumbnailSettings.Instance.ThumbnailSize;
             }
         }
 

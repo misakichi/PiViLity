@@ -1,6 +1,7 @@
 ﻿using PiViLityCore.Shell;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -67,7 +68,7 @@ namespace PiViLityCore.Controls
 
             if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.ModifiedDateTime))
             {
-                SubItems.Add($"{fsi.LastWriteTime:yyyy/MM/dd H:m}");
+                SubItems.Add(fsi.LastWriteTime.ToString("yyyy/MM/dd H:mm", CultureInfo.CurrentCulture)/*$"{fsi.LastWriteTime:yyyy/MM/dd H:m}"*/);
             }
             if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.Type))
             {
@@ -77,10 +78,7 @@ namespace PiViLityCore.Controls
             {
                 if (_fileListViewSubItemType.HasFlag(FileListViewSubItemTypes.Size))
                 {
-                    if (fi.Length < 1024)
-                        SubItems.Add(new ListViewItem.ListViewSubItem(this, $"{fi.Length} B"));
-                    else
-                        SubItems.Add(new ListViewItem.ListViewSubItem(this, $"{fi.Length / 1024:N0} KB"));
+                    SubItems.Add(new ListViewItem.ListViewSubItem(this, Util.String.GetEasyReadFileSize(length, false)));
                 }
             }
             else

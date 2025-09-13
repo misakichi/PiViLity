@@ -60,6 +60,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Option\Resource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
     <Compile Update="PreViewer\ImagePreViewer.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -71,6 +76,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Option\Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>

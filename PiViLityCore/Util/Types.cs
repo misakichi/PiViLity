@@ -10,7 +10,7 @@ namespace PiViLityCore.Util
 {
     public static class Types
     {
-        public static bool HasParentType(Type _type, Type parentType)
+        public static bool HasParentType(Type? _type, Type parentType)
         {
             Type? type = _type;  
             while (type != null && type!=typeof(object))

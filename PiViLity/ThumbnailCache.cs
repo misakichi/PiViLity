@@ -206,7 +206,7 @@ namespace PiViLity
             if (!fi.Exists)
                 return null;
 
-            var ThumbnailSize = PiViLityCore.Option.ShellSettings.Instance.ThumbnailSize;
+            var ThumbnailSize = PiViLityCore.Option.ThumbnailSettings.Instance.ThumbnailSize;
 
             byte[]? buffer = null;
             byte[]? subBuffer = null ;

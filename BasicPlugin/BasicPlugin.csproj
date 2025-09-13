@@ -10,6 +10,8 @@
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <VersionPrefix>0.0.0</VersionPrefix>
     <VersionSuffix>Dev</VersionSuffix>
+    <Authors>©2025, misakichi kaminagare</Authors>
+    <PackageProjectUrl>https://github.com/misakichi/PiViLity</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

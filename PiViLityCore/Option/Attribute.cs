@@ -16,7 +16,7 @@ namespace PiViLityCore.Option
 
         public bool NoOption = false;
 
-
+        public Type? ParentType = null;
     }
 
     public class OptionItemAttribute : Attribute
@@ -55,7 +55,7 @@ namespace PiViLityCore.Option
         /// <summary>
         /// 設定項目の名称を取得するためのリソースID
         /// </summary>
-        public string NameTextResouceId = "";
+        public string TextResouceId = "";
 
         /// <summary>
         /// 項目の詳細を取得するためのリソースID
@@ -66,7 +66,7 @@ namespace PiViLityCore.Option
 
         public bool NoSave = false;
 
-        public int UIOrder = 0;
+        public UInt16 UIOrder = 0;
 
 
     }
