@@ -126,4 +126,10 @@
   <data name="ThumbnailSetting.Name" xml:space="preserve">
     <value>サムネイル</value>
   </data>
+  <data name="ShellSetting.ShowHiddenFiles" xml:space="preserve">
+    <value>隠しファイルを表示する</value>
+  </data>
+  <data name="ShellSetting.ShowSystemFiles" xml:space="preserve">
+    <value>システムファイルを表示する</value>
+  </data>
 </root>

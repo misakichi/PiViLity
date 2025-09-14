@@ -290,7 +290,7 @@ namespace PiViLityCore.Controls
         /// <returns></returns>
         private FileListViewItem? MakeItem(FileSystemInfo? entry)
         {
-            if (entry!=null && PiViLityCore.Global.settings.IsVisibleEntry(entry))
+            if (entry!=null && ShellSettings.Instance.IsVisibleEntry(entry))
             {
                 bool isFile = entry is System.IO.FileInfo;
                 var item = new FileListViewItem(entry, DetailSubItems);

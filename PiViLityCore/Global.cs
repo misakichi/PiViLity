@@ -1,4 +1,5 @@
-﻿using PiViLityCore.Resources;
+﻿using PiViLityCore.Plugin;
+using PiViLityCore.Resources;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,12 +15,12 @@ namespace PiViLityCore
 {
     static public class Global
     {
-        internal static Resource.Manager Resource = new (Resources.Resource.ResourceManager);
+        internal static Resource.Manager Resource = new(Resources.Resource.ResourceManager);
         private static SynchronizationContext? _syncContext;
 
         static Global()
         {
-            _syncContext =SynchronizationContext.Current;
+            _syncContext = SynchronizationContext.Current;
         }
 
         public static void InvokeMainThread(Action action)
@@ -27,6 +28,20 @@ namespace PiViLityCore
             _syncContext?.Post((o) => action(), null);
         }
 
-        public static EnvironmentSettings settings = new();
+    }
+
+
+    public class ModuleInformation : IModuleInformation
+    {
+        public string Name { get; set; } = "Core";
+        public string Description { get; set; } = "Core Module";
+        public string OptionItemName { get; set; } = "";
+        public ModuleInformation()
+        {
+        }
+
+        public bool Initialize() => true;
+
+        public bool Terminate() => true;
     }
 }

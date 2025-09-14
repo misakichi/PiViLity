@@ -1,4 +1,5 @@
-﻿using PiViLityCore.Shell;
+﻿using PiViLityCore.Option;
+using PiViLityCore.Shell;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -182,7 +183,7 @@ namespace PiViLityCore.Controls
                 Children.Clear();
                 foreach (var childDir in dirInfo.EnumerateDirectories())
                 {
-                    if (Global.settings.IsVisibleDirectory(childDir) == false)
+                    if (ShellSettings.Instance.IsVisibleDirectory(childDir) == false)
                         continue;
                     var child = new DirectoryTreeNode(DependencyDirectoryTree);
                     child.SetType(DirTreeNodeType.DirectoryUnknown, childDir.FullName);

@@ -11,8 +11,9 @@ namespace PiViLity
 
         public string OptionItemName => "アプリケーション";
 
-        public System.Resources.ResourceManager? ResourceManager { get => Resource.ResourceManager; }
+        public bool Initialize() => true;
 
+        public bool Terminate() => true;
     }
 
     internal static class App

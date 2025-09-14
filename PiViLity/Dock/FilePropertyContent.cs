@@ -57,13 +57,13 @@ namespace PiViLity.Dock
                 return;
             }
 
+            System.ComponentModel.ComponentResourceManager res = new System.ComponentModel.ComponentResourceManager(typeof(FilePropertyContent));
             TreeNode? fileRoot = null;
-            TreeNode? imgRoot = new TreeNode("画像");
-            TreeNode? othersRoot = new TreeNode("その他");//とりあえずその他としてまとめる。あとでその他のカテゴリ名称をIPropertyから取れるようにする
+            TreeNode? imgRoot = new TreeNode(res.GetString("Property.Type.Image"));
+            TreeNode? othersRoot = new TreeNode(res.GetString("Property.Type.Others"));//とりあえずその他としてまとめる。あとでその他のカテゴリ名称をIPropertyから取れるようにする
 
             if (System.IO.File.Exists(filePath))
             {
-                System.ComponentModel.ComponentResourceManager res = new System.ComponentModel.ComponentResourceManager(typeof(FilePropertyContent));
                 var fileInfo = new System.IO.FileInfo(filePath);
                 fileRoot = new TreeNode(res.GetString("FileInfo.Head"));
                 fileRoot.Nodes.Add(new TreeNode($"{res.GetString("FileInfo.Name")}\v{fileInfo.Name}"));
@@ -76,7 +76,6 @@ namespace PiViLity.Dock
             }
             else if (System.IO.Directory.Exists(filePath))
             {
-                System.ComponentModel.ComponentResourceManager res = new System.ComponentModel.ComponentResourceManager(typeof(FilePropertyContent));
                 var dirInfo = new System.IO.DirectoryInfo(filePath);
                 fileRoot = new TreeNode(res.GetString("FileInfo.DirHead"));
                 fileRoot.Nodes.Add(new TreeNode($"{res.GetString("FileInfo.DirName")}\v{dirInfo.Name}"));

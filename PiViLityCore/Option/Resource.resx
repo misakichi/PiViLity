@@ -126,4 +126,10 @@
   <data name="ThumbnailSetting.Name" xml:space="preserve">
     <value>Thumbnail</value>
   </data>
+  <data name="ShellSetting.ShowHiddenFiles" xml:space="preserve">
+    <value>Show hidden files.</value>
+  </data>
+  <data name="ShellSetting.ShowSystemFiles" xml:space="preserve">
+    <value>Show system files.</value>
+  </data>
 </root>

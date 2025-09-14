@@ -8,36 +8,45 @@ namespace BasicImagePluginCLI
     /// <summary>
     /// プラグイン情報
     /// </summary>
-    public ref class PluginInformation : public IModuleInformation
-    {
+	public ref class PluginInformation : public IModuleInformation
+	{
 	public:
 		/// <summary>
 		/// プラグインの説明
 		/// </summary>
 		virtual property String^ Description
 		{
-			String^ get();
+			String ^ get();
 		}
-		/// <summary>
-		/// プラグイン名称
-		/// </summary>
+			/// <summary>
+			/// プラグイン名称
+			/// </summary>
 		virtual property String^ Name
 		{
-			String^ get();
+			String ^ get();
 		}
-		/// <summary>
-		/// プラグイン名称
-		/// </summary>
+			/// <summary>
+			/// プラグイン名称
+			/// </summary>
 		virtual property String^ OptionItemName
 		{
-			String^ get();
+			String ^ get();
 		}
-		/// <summary>
-		/// プラグイン名称
-		/// </summary>
+			/// <summary>
+			/// プラグイン名称
+			/// </summary>
 		virtual property System::Resources::ResourceManager^ ResourceManager
 		{
-			System::Resources::ResourceManager^ get() { return nullptr; }
+			System::Resources::ResourceManager ^ get() { return nullptr; }
+		}
+
+		virtual bool Initialize() {
+			return true;
+
+
+		}
+		virtual bool Terminate() {
+			return true;
 		}
 	};
 

@@ -117,32 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Detail" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Detail.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="FileListDetailSubItem.ModifiedDateTime" xml:space="preserve">
-    <value>Date modified</value>
-  </data>
-  <data name="FileListDetailSubItem.Name" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="FileListDetailSubItem.Size" xml:space="preserve">
-    <value>Size</value>
-  </data>
-  <data name="FileListDetailSubItem.Type" xml:space="preserve">
-    <value>Type</value>
-  </data>
-  <data name="Icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Icon.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="LargeIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\LargeIcon.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="List" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\List.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Thumb" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Thumb.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
 </root>

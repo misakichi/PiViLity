@@ -19,14 +19,14 @@ namespace PiViLity.Forms
 {
     public partial class MainForm : Form
     {
-        private ToolStripButton _btnSmallIconView = new();
-        private ToolStripButton _btnLargeIconView = new();
-        private ToolStripButton _btnListView = new();
-        private ToolStripButton _btnDetailView = new();
-        private ToolStripButton _btnTileView = new();
-        private ToolStripButton _parentDirectoryBtn = new();
-        private ToolStripButton _previousDirectoryBtn = new();
-        private ToolStripButton _nextDirectoryBtn = new();
+        //private ToolStripButton _btnSmallIconView = new();
+        //private ToolStripButton _btnLargeIconView = new();
+        //private ToolStripButton _btnListView = new();
+        //private ToolStripButton _btnDetailView = new();
+        //private ToolStripButton _btnTileView = new();
+        //private ToolStripButton _parentDirectoryBtn = new();
+        //private ToolStripButton _previousDirectoryBtn = new();
+        //private ToolStripButton _nextDirectoryBtn = new();
 
         class DirectoryTab : IDisposable
         {
@@ -36,10 +36,8 @@ namespace PiViLity.Forms
                 rootNode.SetType(DirTreeNodeType.SpecialFolderMyComputer, null);
                 FolderTreeView.Nodes.Add(rootNode);
 
-                FileListContent.Controls.Clear();
-                FileListContent.Controls.Add(FileListView);
+                FileListContent = new FileListViewContent(FileListView);
                 FileListContent.IsFloat = false;
-                FileListContent.DockAreas = DockAreas.Document | DockAreas.Float;
 
                 FileListView.Dock = DockStyle.Fill;
                 FolderTreeView.Dock = DockStyle.Fill;
@@ -66,7 +64,7 @@ namespace PiViLity.Forms
             public FileListViewApp FileListView { get; set; } = new();
             public DirectoryTreeViewApp FolderTreeView { get; set; } = new();
 
-            public FileListViewContent FileListContent = new();
+            public FileListViewContent FileListContent;
 
             public void Dispose()
             {
@@ -160,17 +158,7 @@ namespace PiViLity.Forms
             var tab = _directoryTabs[index];
             _directoryTreeDock.Controls.Clear();
             _directoryTreeDock.Controls.Add(tab.FolderTreeView);
-
-
-            _currentTab?.FileListView?.ToDisable();
             _currentTab = tab;
-            _currentTab?.FileListView?.ToEnable((s, e) =>
-            {
-                _parentDirectoryBtn.Enabled = _currentTab.FileListView.IsParentDirectoryEnabled;
-                _previousDirectoryBtn.Enabled = _currentTab.FileListView.IsPreviousDirectoryEnabled;
-                _nextDirectoryBtn.Enabled = _currentTab.FileListView.IsNextDirectoryEnabled;
-            });
-            RefreshViewTypeBtnChecked();
         }
 
         public MainForm()
@@ -179,28 +167,7 @@ namespace PiViLity.Forms
 
             if (!DesignMode)
             {
-                toolStrip.Renderer = new ToolStripProfessionalRenderer();
                 stsStrip.Renderer = new ToolStripProfessionalRenderer();
-
-                _btnSmallIconView.Image = App.AppResource.GetIcon("Icon")?.ToBitmap();
-                _btnLargeIconView.Image = App.AppResource.GetIcon("LargeIcon")?.ToBitmap();
-                _btnListView.Image = App.AppResource.GetIcon("List")?.ToBitmap();
-                _btnDetailView.Image = App.AppResource.GetIcon("Detail")?.ToBitmap();
-                _btnTileView.Image = App.AppResource.GetIcon("Thumb")?.ToBitmap();
-
-                //ディレクトリ操作ツールストリップアイテム
-                _parentDirectoryBtn.Text = "↑";
-                _parentDirectoryBtn.Click += (s, e) => _currentTab?.FileListView.MoveParentDirectory();
-
-                _previousDirectoryBtn.Text = "←";
-                _previousDirectoryBtn.Click += (s, e) => _currentTab?.FileListView.MovePreviousDirectory();
-                _nextDirectoryBtn.Text = "→";
-                _nextDirectoryBtn.Click += (s, e) => _currentTab?.FileListView.MoveNextDirectory();
-                toolStrip.Items.Insert(0, _parentDirectoryBtn);
-                toolStrip.Items.Insert(1, _previousDirectoryBtn);
-                toolStrip.Items.Insert(2, _nextDirectoryBtn);
-                toolStrip.Items.Insert(3, new ToolStripSeparator());
-
 
                 if (AppSettings.Instance.WindowSize.Width <= 0 || AppSettings.Instance.WindowSize.Height <= 0)
                 {
@@ -367,24 +334,8 @@ namespace PiViLity.Forms
                 }
             }
 
-            ////リストビュー表示タイプ切り替えボタン
-            List<ToolStripItem> items = new List<ToolStripItem>();
-            items.Add(_btnSmallIconView);
-            items.Add(_btnLargeIconView);
-            items.Add(_btnListView);
-            items.Add(_btnDetailView);
-            items.Add(_btnTileView);
-
-            toolStrip.Items.AddRange(items.ToArray());
-            _btnSmallIconView.Click += (s, e) => SetViewType(View.SmallIcon);
-            _btnLargeIconView.Click += (s, e) => SetViewType(View.LargeIcon);
-            _btnListView.Click += (s, e) => SetViewType(View.List);
-            _btnTileView.Click += (s, e) => SetViewType(View.Tile);
-            _btnDetailView.Click += (s, e) => SetViewType(View.Details);
-
             Show();
-            RefreshViewTypeBtnChecked();
-
+            
             //コントロールのレイアウトを行いサイズを現状に合わせる
             PerformLayout();
             Application.DoEvents();
@@ -575,33 +526,6 @@ namespace PiViLity.Forms
                     _filePropertyContent.SetFile("");
                 }
             }
-        }
-
-        private void SetViewType(View view)
-        {
-            if (_currentTab != null)
-            {
-                PiViLityCore.Option.ThumbnailSettings.Instance.FileListViewStyle = view;
-                _currentTab.FileListView.View = view;
-                RefreshViewTypeBtnChecked();
-            }
-        }
-
-        /// <summary lang="ja-JP">
-        /// リストビュー表示タイプ切り替えボタンを現状に合わせる
-        /// </summary>
-        private void RefreshViewTypeBtnChecked()
-        {
-            if (_currentTab == null)
-                return;
-
-            var viewType = _currentTab.FileListView.View;
-            _btnListView.Checked = viewType == View.List;
-            _btnSmallIconView.Checked = viewType == View.SmallIcon;
-            _btnLargeIconView.Checked = viewType == View.LargeIcon;
-            _btnTileView.Checked = viewType == View.Tile;
-            _btnDetailView.Checked = viewType == View.Details;
-
         }
 
 

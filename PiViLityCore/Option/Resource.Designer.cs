@@ -70,6 +70,24 @@ namespace PiViLityCore.Option {
         }
         
         /// <summary>
+        ///   Show hidden files. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string ShellSetting_ShowHiddenFiles {
+            get {
+                return ResourceManager.GetString("ShellSetting.ShowHiddenFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Show system files. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string ShellSetting_ShowSystemFiles {
+            get {
+                return ResourceManager.GetString("ShellSetting.ShowSystemFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Thumbnail に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string ThumbnailSetting_Name {

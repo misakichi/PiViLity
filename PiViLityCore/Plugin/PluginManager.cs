@@ -163,7 +163,7 @@ namespace PiViLityCore.Plugin
         {
             PluginInformation? information = null;
             int moduleInfoCount = 0;
-            foreach (var type in assembly.GetTypes())
+            foreach (var type in assembly.GetExportedTypes())
             {
                 foreach (var hasInterface in type.GetInterfaces())
                 {

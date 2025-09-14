@@ -53,18 +53,18 @@ namespace PiViLity.Forms
 
             PluginManager.Instance.Plugins.ForEach(plugin =>
             {
-            var assemName = plugin.assembly.GetName();
-            moduleInfoText += plugin.information.Description;
-            if (assemName != null)
-            {
-                moduleInfoText =
-                $"Module:{assemName.Name}\n" +
-                $"Version:{assemName.Version?.Major ?? 0}.{assemName.Version?.Minor ?? 0}.{assemName.Version?.Revision ?? 0}.{assemName.Version?.Build ?? 0}\n" +
-                $"Company:{plugin.assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company ?? ""}\n" +
-                $"Copyright:{plugin.assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? ""}\n" +
-                $"Description:{plugin.information.Description}\n\n";
+                var assemName = plugin.assembly.GetName();
+                moduleInfoText += plugin.information.Description;
+                if (assemName != null)
+                {
+                    moduleInfoText +=
+                    $"Module:{assemName.Name}\n" +
+                    $"Version:{assemName.Version?.Major ?? 0}.{assemName.Version?.Minor ?? 0}.{assemName.Version?.Revision ?? 0}.{assemName.Version?.Build ?? 0}\n" +
+                    $"Company:{plugin.assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company ?? ""}\n" +
+                    $"Copyright:{plugin.assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? ""}\n" +
+                    $"Description:{plugin.information.Description}\n\n";
 
-            }
+                }
 
             //カテゴリ名と親カテゴリ毎にグループ化
             
@@ -127,29 +127,35 @@ namespace PiViLity.Forms
                 AddGroupToNode(appSettingGroup);
                 AddGroupToNode(pluginSsettingGroup);
 
-                tvOptions.AfterSelect += (s, e) =>
-                {
-                    var tag = e?.Node?.Tag;
-                    if (e?.Node?.Tag is Label label)
-                    {
-                        pnlContent.Controls.Clear();
-                        pnlContent.Controls.Add(label);
-                    }
-                    else if (e?.Node is OptionGroup group)
-                    {
-                        pnlContent.Controls.Clear();
-                        pnlContent.Controls.Add(group.Panel);
-                    }
-                };
             });
+            tvOptions.AfterSelect += (s, e) =>
+            {
+                var tag = e?.Node?.Tag;
+                if (e?.Node?.Tag is Label label)
+                {
+                    pnlContent.AutoScroll = true;
+                    pnlContent.Controls.Clear();
+                    pnlContent.Controls.Add(label);
+                }
+                else if (e?.Node is OptionGroup group)
+                {
+                    pnlContent.AutoScroll = true;
+                    pnlContent.Controls.Clear();
+                    pnlContent.Controls.Add(group.Panel);
+                }
+            };
             //モジュール情報ノード追加
             var moduleInfoLabel = new Label()
             {
                 Text = moduleInfoText,
                 AutoSize = true,
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.None,
                 Padding = new Padding(10),
             };
+            moduleInfoLabel.PerformLayout();
+            var labelSize = moduleInfoLabel.Size;
+            //moduleInfoLabel.AutoSize = false;
+            moduleInfoLabel.Size = labelSize;
             var moduleInfoNode = new TreeNode("Module Information")
             {
                 Tag = moduleInfoLabel,
