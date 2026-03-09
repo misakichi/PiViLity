@@ -131,7 +131,7 @@ namespace PiViLity.Forms
                     {
                         isShow |= settingAttr.NoOption == false;
                         if (settingAttr.TextResouceId.Length > 0)
-                            itemText = settingInstance.SettingResource.GetString(settingAttr.TextResouceId);
+                            itemText = settingInstance.SettingResource?.GetString(settingAttr.TextResouceId) ?? "";
                         optionItemAttribute = settingAttr;
                     }
                 }
@@ -258,7 +258,7 @@ namespace PiViLity.Forms
                         string text = item.ToString() ?? "";
                         if (enumAttr!=null && enumAttr.TextResouceId!="")
                         {
-                            text = settingInstance.SettingResource.GetString(enumAttr.TextResouceId);
+                            text = settingInstance.SettingResource?.GetString(enumAttr.TextResouceId) ?? "";
                         }
                         enumList.Add(new EnunmOptionItem(item, text));
                     }

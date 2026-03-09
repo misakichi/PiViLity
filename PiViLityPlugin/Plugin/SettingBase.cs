@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualBasic.FileIO;
-using PiViLityCore.Option;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -41,7 +41,7 @@ namespace PiViLityCore.Plugin
         /// </summary>
         public abstract UInt16 GroupUIOrder { get; }
 
-        public abstract Resource.Manager SettingResource { get; }
+        public abstract ResourceManager? SettingResource { get; }
 
     }
 }

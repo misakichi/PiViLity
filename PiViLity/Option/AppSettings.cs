@@ -1,5 +1,4 @@
 ﻿using PiViLityCore.Option;
-using PiViLityCore.Resource;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +23,8 @@ namespace PiViLity.Option
     public class AppSettings : PiViLityCore.Plugin.SettingBase
     {
         static public readonly AppSettings Instance = new();
-        private static PiViLityCore.Resource.Manager _resource = new(Option.Resource.ResourceManager);
 
-        public override string CategoryText { get => SettingResource.GetString("Application"); }
+        public override string CategoryText { get => SettingResource.GetString("Application") ?? ""; }
         public override string CategoryName { get => "PiViLity App"; }
 
         public string ApplicationDirectory = System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? "";
@@ -39,7 +37,7 @@ namespace PiViLity.Option
         [OptionItem(NoOption = true)]
         public List<TvLvTabPage> TvLvTabPages { get; set; } = new();
 
-        public override Manager SettingResource => _resource;
+        public override System.Resources.ResourceManager SettingResource => Option.Resource.ResourceManager;
 
         public override ushort GroupUIOrder => 0;
 

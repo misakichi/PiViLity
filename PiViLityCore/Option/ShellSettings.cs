@@ -10,7 +10,7 @@ namespace PiViLityCore.Option
     public class ShellSettings : PiViLityCore.Plugin.SettingBase
     {
         public static readonly ShellSettings Instance = new();
-        private static PiViLityCore.Resource.Manager _resource = new(Option.Resource.ResourceManager);
+
         public override string CategoryText
         {
             get => Option.Resource.ShellSetting_Name;
@@ -19,7 +19,8 @@ namespace PiViLityCore.Option
         {
             get => "ShellSetting";
         }
-        public override PiViLityCore.Resource.Manager SettingResource => _resource;
+
+        public override System.Resources.ResourceManager? SettingResource => Option.Resource.ResourceManager;
         public override ushort GroupUIOrder => 10;
 
 

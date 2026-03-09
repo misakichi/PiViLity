@@ -46,9 +46,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <CLRSupport>NetCore</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -142,11 +142,6 @@ copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PiViLityCore\PiViLityCore.csproj">
-      <Project>{b0e9f600-c4fa-463f-b511-bca535f1da65}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="ImageReaderWIC.h" />
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="resource.h" />
@@ -162,11 +157,15 @@ copy $(TargetPath) $(SolutionDir)\PluginOut\$(Configuration)\</Command>
   <ItemGroup>
     <EmbeddedResource Include="CliResource.resx" />
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="CliResource.ja-JP.resx">
       <WithCulture>true</WithCulture>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PiViLityPlugin\PiViLityPlugin.csproj">
+      <Project>{49eca160-0765-4c49-93f1-bee95c9126a0}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

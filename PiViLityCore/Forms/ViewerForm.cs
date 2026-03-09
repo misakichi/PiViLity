@@ -103,7 +103,7 @@ namespace PiViLityCore.Forms
                 _onLeftKeyDown = true;
             }
             //ショートカットキーの処理
-            else if (_viewer is IShotcutCommandSupport commandSupport)
+            else if (_viewer is IShortcutCommandSupport commandSupport)
             {
                 commandSupport.OnKeyDown(e);
             }

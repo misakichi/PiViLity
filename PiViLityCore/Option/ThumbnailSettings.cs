@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PiViLityCore.Plugin;
-using PiViLityCore.Resource;
-using PiViLityCore.Resources;
 
 namespace PiViLityCore.Option
 {
@@ -16,7 +14,7 @@ namespace PiViLityCore.Option
     public class ThumbnailSettings : SettingBase
     {
         public static readonly ThumbnailSettings Instance = new();
-        private static PiViLityCore.Resource.Manager _resource = new (Option.Resource.ResourceManager);
+
         public override string CategoryText { 
             get=>Option.Resource.ThumbnailSetting_Name;
         }
@@ -26,7 +24,7 @@ namespace PiViLityCore.Option
             get => "ThumbnailSetting";
         }
 
-        public override Manager SettingResource => _resource;
+        public override System.Resources.ResourceManager? SettingResource => Option.Resource.ResourceManager;
 
         public override ushort GroupUIOrder => 20;
 

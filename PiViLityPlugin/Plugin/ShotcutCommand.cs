@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 
 namespace PiViLityCore.Plugin
 {
-    public class ShorcutTrigger
+    public class ShortcutTrigger
     {
         public Keys Key { get; set; } = Keys.None;
         public Keys Modifiers { get => Key & (Keys.Modifiers); }
@@ -22,11 +22,11 @@ namespace PiViLityCore.Plugin
         public MethodInfo? MethodInfo { get; set; } = null;
     }
 
-    public interface IShotcutCommandSupport
+    public interface IShortcutCommandSupport
     {
         string TargetName { get; }
 
-        List<ShorcutTrigger> ShortCutTriggers { get; set; }
+        List<ShortcutTrigger> ShortCutTriggers { get; set; }
 
         public void ResolveCommandMethods()
         {

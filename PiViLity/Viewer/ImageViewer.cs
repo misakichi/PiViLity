@@ -24,7 +24,7 @@ namespace PiViLity.Viewer
     public partial class ImageViewer :
         Panel,
         IImageViewer,
-        IShotcutCommandSupport
+        IShortcutCommandSupport
     {
         private float _drawScale = 1.0f;
         private Point _drawOffset = new(0, 0);
@@ -47,7 +47,7 @@ namespace PiViLity.Viewer
         public string TargetName => "Standard Image Viewer";
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public List<ShorcutTrigger> ShortCutTriggers { get; set; } = new();
+        public List<ShortcutTrigger> ShortCutTriggers { get; set; } = new();
 
 
         private PiViLityCore.Shell.DirectoryFilesDualterator directoryFilesDualterator = new();
@@ -87,11 +87,11 @@ namespace PiViLity.Viewer
             picImage.Paint += picImage_Paint;
 
             //register shortcut keys
-            ShortCutTriggers.Add(new ShorcutTrigger() { Key = Keys.Oemplus, MethodName = "ZoomIn" });
-            ShortCutTriggers.Add(new ShorcutTrigger() { Key = Keys.OemMinus, MethodName = "ZoomOut" });
-            ShortCutTriggers.Add(new ShorcutTrigger() { Key = Keys.Control | Keys.C, MethodName = "CopyImage" });
+            ShortCutTriggers.Add(new ShortcutTrigger() { Key = Keys.Oemplus, MethodName = "ZoomIn" });
+            ShortCutTriggers.Add(new ShortcutTrigger() { Key = Keys.OemMinus, MethodName = "ZoomOut" });
+            ShortCutTriggers.Add(new ShortcutTrigger() { Key = Keys.Control | Keys.C, MethodName = "CopyImage" });
             //resolve methods
-            (this as IShotcutCommandSupport)?.ResolveCommandMethods();
+            (this as IShortcutCommandSupport)?.ResolveCommandMethods();
 
         }
 

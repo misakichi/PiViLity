@@ -1,6 +1,7 @@
-using PiViLityCore.Plugin;
+ï»¿using PiViLityCore.Plugin;
 using System.Globalization;
 using System.Reflection;
+using System.Resources;
 
 namespace PiViLity
 {
@@ -9,7 +10,7 @@ namespace PiViLity
         public string Name => "PiViLity App";
         public string Description => "";
 
-        public string OptionItemName => "ƒAƒvƒŠƒP[ƒVƒ‡ƒ“";
+        public string OptionItemName => "ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³";
 
         public bool Initialize() => true;
 
@@ -18,7 +19,7 @@ namespace PiViLity
 
     internal static class App
     {
-        public static PiViLityCore.Resource.Manager AppResource { get; } = new ("PiViLity.Resource", Assembly.GetExecutingAssembly());
+        public static ResourceManager AppResource { get; } = new ResourceManager("PiViLity.Resource", Assembly.GetExecutingAssembly());
 
         /// <summary lang="ja">
         ///  The main entry point for the application.

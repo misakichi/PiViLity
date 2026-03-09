@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -17,6 +18,41 @@ using System.Xml.Serialization;
 namespace PiViLityCore.Plugin
 {
 
+    public sealed class PluginLoadContext : AssemblyLoadContext
+    {
+        private readonly string _pluginDirectory;
+        private readonly AssemblyDependencyResolver _resolver;
+
+        public PluginLoadContext(string pluginPath, bool isCollectible)
+            : base(isCollectible)
+        {
+            _pluginDirectory = Path.GetDirectoryName(pluginPath)!;
+            _resolver = new AssemblyDependencyResolver(pluginPath);
+        }
+
+        protected override Assembly? Load(AssemblyName assemblyName)
+        {
+            var defaultAsm = Default.Assemblies;
+            foreach (var asm in defaultAsm)
+            {
+                if (AssemblyName.ReferenceMatchesDefinition(asm.GetName(), assemblyName))
+                    return asm;
+            }
+
+            var path = _resolver.ResolveAssemblyToPath(assemblyName);
+            if (path != null)
+                return LoadFromAssemblyPath(path);
+            return null;
+        }
+
+        protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+        {
+            var path = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+            if (path != null)
+                return LoadUnmanagedDllFromPath(path);
+            return IntPtr.Zero;
+        }
+    }
 
     /// <summary>
     /// プラグイン情報
@@ -151,7 +187,9 @@ namespace PiViLityCore.Plugin
         {
             if (System.IO.File.Exists(path))
             {
-                var asm = Assembly.LoadFile(path);
+                var alc = new PluginLoadContext(path, false);
+                var asm = alc.LoadFromAssemblyPath(path);
+                //var asm = Assembly.LoadFile(path);
                 if (asm != null)
                 {
                     AnalyzeAssembly(asm);

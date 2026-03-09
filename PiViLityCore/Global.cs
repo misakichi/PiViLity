@@ -15,7 +15,7 @@ namespace PiViLityCore
 {
     static public class Global
     {
-        internal static Resource.Manager Resource = new(Resources.Resource.ResourceManager);
+        internal static ResourceManager Resource = Resources.Resource.ResourceManager;
         private static SynchronizationContext? _syncContext;
 
         static Global()

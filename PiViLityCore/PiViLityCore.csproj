@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PiViLityNative\PiViLityNative.vcxproj" />
+    <ProjectReference Include="..\PiViLityPlugin\PiViLityPlugin.csproj" />
   </ItemGroup>
 
   <ItemGroup>

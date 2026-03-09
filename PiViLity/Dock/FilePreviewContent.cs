@@ -17,6 +17,16 @@ namespace PiViLity.Dock
             Text = "Preview";
             DockAreas = DockAreas.DockLeft | DockAreas.DockRight | DockAreas.DockTop | DockAreas.DockBottom | DockAreas.Float;
         }
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                return cp;
+            }
+        }
+        
         protected override string GetPersistString()
         {
             return "FilePreviewContent";

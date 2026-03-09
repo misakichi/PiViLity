@@ -18,7 +18,19 @@ namespace PiViLity.Dock
             InitializeComponent();
             treeProp.DrawMode = TreeViewDrawMode.OwnerDrawText;
             treeProp.DrawNode += TreeProp_DrawNode;
+            
         }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                return cp;
+            }
+        }
+
         protected override string GetPersistString()
         {
             return "FilePropertyContent";
@@ -113,6 +125,7 @@ namespace PiViLity.Dock
                     }
                 }
             }
+            treeProp.BeginUpdate();
             treeProp.Nodes.Clear();
             treeProp.Nodes.Add(fileRoot);
             if(imgRoot.Nodes.Count > 0)
@@ -120,6 +133,7 @@ namespace PiViLity.Dock
             if(othersRoot.Nodes.Count > 0)
                 treeProp.Nodes.Add(othersRoot);
             treeProp.ExpandAll();
+            treeProp.EndUpdate();
         }
     }
 }
