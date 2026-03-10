@@ -38,10 +38,6 @@ namespace PiViLity
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            if(SystemIsLightThemeSetting())
-                Application.SetColorMode(SystemColorMode.Classic);
-            else
-                Application.SetColorMode(SystemColorMode.Dark);
             Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             System.Diagnostics.Debug.Assert(Application.RenderWithVisualStyles);
             System.Diagnostics.Debug.WriteLine($"IsDark={PiVilityNative.SystemColor.IsDarkMode()} BackGround={PiVilityNative.SystemColor.BackGroundColor().ToString()}");
@@ -62,6 +58,22 @@ namespace PiViLity
                 PluginManager.Instance.AnalyzeAssembly(typeof(PiViLityCore.Global).Assembly);
                 PluginManager.Instance.LoadPlugins(appDir + "\\Plugins");
                 PluginManager.Instance.LoadSettings(appDir + "\\settings.json");
+            }
+
+            var isSystemColor = Option.AppSettings.Instance.Theme == Option.ColorTheme.SystemDefault;
+            if (isSystemColor)
+            {
+                if (SystemIsLightThemeSetting())
+                    Application.SetColorMode(SystemColorMode.Classic);
+                else
+                    Application.SetColorMode(SystemColorMode.Dark);
+            }
+            else
+            {
+                if (Option.AppSettings.Instance.Theme == Option.ColorTheme.Light)
+                    Application.SetColorMode(SystemColorMode.Classic);
+                else
+                    Application.SetColorMode(SystemColorMode.Dark);
             }
 
             switch (Option.AppSettings.Instance.AppLanguage)

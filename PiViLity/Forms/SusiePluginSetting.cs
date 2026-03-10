@@ -14,5 +14,10 @@ namespace PiViLity.Forms
         {
             InitializeComponent();
         }
+
+        private void SusiePluginSetting_Load(object sender, EventArgs e)
+        {
+            txtPluginDirectory.Text = PiViLity.Option.SusiePluginSettings.Instance.PluginPath;
+        }
     }
 }

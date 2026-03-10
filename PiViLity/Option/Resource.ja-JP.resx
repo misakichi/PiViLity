@@ -135,4 +135,19 @@
   <data name="Application.Language.English" xml:space="preserve">
     <value>English</value>
   </data>
+  <data name="Application.Theme" xml:space="preserve">
+    <value>テーマ色</value>
+  </data>
+  <data name="Application.Theme.SystemDefault" xml:space="preserve">
+    <value>OSの設定に準ずる</value>
+  </data>
+  <data name="Application.Theme.Light" xml:space="preserve">
+    <value>ライト</value>
+  </data>
+  <data name="Application.Theme.Dark" xml:space="preserve">
+    <value>ダーク</value>
+  </data>
+  <data name="Application.Theme.Desc" xml:space="preserve">
+    <value>UIの色を設定します。適用するにはアプリケーションの再起動が必要です。</value>
+  </data>
 </root>

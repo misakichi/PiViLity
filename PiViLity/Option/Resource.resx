@@ -135,4 +135,19 @@
   <data name="Application.Language.English" xml:space="preserve">
     <value>English</value>
   </data>
+  <data name="Application.Theme" xml:space="preserve">
+    <value>Theme Color</value>
+  </data>
+  <data name="Application.Theme.SystemDefault" xml:space="preserve">
+    <value>Ststem Default</value>
+  </data>
+  <data name="Application.Theme.Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Application.Theme.Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Application.Theme.Desc" xml:space="preserve">
+    <value>Select the UI  color. Do restart application for to apply.</value>
+  </data>
 </root>

@@ -20,6 +20,16 @@ namespace PiViLity.Option
         [OptionItem(TextResouceId = "Application.Language.English")]
         English = 2,
     }
+    public enum ColorTheme
+    {
+        [OptionItem(TextResouceId = "Application.Theme.SystemDefault")]
+        SystemDefault = 0,
+        [OptionItem(TextResouceId = "Application.Theme.Light")]
+        Light = 1,
+        [OptionItem(TextResouceId = "Application.Theme.Dark")]
+        Dark = 2,
+    }
+
 
     [Serializable, Option]
     public class AppSettings : SettingBase
@@ -33,8 +43,11 @@ namespace PiViLity.Option
 
         public string DockLayoutFile = (System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? "") + "\\layout.config";
 
-        [OptionItem(TextResouceId = "Application.Language", DescriptionTextResouceId ="Application.Language.Desc")]
+        [OptionItem(TextResouceId = "Application.Language", DescriptionTextResouceId ="Application.Language.Desc", UIOrder = 1)]
         public Language AppLanguage = Language.SystemDefault;
+
+        [OptionItem(TextResouceId = "Application.Theme", DescriptionTextResouceId = "Application.Theme.Desc", UIOrder = 2)]
+        public ColorTheme Theme = ColorTheme.SystemDefault;
 
         [OptionItem(NoOption = true)]
         public List<TvLvTabPage> TvLvTabPages { get; set; } = new();

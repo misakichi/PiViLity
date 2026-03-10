@@ -29,18 +29,44 @@
         private void InitializeComponent()
         {
             GroupBox groupBox1;
+            Button btnDirRef;
+            txtPluginDirectory = new TextBox();
             groupBox1 = new GroupBox();
+            btnDirRef = new Button();
+            groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(txtPluginDirectory);
+            groupBox1.Controls.Add(btnDirRef);
             groupBox1.Dock = DockStyle.Top;
             groupBox1.Location = new Point(3, 3);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(548, 49);
-            groupBox1.TabIndex = 0;
+            groupBox1.Padding = new Padding(6);
+            groupBox1.Size = new Size(906, 54);
+            groupBox1.TabIndex = 2;
             groupBox1.TabStop = false;
             groupBox1.Text = "Susie プラグインディレクトリ";
+            // 
+            // txtPluginDirectory
+            // 
+            txtPluginDirectory.Dock = DockStyle.Fill;
+            txtPluginDirectory.Location = new Point(6, 22);
+            txtPluginDirectory.Name = "txtPluginDirectory";
+            txtPluginDirectory.Size = new Size(866, 23);
+            txtPluginDirectory.TabIndex = 2;
+            // 
+            // btnDirRef
+            // 
+            btnDirRef.Dock = DockStyle.Right;
+            btnDirRef.Location = new Point(872, 22);
+            btnDirRef.Name = "btnDirRef";
+            btnDirRef.Padding = new Padding(0, 0, 0, 6);
+            btnDirRef.Size = new Size(28, 26);
+            btnDirRef.TabIndex = 1;
+            btnDirRef.Text = "...";
+            btnDirRef.UseVisualStyleBackColor = true;
             // 
             // SusiePluginSetting
             // 
@@ -49,11 +75,15 @@
             Controls.Add(groupBox1);
             Name = "SusiePluginSetting";
             Padding = new Padding(3);
-            Size = new Size(554, 401);
+            Size = new Size(912, 586);
+            Load += SusiePluginSetting_Load;
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
+        private TextBox txtPluginDirectory;
     }
 }

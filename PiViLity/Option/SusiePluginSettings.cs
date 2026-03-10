@@ -1,4 +1,5 @@
-﻿using PiViLityCore.Option;
+﻿using Microsoft.VisualBasic.FileIO;
+using PiViLityCore.Option;
 using PiViLityPlugin.Difinition;
 using PiViLityPlugin.Option;
 using System;
@@ -24,6 +25,7 @@ namespace PiViLity.Option
 
         public override ResourceManager? SettingResource => null;
 
-        
+        [OptionItem(NoOption = true)]
+        public string PluginPath { get; set; } = SpecialDirectories.CurrentUserApplicationData;
     }
 }

@@ -204,7 +204,7 @@ namespace PiViLity.Forms
         private void TreeAndViewTab_Load(object sender, EventArgs e)
         {
             List<Tuple<bool, DirectoryTab>> loadSettingPair = new();
-            if (App.SystemIsLightThemeSetting())
+            if (Application.ColorMode==SystemColorMode.Classic)
             {
                 dockPanel.Theme = new WeifenLuo.WinFormsUI.Docking.VS2015LightTheme();
             }

@@ -68,6 +68,13 @@ namespace PiViLityCore.Controls
         private int _activeSortIndex = 0;
         private int _dragEnterKeyState = 0;
 
+        static private readonly SolidBrush SelectedColorDark = new SolidBrush(Color.FromArgb(128, 64, 64, 160));
+        static private readonly SolidBrush PlateColorDark = new(Color.FromArgb(192, 24, 24, 24));
+        static private readonly SolidBrush SelectedColorLight = new SolidBrush(Color.FromArgb(128, 200, 200, 200));
+        static private readonly SolidBrush PlateColorLight = new(Color.FromArgb(192, 150, 150, 200));
+        private SolidBrush SelectedColor = Application.ColorMode==SystemColorMode.Dark ? SelectedColorDark : SelectedColorLight;
+        private SolidBrush PlateColor = Application.ColorMode == SystemColorMode.Dark ? PlateColorDark : PlateColorLight;
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -404,6 +411,7 @@ namespace PiViLityCore.Controls
             }
         }
 
+
         /// <summary>
         /// DrawItemイベントを発生させます。
         /// タイルの場合のみサムネイルをオーナードローで描画します。
@@ -467,18 +475,13 @@ namespace PiViLityCore.Controls
 
                 if(e.Item.Selected)
                 {
-                    e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(128, 64, 64, 160)), e.Bounds);
+                    e.Graphics.FillRectangle(SelectedColor, e.Bounds);
                 }
 
                 e.DrawFocusRectangle();
                 
                 var plateBounds = new Rectangle(e.Bounds.Left, e.Bounds.Bottom-Font.Height, e.Bounds.Width, Font.Height);
-                using (var brush = new SolidBrush(Color.FromArgb(192, 24, 24, 24)))
-                {
-                    if (brush != null)
-                        e.Graphics.FillRectangle(brush, plateBounds);
-                }
-
+                e.Graphics.FillRectangle(PlateColor, plateBounds);                
                 e.DrawText(TextFormatFlags.Bottom | TextFormatFlags.HorizontalCenter | TextFormatFlags.TextBoxControl | TextFormatFlags.EndEllipsis);
                 base.OnDrawItem(e);
                 return;
