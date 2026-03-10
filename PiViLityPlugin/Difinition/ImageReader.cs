@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PiViLityCore.Plugin
+namespace PiViLityPlugin.Difinition
 {
     /// <summary>
     /// 画像ファイルのサムネイルの品質を指定します。

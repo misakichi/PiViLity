@@ -27,9 +27,9 @@ namespace PiViLityCore.Shell
             get => _path;
             set
             {
+                _fsw?.Dispose();
                 if (_path != value)
                 {
-                    _fsw?.Dispose();
                     _path = "";
 
                     var dirpath = File.Exists(value) ? System.IO.Path.GetDirectoryName(value) : value;

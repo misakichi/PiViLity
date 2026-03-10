@@ -7,7 +7,7 @@ using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PiViLityCore.Plugin
+namespace PiViLityPlugin.Difinition
 {
 
     /// <summary>
@@ -29,11 +29,12 @@ namespace PiViLityCore.Plugin
         /// </summary>
         public abstract string CategoryName { get; }
 
-        public virtual bool IsUserOptions { get => false; }
-
-        public virtual bool GetHasSettingDialog() => false;
-
-        public virtual Form? SettingDialog() => null;
+        /// <summary>
+        /// 非nullの場合、そのコントロールが設定の責任を負う。
+        /// 自動UI生成を行わずにコントロールがfillでが表示される。
+        /// </summary>
+        /// <returns>パネル</returns>
+        public virtual Control? SettingControl() => null;
 
         /// <summary>
         /// カテゴリ表示順ソート
@@ -41,6 +42,9 @@ namespace PiViLityCore.Plugin
         /// </summary>
         public abstract UInt16 GroupUIOrder { get; }
 
+        /// <summary>
+        /// OptionItem属性がテキストリソース参照を行う際はこのリソースを参考する。
+        /// </summary>
         public abstract ResourceManager? SettingResource { get; }
 
     }

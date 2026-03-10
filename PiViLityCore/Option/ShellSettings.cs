@@ -1,13 +1,15 @@
-﻿using System;
+﻿using PiViLityPlugin.Difinition;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PiViLityPlugin.Option;
 
 namespace PiViLityCore.Option
 {
     [Serializable, Option]
-    public class ShellSettings : PiViLityCore.Plugin.SettingBase
+    public class ShellSettings : SettingBase
     {
         public static readonly ShellSettings Instance = new();
 

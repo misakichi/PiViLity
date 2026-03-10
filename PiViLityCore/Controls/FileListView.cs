@@ -10,6 +10,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using PiViLityPlugin.Option;
 
 namespace PiViLityCore.Controls
 {
@@ -99,6 +100,12 @@ namespace PiViLityCore.Controls
             UpdateStyles();
             DoubleBuffered = true;
             PiViLityCore.Event.Option.ApplySettings += OnApplySettings;
+
+            Disposed += (o, e) =>
+            {
+                _fsw.NotifyFilter = (0);
+                _fsw?.Dispose();
+            };
         }
 
         void CreateIconStore()
@@ -191,6 +198,7 @@ namespace PiViLityCore.Controls
 
         }
 
+        
         /// <summary>
         /// ファイルリストの表示パスを取得または設定します。
         /// </summary>
@@ -313,6 +321,9 @@ namespace PiViLityCore.Controls
         /// </summary>
         private void RemakeFileList()
         {
+            if (IsDisposed)
+                return;
+
             var path = _path;
             if (Directory.Exists(path))
             {

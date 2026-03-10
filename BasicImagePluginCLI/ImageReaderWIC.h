@@ -1,5 +1,5 @@
 ﻿#pragma once
-using namespace PiViLityCore::Plugin;
+using namespace PiViLityPlugin::Difinition;
 using namespace System;
 using namespace System::Collections::Generic;
 
@@ -7,7 +7,7 @@ namespace BasicImagePluginCLI
 {
 	class ImageReaderWICNativeImpl;
 
-	public ref class ImageReaderWIC : public PiViLityCore::Plugin::ImageReaderBase, public PiViLityCore::Plugin::IPropertyReader
+	public ref class ImageReaderWIC : public ImageReaderBase, public IPropertyReader
 	{
 	private:
 		String^ filePath_ = "";
@@ -37,7 +37,7 @@ namespace BasicImagePluginCLI
 
 		ImageReaderWICNativeImpl* nativeImpl_ = nullptr;
 
-		virtual List<PiViLityCore::Plugin::Property^>^ ReadProperties();
+		virtual List<PiViLityPlugin::Difinition::Property^>^ ReadProperties();
 
 	}; // class ImageReaderJpeg
 

@@ -1,4 +1,6 @@
 ﻿using PiViLityCore.Option;
+using PiViLityPlugin.Difinition;
+using PiViLityPlugin.Option;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +22,7 @@ namespace PiViLity.Option
     }
 
     [Serializable, Option]
-    public class AppSettings : PiViLityCore.Plugin.SettingBase
+    public class AppSettings : SettingBase
     {
         static public readonly AppSettings Instance = new();
 

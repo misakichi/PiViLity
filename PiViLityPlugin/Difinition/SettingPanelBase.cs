@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PiViLityCore.Plugin
+namespace PiViLityPlugin.Difinition
 {
     /// <summary>
     /// パネルそのままを設定画面として利用する場合の基底クラス

@@ -1,4 +1,5 @@
 ﻿using PiVilityNative;
+using PiViLityPlugin.Difinition;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -117,7 +118,7 @@ namespace PiViLity
 
         object _lockObj = new object();
 
-        private void GetThumbnailAsync(PiViLityCore.Plugin.IImageReader imageReader, string path, Action<int>? postAction, bool nouseSys)
+        private void GetThumbnailAsync(IImageReader imageReader, string path, Action<int>? postAction, bool nouseSys)
         {
             try
             {

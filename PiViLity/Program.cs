@@ -1,4 +1,5 @@
 ﻿using PiViLityCore.Plugin;
+using PiViLityPlugin.Difinition;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
@@ -21,6 +22,14 @@ namespace PiViLity
     {
         public static ResourceManager AppResource { get; } = new ResourceManager("PiViLity.Resource", Assembly.GetExecutingAssembly());
 
+
+        internal static bool SystemIsLightThemeSetting()
+        {
+            var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
+            int.TryParse(key?.GetValue("AppsUseLightTheme")?.ToString(), out var isLight);
+            return isLight != 0;
+        }
+
         /// <summary lang="ja">
         ///  The main entry point for the application.
         /// </summary>
@@ -29,10 +38,10 @@ namespace PiViLity
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-#pragma warning disable WFO5001 
-            Application.SetColorMode(SystemColorMode.System);
-            //Application.SetColorMode(SystemColorMode.Classic);
-#pragma warning restore WFO5001
+            if(SystemIsLightThemeSetting())
+                Application.SetColorMode(SystemColorMode.Classic);
+            else
+                Application.SetColorMode(SystemColorMode.Dark);
             Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             System.Diagnostics.Debug.Assert(Application.RenderWithVisualStyles);
             System.Diagnostics.Debug.WriteLine($"IsDark={PiVilityNative.SystemColor.IsDarkMode()} BackGround={PiVilityNative.SystemColor.BackGroundColor().ToString()}");
@@ -50,6 +59,7 @@ namespace PiViLity
             {
                 var executingAssembly = Assembly.GetExecutingAssembly();
                 PluginManager.Instance.AnalyzeAssembly(executingAssembly);
+                PluginManager.Instance.AnalyzeAssembly(typeof(PiViLityCore.Global).Assembly);
                 PluginManager.Instance.LoadPlugins(appDir + "\\Plugins");
                 PluginManager.Instance.LoadSettings(appDir + "\\settings.json");
             }

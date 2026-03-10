@@ -1,5 +1,7 @@
 ﻿using PiViLityCore.Option;
 using PiViLityCore.Plugin;
+using PiViLityPlugin.Difinition;
+using PiViLityPlugin.Option;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,51 +59,60 @@ namespace PiViLity.Forms
             public int GroupUIOrder = int.MaxValue;
 
             //グループパネル
-            public Panel Panel = new();
+            public Panel _groupPanel = new();
 
             //オプション項目パネル
-            private List<OptionItemPanel> Items = new();
+            private List<OptionItemPanel>? _settingItems = null;
+
+            //専用パネル
+            private Control? _optionGroupPanelFromSetting = null;
 
             public void AddSetting(SettingBase setting)
             {
-                var fields = setting.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetField);
-                var properties = setting.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
-
-
                 GroupUIOrder = Math.Min(GroupUIOrder, setting.GroupUIOrder);
-
-                //項目単位ではプラグイン→グループ→項目の順でソートする
-                var pluginIndex = PluginManager.Instance.Plugins.FindIndex(plugin => plugin.settings.Contains(setting));
-                if (setting.GetType().Assembly == typeof(App).Assembly || setting.GetType().Assembly == typeof(PiViLityCore.Global).Assembly)
+                if (setting.SettingControl() is Control groupSettingControl)
                 {
-                    pluginIndex = 0;
+                    _optionGroupPanelFromSetting = groupSettingControl;
                 }
                 else
                 {
-                    pluginIndex = Math.Max(1, pluginIndex + 1);
-                }
+                    _settingItems = new();
 
-                //フィールド、プロパティを列挙し、UIOrderに応じてソートしてから追加
-                foreach (var field in fields)
-                {
-                    var panel = AddSettingItem(setting, field);
-                    if(panel == null)
-                        continue;
-                    panel.UIOrder+= (UInt64)pluginIndex << 32;
-                    Items.Add(panel);
-                }
-                foreach (var prop in properties)
-                {
-                    if (prop.CanWrite)
+                    var fields = setting.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetField);
+                    var properties = setting.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
+
+                    //項目単位ではプラグイン→グループ→項目の順でソートする
+                    var pluginIndex = PluginManager.Instance.Plugins.FindIndex(plugin => plugin.settings.Contains(setting));
+                    if (setting.GetType().Assembly == typeof(App).Assembly || setting.GetType().Assembly == typeof(PiViLityCore.Global).Assembly)
                     {
-                        var panel = AddSettingItem(setting, prop);
+                        pluginIndex = 0;
+                    }
+                    else
+                    {
+                        pluginIndex = Math.Max(1, pluginIndex + 1);
+                    }
+
+                    //フィールド、プロパティを列挙し、UIOrderに応じてソートしてから追加
+                    foreach (var field in fields)
+                    {
+                        var panel = AddSettingItem(setting, field);
                         if (panel == null)
                             continue;
-                        panel.UIOrder+= (UInt64)pluginIndex << 32;
-                        Items.Add(panel);
+                        panel.UIOrder += (UInt64)pluginIndex << 32;
+                        _settingItems.Add(panel);
+                    }
+                    foreach (var prop in properties)
+                    {
+                        if (prop.CanWrite)
+                        {
+                            var panel = AddSettingItem(setting, prop);
+                            if (panel == null)
+                                continue;
+                            panel.UIOrder += (UInt64)pluginIndex << 32;
+                            _settingItems.Add(panel);
+                        }
                     }
                 }
-
             }
             /// <summary>
             /// 設定１要素のUIを生成し、パネルにまとめて返す
@@ -115,6 +126,9 @@ namespace PiViLity.Forms
             /// <exception cref="NotImplementedException"></exception>
             private OptionItemPanel? AddSettingItem(SettingBase settingInstance, MemberInfo member)
             {
+                if (_settingItems == null)
+                    return null;
+
                 bool isShow = false;
                 string itemText = member.Name;
 
@@ -164,10 +178,17 @@ namespace PiViLity.Forms
                 //string
                 if (targetType == typeof(string))
                 {
+                    if (optionItemAttribute.Width == 0)
+                    {
+                        PiViLityCore.Global.ErrorLog("string型OptionはWidthが0以外であること");
+                        return null;
+                    }
+
                     var strInput = new TextBox()
                     {
                         Text = PiViLityCore.Util.Member.GetClassValue<string>(settingInstance, member)
                     };
+                    strInput.Width = optionItemAttribute.Width;
                     AddControlToPanel(strInput);
                     strInput.TextChanged += (s, e) =>
                     {
@@ -180,10 +201,23 @@ namespace PiViLity.Forms
                 //int
                 else if (targetType == typeof(int))
                 {
+                    if (optionItemAttribute.Width == 0)
+                    {
+                        PiViLityCore.Global.ErrorLog("int型OptionはWidthが0以外であること");
+                        return null;
+                    }
+
                     var numInput = new NumericUpDown()
                     {
                         Value = PiViLityCore.Util.Member.GetValue<int>(settingInstance, member)
                     };
+                    numInput.Width = optionItemAttribute.Width;
+                    if (optionItemAttribute is OptionItemIntAttribute intAttribute)
+                    {
+                        numInput.Minimum = intAttribute.Min;
+                        numInput.Maximum = intAttribute.Max;
+                    }
+
                     AddControlToPanel(numInput);
                     numInput.ValueChanged += (s, e) =>
                     {
@@ -203,6 +237,11 @@ namespace PiViLity.Forms
                         Text = itemText,
                         Checked = PiViLityCore.Util.Member.GetValue<bool>(settingInstance, member)
                     };
+                    if (optionItemAttribute.Width == 0)
+                        checkBox.AutoSize = true;
+                    else
+                        checkBox.Width = optionItemAttribute.Width;
+
                     nameLabel.Text = "";
                     AddControlToPanel(checkBox);
                     checkBox.CheckedChanged += (s, e) =>
@@ -230,6 +269,16 @@ namespace PiViLity.Forms
                             heightInput.Minimum = sizeAttr.MinHeight;
                             heightInput.Maximum = sizeAttr.MaxHeight;
                         }
+                    }
+                    if (optionItemAttribute.Width == 0)
+                    {
+                        widthInput.AutoSize = true;
+                        heightInput.AutoSize = true;
+                    }
+                    else
+                    {
+                        widthInput.Width = optionItemAttribute.Width;
+                        heightInput.Width = optionItemAttribute.Width;
                     }
                     Size value = PiViLityCore.Util.Member.GetValue(settingInstance, member);
                     void OnChangeSizeValue(object? sender, EventArgs e)
@@ -270,6 +319,16 @@ namespace PiViLity.Forms
                         DropDownStyle = ComboBoxStyle.DropDownList,
                     };
                     comboBox.Items.AddRange(enumList.ToArray());
+                    int requireWidth = optionItemAttribute.Width;
+                    if (optionItemAttribute.Width == 0)
+                    {
+                        foreach (var it in enumList)
+                        {
+                            requireWidth = Math.Max(TextRenderer.MeasureText(it.Text, comboBox.Font).Width + 32, requireWidth);
+                        }
+                    }
+                    comboBox.Width = requireWidth;
+
                     //名称とコンボをパネルにまとめる
                     var selected = enumList.FindIndex(e => e.Value.Equals(currentValue));
                     comboBox.SelectedIndex = Math.Max(0,selected);
@@ -323,33 +382,42 @@ namespace PiViLity.Forms
             /// </summary>
             public void SettingPanelFinalize()
             {
-                Panel.Dock = DockStyle.Top;
-                Panel.PerformLayout();
-                foreach (Control control in Panel.Controls)
+                if (_optionGroupPanelFromSetting != null)
                 {
-                    Panel.Height = Math.Max(Panel.Height, control.Bottom);
+                    _optionGroupPanelFromSetting.Dock=DockStyle.Fill;
+                    _groupPanel.Dock = DockStyle.Fill;
+                    _groupPanel.Controls.Add(_optionGroupPanelFromSetting);
                 }
-                Items.Sort((a, b) => b.OptionAttribute.UIOrder - a.OptionAttribute.UIOrder);
-                Panel.Controls.AddRange(Items.ToArray());
-
-                setTabIndex(Panel);
-                Panel.PerformLayout();
-
-                //パネルの高さを調整
-                int nameMaxWidth = 0;
-                foreach (var panel in Items)
+                else if (_settingItems != null)
                 {
-                    nameMaxWidth = Math.Max(nameMaxWidth, panel.ItemNameLabel?.Width ?? 0);
-                    Panel.Height = Math.Max(Panel.Height, panel.Bottom);
-                }
+                    _groupPanel.Dock = DockStyle.Top;
+                    _groupPanel.PerformLayout();
+                    foreach (Control control in _groupPanel.Controls)
+                    {
+                        _groupPanel.Height = Math.Max(_groupPanel.Height, control.Bottom);
+                    }
+                    _settingItems.Sort((a, b) => b.OptionAttribute.UIOrder - a.OptionAttribute.UIOrder);
+                    _groupPanel.Controls.AddRange(_settingItems.ToArray());
 
-                //名称ラベルの幅を揃える
-                foreach (var panel in Items)
-                {
-                    if (panel.ItemNameLabel == null)
-                        continue;
-                    panel.ItemNameLabel.AutoSize = false;
-                    panel.ItemNameLabel.Width = nameMaxWidth;
+                    setTabIndex(_groupPanel);
+                    _groupPanel.PerformLayout();
+
+                    //パネルの高さを調整
+                    int nameMaxWidth = 0;
+                    foreach (var panel in _settingItems)
+                    {
+                        nameMaxWidth = Math.Max(nameMaxWidth, panel.ItemNameLabel?.Width ?? 0);
+                        _groupPanel.Height = Math.Max(_groupPanel.Height, panel.Bottom);
+                    }
+
+                    //名称ラベルの幅を揃える
+                    foreach (var panel in _settingItems)
+                    {
+                        if (panel.ItemNameLabel == null)
+                            continue;
+                        panel.ItemNameLabel.AutoSize = false;
+                        panel.ItemNameLabel.Width = nameMaxWidth;
+                    }
                 }
             }
 

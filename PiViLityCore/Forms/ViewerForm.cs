@@ -1,4 +1,5 @@
 ﻿using PiViLityCore.Plugin;
+using PiViLityPlugin.Difinition;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,7 +15,7 @@ namespace PiViLityCore.Forms
 {
     public partial class ViewerForm : Form
     {
-        private Plugin.IViewer? _viewer;
+        private IViewer? _viewer;
 
         public ViewerForm()
         {
@@ -33,9 +34,9 @@ namespace PiViLityCore.Forms
         {
             var reader = PluginManager.Instance.GetImageReader(filename);
             bool ret = false;
-            if (reader is PiViLityCore.Plugin.IImageReader)
+            if (reader is IImageReader)
             {
-                if (_viewer is not PiViLityCore.Plugin.IViewer)
+                if (_viewer is not IViewer)
                 {
                     status.Items.Clear();
                     viewToolStrip.Items.Clear();

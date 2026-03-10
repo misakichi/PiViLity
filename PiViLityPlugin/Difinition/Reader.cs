@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PiViLityCore.Plugin
+namespace PiViLityPlugin.Difinition
 {
     public interface IReader : IDisposable
     {

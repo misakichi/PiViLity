@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PiViLityCore.Option
+namespace PiViLityPlugin.Option
 {
     public class OptionAttribute : Attribute
     {
@@ -68,9 +68,20 @@ namespace PiViLityCore.Option
 
         public UInt16 UIOrder = 0;
 
+        /// <summary>
+        /// 項目入力コントロールの幅。0ならAutoSize
+        /// </summary>
+        public int Width = 0;
+
 
     }
 
+    public class OptionItemIntAttribute : OptionItemAttribute
+    {
+        public OptionItemIntAttribute() : base() { }
+        public int Min = 0;
+        public int Max = 999;
+    }
 
     public class OptionItemSizeAttribute : OptionItemAttribute
     {

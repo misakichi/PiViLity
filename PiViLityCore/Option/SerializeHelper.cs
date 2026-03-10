@@ -10,6 +10,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using PiViLityPlugin.Option;
 
 namespace PiViLityCore.Option
 {

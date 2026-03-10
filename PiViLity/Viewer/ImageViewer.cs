@@ -1,10 +1,12 @@
 ﻿using PiViLityCore.Option;
 using PiViLityCore.Plugin;
 using PiViLityCore.Shell;
+using PiViLityPlugin.Difinition;
 using Sharpen;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -14,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Windows.Media.Audio;
+using Windows.Security.EnterpriseData;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PiViLity.Viewer
@@ -92,6 +95,11 @@ namespace PiViLity.Viewer
             ShortCutTriggers.Add(new ShortcutTrigger() { Key = Keys.Control | Keys.C, MethodName = "CopyImage" });
             //resolve methods
             (this as IShortcutCommandSupport)?.ResolveCommandMethods();
+
+            Disposed += (o, e) =>
+            {
+                directoryFilesDualterator.Path = "";
+            };
 
         }
 

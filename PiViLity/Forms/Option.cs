@@ -1,6 +1,8 @@
 ﻿using PiViLityCore;
 using PiViLityCore.Option;
 using PiViLityCore.Plugin;
+using PiViLityPlugin.Difinition;
+using PiViLityPlugin.Option;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -66,8 +68,7 @@ namespace PiViLity.Forms
 
                 }
 
-            //カテゴリ名と親カテゴリ毎にグループ化
-            
+                //カテゴリ名と親カテゴリ毎にグループ化            
                 Dictionary<(string Name, Type Type, Type? Parent), OptionGroup> appSettingGroup = new();
                 Dictionary<(string Name, Type Type, Type? Parent), OptionGroup> pluginSsettingGroup = new();
 
@@ -120,7 +121,7 @@ namespace PiViLity.Forms
                                 continue;
                             }
                         }
-                        //親カテゴリがない場合はルートに追加                        
+                        //親カテゴリがない場合はルートに追加
                         moduleNodes.Add(group.Value);
                     }
                 }
@@ -141,7 +142,7 @@ namespace PiViLity.Forms
                 {
                     pnlContent.AutoScroll = true;
                     pnlContent.Controls.Clear();
-                    pnlContent.Controls.Add(group.Panel);
+                    pnlContent.Controls.Add(group._groupPanel);
                 }
             };
             //モジュール情報ノード追加

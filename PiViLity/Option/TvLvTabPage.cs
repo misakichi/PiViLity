@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using PiViLity.Controls;
 using PiViLityCore.Option;
+using PiViLityPlugin.Option;
 using System;
 using System.Collections.Generic;
 using System.Linq;

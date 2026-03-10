@@ -1,4 +1,5 @@
 ﻿using PiViLityCore.Plugin;
+using PiViLityPlugin.Difinition;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

@@ -1,5 +1,5 @@
-﻿using PiViLityCore.Plugin;
-using PiViLityCore.Resources;
+﻿using PiViLityCore.Resources;
+using PiViLityPlugin.Difinition;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,6 +15,7 @@ namespace PiViLityCore
 {
     static public class Global
     {
+
         internal static ResourceManager Resource = Resources.Resource.ResourceManager;
         private static SynchronizationContext? _syncContext;
 
@@ -26,6 +27,13 @@ namespace PiViLityCore
         public static void InvokeMainThread(Action action)
         {
             _syncContext?.Post((o) => action(), null);
+        }
+
+        public static void ErrorLog(string message)
+        {
+        }
+        public static void WarningLog(string message)
+        {
         }
 
     }

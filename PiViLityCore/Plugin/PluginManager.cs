@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualBasic;
 using PiViLityCore;
 using PiViLityCore.Option;
-using PiViLityCore.Plugin;
+using PiViLityPlugin.Difinition;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -170,7 +170,7 @@ namespace PiViLityCore.Plugin
         /// <param name="dirPath"></param>
         public void LoadPlugins(string dirPath)
         {
-            AnalyzeAssembly(typeof(PiViLityCore.Plugin.IModuleInformation).Assembly);
+            AnalyzeAssembly(typeof(IModuleInformation).Assembly);
 
             if (Directory.Exists(dirPath))
             {
@@ -279,11 +279,19 @@ namespace PiViLityCore.Plugin
                     //SettingBase継承のクラスはInstanceメソッドがあればそれで得られるインスタンスを取得する
                     if (PiViLityCore.Util.Types.HasParentType(type, typeof(SettingBase)))
                     {
-                        if( type.GetField("Instance", BindingFlags.Public | BindingFlags.Static) is FieldInfo getInstanceField)
+                        SettingBase? settingInstance = null;
+                        if (type.GetField("Instance", BindingFlags.Public | BindingFlags.Static) is FieldInfo getInstanceField)
                         {
-                            if(getInstanceField.GetValue(null) is SettingBase setting)
-                                information.settings.Add(setting);
+                            if (getInstanceField.GetValue(null) is SettingBase setting)
+                                settingInstance = setting;
                         }
+                        if (settingInstance==null &&  type.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static) is PropertyInfo getInstanceProp)
+                        {
+                            if (getInstanceProp.CanRead &&  getInstanceProp.GetValue(null) is SettingBase setting)
+                                settingInstance = setting;
+                        }
+                        if (settingInstance != null)
+                            information.settings.Add(settingInstance);
                     }
                 }
                 _plugins.Add(information);

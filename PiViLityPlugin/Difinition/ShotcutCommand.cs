@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace PiViLityCore.Plugin
+namespace PiViLityPlugin.Difinition
 {
     public class ShortcutTrigger
     {
