@@ -52,7 +52,8 @@ jobs:
       matrix:
         configuration: [Debug, Release]
 
-    runs-on: windows-latest  # For a list of available runner types, refer to
+    #runs-on: windows-latest  # For a list of available runner types, refer to
+    runs-on: windows-2025-vs2026
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
 
     env:
@@ -71,13 +72,15 @@ jobs:
     - name: Install .NET SDK Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.x
+        #dotnet-version:  8.0.x
         
     # Install the .NET SDK Desktop workload
     - name: Install .NET SDK Desktop
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.x
+        #dotnet-version: 8.0.x
 
     #- name: Install MSBuild Tools
     #  run: choco install visualstudio2022buildtools -y --ignore-checksums --params "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"        
