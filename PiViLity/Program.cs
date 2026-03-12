@@ -1,5 +1,7 @@
-﻿using PiViLityCore.Plugin;
+﻿using PiViLity.COM;
+using PiViLityCore.Plugin;
 using PiViLityPlugin.Difinition;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
@@ -103,6 +105,16 @@ namespace PiViLity
 
             ThreadPool.SetMinThreads(32,32);
             ThreadPool.SetMaxThreads(64, 64);
+            try
+            {
+                using var com = new PiVilityNative.SusiePluginCom();
+                com.Load(Path.GetDirectoryName(Application.ExecutablePath) + "\\ifjpeg.spi");
+                Debug.WriteLine(com.ToString());
+            }
+            catch(Exception e) 
+            {
+                    Debug.WriteLine(e.ToString());
+            }
 
             try
             {
