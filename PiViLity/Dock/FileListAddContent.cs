@@ -9,6 +9,11 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace PiViLity.Dock
 {
+    /// <summary>
+    /// タブの追加用コンテンツ
+    /// 追加を認識するためだけに存在する。
+    /// タブ追加がなくなってはいけないので閉じるは無効化しているし、ドッキング変更も禁止
+    /// </summary>
     internal class FileListAddContent : DockContent
     {
         public FileListAddContent()

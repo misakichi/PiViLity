@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace PiViLityPlugin.Difinition
 {
+    /// <summary>
+    /// サムネイルの要求サイズに対するイメージの加工の実装を省略できるImageReader実装用ベースクラス
+    /// </summary>
 	public abstract class ImageReaderBase : IImageReader, IDisposable
     {
 		public virtual ThumbnailQualities ThumbnailQuality { get; set; } = ThumbnailQualities.UseThumbnail;

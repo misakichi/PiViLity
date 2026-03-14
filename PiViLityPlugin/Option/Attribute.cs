@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace PiViLityPlugin.Option
 {
+    /// <summary>
+    /// オプションもちであることを示す属性
+    /// </summary>
     public class OptionAttribute : Attribute
     {
         public OptionAttribute()
@@ -19,6 +22,9 @@ namespace PiViLityPlugin.Option
         public Type? ParentType = null;
     }
 
+    /// <summary>
+    /// 設定項目用属性
+    /// </summary>
     public class OptionItemAttribute : Attribute
     {
         static public bool MemberIsNoOption(MemberInfo member)
@@ -76,6 +82,9 @@ namespace PiViLityPlugin.Option
 
     }
 
+    /// <summary>
+    /// int型の設定項目に値制限を設けるための属性
+    /// </summary>
     public class OptionItemIntAttribute : OptionItemAttribute
     {
         public OptionItemIntAttribute() : base() { }
@@ -83,6 +92,9 @@ namespace PiViLityPlugin.Option
         public int Max = 999;
     }
 
+    /// <summary>
+    /// Size型の設定項目に値制限を設けるための属性
+    /// </summary>
     public class OptionItemSizeAttribute : OptionItemAttribute
     {
         public OptionItemSizeAttribute() : base() { }

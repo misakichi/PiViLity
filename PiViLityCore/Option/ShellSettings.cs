@@ -9,9 +9,9 @@ using PiViLityPlugin.Option;
 namespace PiViLityCore.Option
 {
     [Serializable, Option]
-    public class ShellSettings : SettingBase
+    public class ShellSettings : Setting<ShellSettings>
     {
-        public static readonly ShellSettings Instance = new();
+        public override void Dispose() { }
 
         public override string CategoryText
         {
@@ -49,5 +49,6 @@ namespace PiViLityCore.Option
             return IsVisibleEntry(dirInfo);
 
         }
+
     }
 }

@@ -12,9 +12,9 @@ namespace PiViLityCore.Option
     /// シェル設定クラス
     /// </summary>
     [Serializable, Option(ParentType = typeof(ShellSettings))]
-    public class ThumbnailSettings : SettingBase
+    public class ThumbnailSettings : Setting<ThumbnailSettings>
     {
-        public static readonly ThumbnailSettings Instance = new();
+        public override void Dispose(){}
 
         public override string CategoryText { 
             get=>Option.Resource.ThumbnailSetting_Name;

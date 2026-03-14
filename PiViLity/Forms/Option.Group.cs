@@ -67,7 +67,7 @@ namespace PiViLity.Forms
             //専用パネル
             private Control? _optionGroupPanelFromSetting = null;
 
-            public void AddSetting(SettingBase setting)
+            public void AddSetting(ISetting setting)
             {
                 GroupUIOrder = Math.Min(GroupUIOrder, setting.GroupUIOrder);
                 if (setting.SettingControl() is Control groupSettingControl)
@@ -124,7 +124,7 @@ namespace PiViLity.Forms
             /// <returns></returns>
             /// <exception cref="HasMultipleOptionAttributeException"></exception>
             /// <exception cref="NotImplementedException"></exception>
-            private OptionItemPanel? AddSettingItem(SettingBase settingInstance, MemberInfo member)
+            private OptionItemPanel? AddSettingItem(ISetting settingInstance, MemberInfo member)
             {
                 if (_settingItems == null)
                     return null;

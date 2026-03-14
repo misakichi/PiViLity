@@ -1,91 +1,93 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.VisualBasic;
+using PiViLityPlugin;
 using SQLitePCL;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.Security.Authentication.Identity.Core;
-using Windows.UI.WebUI;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+
 namespace PiViLity
 {
     /// <summary>
     /// サムネイル画像のキャッシュ
     /// アルファ付はRgbのJpegとAlphaのPngを組み合わせて保存する
     /// </summary>
-    internal class ThumbnailCache : IDisposable
+    internal class ThumbnailCache : Singleton<ThumbnailCache>
     {
 
-        private static ThumbnailCache _incetance = new();
-        private const string DbName = "PVilityIconThumbnailCache.db";
+        private const string _dbName = "PVilityIconThumbnailCache.db";
 
-        public static ThumbnailCache Instance => _incetance;
         private string _dbFilename = "";
-        private SqliteConnection? appDb;
+        private SqliteConnection? _appDb;
 
-        const string memoryName = "PiVilityIconDbRef";
-        const string mutexName = "PiVilityIconDbRefMutex";
+        const string MemoryName = "PiVilityIconDbRef";
+        const string MemoryMutexName = "PiVilityIconDbRefMutex";
 
-        private static Mutex? mutex = new(false, mutexName);
-        private static System.IO.MemoryMappedFiles.MemoryMappedFile? mmfDbRef = System.IO.MemoryMappedFiles.MemoryMappedFile.CreateOrOpen(memoryName, 4, System.IO.MemoryMappedFiles.MemoryMappedFileAccess.ReadWrite);
+        //共有メモリ排他アクセス用
+        private Mutex? _mmfDbMuex = new(false, MemoryMutexName);
 
-        public void Dispose()
+        /// <summary>
+        /// DBを参照している数を管理するための共有メモリ
+        /// </summary>
+        private System.IO.MemoryMappedFiles.MemoryMappedFile? _mmfDbRef = System.IO.MemoryMappedFiles.MemoryMappedFile.CreateOrOpen(MemoryName, 4, System.IO.MemoryMappedFiles.MemoryMappedFileAccess.ReadWrite);
+
+        public override void Dispose()
         {
-            appDb?.Dispose();
-            appDb = null;
-            mmfDbRef?.Dispose();
-            mmfDbRef = null;
-            mutex?.Dispose();
-            mutex = null;
+            _appDb?.Dispose();
+            _appDb = null;
+            _mmfDbRef?.Dispose();
+            _mmfDbRef = null;
+            _mmfDbMuex?.Dispose();
+            _mmfDbMuex = null;
         }
-        public static void Initialize(string dbFilename)
+        public void Initialize(string dbFilename)
         {
-            _incetance._Initialize(dbFilename);
+            _Initialize(dbFilename);
         }
-        public static void Terminate()
+        public void Terminate()
         {
-            _incetance.SaveDb(_incetance._dbFilename);
-            _incetance._terminate();
-            _incetance.Dispose();
+            SaveDb(_dbFilename);
+            _terminate();
         }
+
         private SqliteConnection openDb()
         {
-            var db = new SqliteConnection($"Data Source=File:{DbName}?Mode=Memory&Cache=Shared");
+            var db = new SqliteConnection($"Data Source=File:{_dbName}?Mode=Memory&Cache=Shared");
             db.Open();
             return db;
         }
 
-        System.Threading.Thread? transactionThread = null;
-        System.Threading.AutoResetEvent transactionEvent = new(false);
-        System.Threading.Mutex? transactionCommandMutex = new(false);
-        Queue<Action<SqliteConnection,SqliteCommand>> transactionCommandQueue = new();
-        bool transactionExit = false;
+        //トランザクションの別スレッド実行管理
+        System.Threading.Thread? _transactionThread = null;
+        System.Threading.AutoResetEvent _transactionEvent = new(false);
+        System.Threading.Mutex? _transactionCommandMutex = new(false);
+        Queue<Action<SqliteConnection,SqliteCommand>> _transactionCommandQueue = new();
+        bool _transactionExit = false;
+
+        /// <summary>
+        /// トランザクションスレッド
+        /// </summary>
         void TransactionoProc()
         {
             using var db = openDb();
-            while (!transactionExit)
+            while (!_transactionExit)
             {
 
                 //コマンドがあれば処理する
-                transactionEvent.WaitOne(1000);
+                _transactionEvent.WaitOne(1000);
 
 
                 while (true)
                 {
                     //キューがあれば取得する
                     Action<SqliteConnection,SqliteCommand>? cmd = null;
-                    transactionCommandMutex?.WaitOne();
-                    if (transactionCommandQueue.Count > 0)
+                    _transactionCommandMutex?.WaitOne();
+                    if (_transactionCommandQueue.Count > 0)
                     {
-                        cmd = transactionCommandQueue.Dequeue();
+                        cmd = _transactionCommandQueue.Dequeue();
                     }
-                    transactionCommandMutex?.ReleaseMutex();
+                    _transactionCommandMutex?.ReleaseMutex();
 
                     if (cmd == null)
                         break;
@@ -104,25 +106,26 @@ namespace PiViLity
         /// <param name="cmd">トランザクションスレッドによる実行を行う処理</param>
         void AddTransactionCommand(Action<SqliteConnection,SqliteCommand> cmd)
         {
-            transactionCommandMutex?.WaitOne();
-            transactionCommandQueue.Enqueue(cmd);
-            transactionCommandMutex?.ReleaseMutex();
-            transactionEvent.Set();
+            _transactionCommandMutex?.WaitOne();
+            _transactionCommandQueue.Enqueue(cmd);
+            _transactionCommandMutex?.ReleaseMutex();
+            _transactionEvent.Set();
         }
 
         private void _Initialize(string dbFilename)
         {
-            if (appDb != null)
+            if (_appDb != null)
                 return;
 
 
-            appDb = openDb();
+            _appDb = openDb();
             using (SqliteConnection db = openDb())
             {
-                if (mutex != null)
+                //mutexで扱うのは共有メモリやDBの変更が衝突しないため
+                if (_mmfDbMuex != null)
                 {
-                    mutex.WaitOne();
-                    using (var view = mmfDbRef?.CreateViewAccessor(0, 4, System.IO.MemoryMappedFiles.MemoryMappedFileAccess.ReadWrite))
+                    _mmfDbMuex.WaitOne();
+                    using (var view = _mmfDbRef?.CreateViewAccessor(0, 4, System.IO.MemoryMappedFiles.MemoryMappedFileAccess.ReadWrite))
                     {
                         int dbRefCount = 0;
                         view?.Read<int>(0, out dbRefCount);
@@ -136,9 +139,10 @@ namespace PiViLity
                             view?.Write(0, dbRefCount + 1);
                         }
                     }
-                    mutex.ReleaseMutex();
+                    _mmfDbMuex.ReleaseMutex();
                 }
 
+                //初期ではテーブルがない
                 using (SqliteCommand cmd = db.CreateCommand())
                 {
                     cmd.CommandText = "CREATE TABLE IF NOT EXISTS ThumbnailCache (Path TEXT PRIMARY KEY, UpdateTime INTEGER, FileSize INTEGER, Width INTEGER, Height INTEGER, Thumbnail BLOB, ThumbnailSub BLOB)";
@@ -147,26 +151,30 @@ namespace PiViLity
                 _dbFilename = dbFilename;
             }
 
-            transactionThread = new(TransactionoProc);
-            transactionThread.IsBackground = true;
-            transactionThread.Start();
+            _transactionThread = new(TransactionoProc);
+            _transactionThread.IsBackground = true;
+            _transactionThread.Start();
         }
         private void _terminate()
         {
-            transactionExit = true;
-            transactionEvent.Set();
-            transactionThread?.Join();
-            transactionThread = null;
-            if (appDb != null)
+            //終了前にトランザクションを完全に終えないと破綻するのでスレッドに終了伝えて待っている
+            _transactionExit = true;
+            _transactionEvent.Set();
+            _transactionThread?.Join();
+            _transactionThread = null;
+
+            if (_appDb != null)
             {
-                appDb.Close();
-                appDb.Dispose();
-                appDb = null;
+                _appDb.Close();
+                _appDb.Dispose();
+                _appDb = null;
             }
-            if (mutex != null)
+
+            //複数起動時のDB共有用管理破棄
+            if (_mmfDbMuex != null)
             {
-                mutex.WaitOne();
-                using (var view = mmfDbRef?.CreateViewAccessor(0, 4, System.IO.MemoryMappedFiles.MemoryMappedFileAccess.ReadWrite))
+                _mmfDbMuex.WaitOne();
+                using (var view = _mmfDbRef?.CreateViewAccessor(0, 4, System.IO.MemoryMappedFiles.MemoryMappedFileAccess.ReadWrite))
                 {
                     int dbRefCount = 0;
                     view?.Read<int>(0, out dbRefCount);
@@ -175,7 +183,7 @@ namespace PiViLity
                         view?.Write(0, dbRefCount - 1);
                     }
                 }
-                mutex.ReleaseMutex();
+                _mmfDbMuex.ReleaseMutex();
             }
         }
 
@@ -275,7 +283,11 @@ namespace PiViLity
             return null;
         }
 
-
+        /// <summary>
+        /// サムネイルの設定（保存）
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <param name="thumbnail"></param>
         public void SetThumbnail(string filename, Image thumbnail)
         {
             ImageCodecInfo? GetImageCodecInfo(ImageFormat imageFormat)
@@ -308,6 +320,8 @@ namespace PiViLity
                 }
                 else if (thumbnail.PixelFormat == PixelFormat.Format32bppArgb)
                 {
+                    //使用頻度の高い32bitに限りRGBとAを分解してjpegを活用している。
+                    //todo:Aもjpegにできないか？
                     Bitmap? srcBmp = null;
                     if (thumbnail is Bitmap bmp)
                     {
@@ -342,6 +356,8 @@ namespace PiViLity
                     imageFormat = ImageFormat.Jpeg;
                 }
 
+                //イメージをフォーマットに応じてセムネイル用にエンコード
+                //基本はjpeg、アルファがあるとpng
                 void SaveImage(Image img, MemoryStream ms, ImageFormat format)
                 {
                     var codec = GetImageCodecInfo(format);
@@ -379,7 +395,7 @@ namespace PiViLity
                 {
                     SaveImage(thumbnail, ms, imageFormat);
                 }
-#if true
+
                 var width = thumbnail.Size.Width;
                 var height = thumbnail.Size.Height;
                 AddTransactionCommand((db, cmd) =>
@@ -415,41 +431,6 @@ namespace PiViLity
                     }
                 }
                 );
-#else
-                using (SqliteConnection db = openDb())
-                {
-                    SqliteTransaction? transaction = null;
-                    {
-                        using (SqliteCommand cmdCheck = db.CreateCommand())
-                        using (SqliteCommand cmd = db.CreateCommand())
-                        {
-                            cmdCheck.CommandText = "SELECT COUNT(*) FROM ThumbnailCache WHERE Path = @Path";
-                            cmdCheck.Parameters.AddWithValue("@Path", inDbFilename);
-                            var execRet = cmdCheck.ExecuteScalar();
-                            bool isExistRecord = ((long?)execRet ?? 0) > 0;
-                            if (isExistRecord)
-                            {
-                                cmd.CommandText = "UPDATE ThumbnailCache SET UpdateTime = @UpdateTime, FileSize = @FileSize, Width = @Width, Height = @Height, Thumbnail = @Thumbnail, ThumbnailSub=@ThumbnailSub WHERE Path = @Path";
-                            }
-                            else
-                            {
-                                cmd.CommandText = "INSERT INTO ThumbnailCache (Path, UpdateTime, FileSize, Width, Height, Thumbnail, ThumbnailSub) VALUES (@Path, @UpdateTime, @FileSize, @Width, @Height, @Thumbnail, @ThumbnailSub)";
-                            }
-                            transaction = db.BeginTransaction();
-                            cmd.Parameters.AddWithValue("@Path", inDbFilename);
-                            cmd.Parameters.AddWithValue("@UpdateTime", fi.LastWriteTimeUtc.ToFileTimeUtc());
-                            cmd.Parameters.AddWithValue("@FileSize", fi.Length);
-                            cmd.Parameters.AddWithValue("@Width", thumbnail.Size.Width);
-                            cmd.Parameters.AddWithValue("@Height", thumbnail.Size.Height);
-                            cmd.Parameters.AddWithValue("@Thumbnail", ms.ToArray());
-                            cmd.Parameters.AddWithValue("@ThumbnailSub", msa.ToArray());
-                            cmd.Transaction = transaction;
-                            cmd.ExecuteNonQuery();
-                        }
-                        transaction?.Commit();
-                    }
-                }
-#endif
             }
         }
     }

@@ -51,6 +51,7 @@ namespace PiViLity
             //CultureInfo.CurrentCulture = new CultureInfo("en-US");
             //CultureInfo.CurrentUICulture = new CultureInfo("en-US");
 
+            PluginManager.Create();
 
             var appDir = Path.GetDirectoryName(Application.ExecutablePath);
             if (appDir != null)
@@ -99,9 +100,9 @@ namespace PiViLity
                     }
                     break;
             }
-     
 
-            ThumbnailCache.Initialize(Option.AppSettings.Instance.CacheDb);
+            ThumbnailCache.Create();
+            ThumbnailCache.Instance.Initialize(Option.AppSettings.Instance.CacheDb);
 
             ThreadPool.SetMinThreads(32,32);
             ThreadPool.SetMaxThreads(64, 64);
@@ -124,12 +125,16 @@ namespace PiViLity
                 MessageBox.Show(ex.ToString(), "Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            ThumbnailCache.Terminate();
+            ThumbnailCache.Instance.Terminate();
+            ThumbnailCache.Release();
 
             if (appDir != null)
             {
                 PluginManager.Instance.SaveSettings(appDir + "\\settings.json");
             }
+
+            PluginManager.Release();
+
         }
     }
 }

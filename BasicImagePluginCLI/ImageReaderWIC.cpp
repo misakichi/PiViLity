@@ -2,45 +2,13 @@
 #pragma unmanaged
 #include <algorithm>
 #include <wincodec.h>
-
+#include <atlcomcli.h>
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "User32.lib")
-template<class T>
-class ComPtr {
-public:
-	ComPtr() : ptr_(nullptr) {}
-	ComPtr(T* ptr) : ptr_(ptr) { if (ptr_) ptr_->AddRef(); }
-	ComPtr(const ComPtr& other) : ptr_(other.ptr_) { if (ptr_) ptr_->AddRef(); }
-	~ComPtr() { if (ptr_) ptr_->Release(); }
-	ComPtr& operator=(const ComPtr& other) {
-		if (this != &other) {
-			if (ptr_) 
-                ptr_->Release();
-			ptr_ = other.ptr_;
-			if (ptr_)
-                ptr_->AddRef();
-		}
-		return *this;
-	}
-	T* Get() { return ptr_; }
-	const T* Get() const { return ptr_; }
-	void Reset(T* ptr = nullptr) {
-		if (ptr_) 
-            ptr_->Release();
-		ptr_ = ptr;
-		if (ptr_) 
-            ptr_->AddRef();
-	}
-	T** GetAddressOf() { return &ptr_; }
-	operator T* () { return ptr_; }
-	operator const T* () const { return ptr_; }
-	T* operator->() { return ptr_; }
-    const T* operator->() const { return ptr_; }
-private:
-	T* ptr_;
-};
+#pragma comment(lib, "OleAut32.lib")
+
 #pragma managed
 
 #include "ImageReaderWIC.h"
@@ -58,8 +26,7 @@ public:
             CLSID_WICImagingFactory,
             nullptr,
             CLSCTX_INPROC_SERVER,
-            IID_IWICImagingFactory,
-			(LPVOID*)wicFactory_.GetAddressOf()
+            IID_PPV_ARGS(&wicFactory_)
         );
     }
     IWICImagingFactory* operator->()
@@ -67,7 +34,7 @@ public:
 		return wicFactory_;
 	}
 private:
-    ComPtr<IWICImagingFactory> wicFactory_ = nullptr;
+    CComPtr<IWICImagingFactory> wicFactory_ = nullptr;
 };
 static WicFactory s_WicFactory;
 
@@ -87,21 +54,21 @@ namespace BasicImagePluginCLI
         }
         bool  Initialize(const wchar_t* filePath)
         {
-            ComPtr<IWICBitmapDecoder> decoder = nullptr;
-            ComPtr<IWICBitmapFrameDecode> frameDecode_ = nullptr;
+			CComPtr<IWICBitmapDecoder> decoder = nullptr;
+			CComPtr<IWICBitmapFrameDecode> frameDecode_ = nullptr;
             HRESULT hr = s_WicFactory->CreateDecoderFromFilename(
                 filePath,
                 nullptr,
                 GENERIC_READ,
-                WICDecodeMetadataCacheOnDemand,
-                decoder.GetAddressOf()
+				WICDecodeMetadataCacheOnDemand,
+                &decoder
             );
             if (FAILED(hr)) {
                 return false;
             }
 
-            ComPtr<IWICBitmapFrameDecode> frameDecoder = nullptr;
-            hr = decoder->GetFrame(0, frameDecoder.GetAddressOf());
+			CComPtr<IWICBitmapFrameDecode> frameDecoder = nullptr;
+            hr = decoder->GetFrame(0, &frameDecoder);
             if (FAILED(hr)) {
                 return false;
             }
@@ -218,15 +185,15 @@ namespace BasicImagePluginCLI
         }
         HBITMAP GetImageGdi()
         {
-            ComPtr<IWICFormatConverter> converter;
-            if (SUCCEEDED(s_WicFactory->CreateFormatConverter(converter.GetAddressOf())))
+			CComPtr<IWICFormatConverter> converter;
+            if (SUCCEEDED(s_WicFactory->CreateFormatConverter(&converter)))
             {
-                if (SUCCEEDED(converter->Initialize(frameDecoder_.Get(), GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
+                if (SUCCEEDED(converter->Initialize(frameDecoder_, GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
                 {
-                    ComPtr<IWICBitmap> bmp;
-                    if (SUCCEEDED(s_WicFactory->CreateBitmapFromSource(converter.Get(), WICBitmapCacheOnDemand, bmp.GetAddressOf())))
+					CComPtr<IWICBitmap> bmp;
+                    if (SUCCEEDED(s_WicFactory->CreateBitmapFromSource(converter, WICBitmapCacheOnDemand, &bmp)))
                     {
-                        return wicToGdi(bmp.Get(), width_, height_, 0, 0);
+                        return wicToGdi(bmp, width_, height_, 0, 0);
                     }
                 }
             }
@@ -234,15 +201,15 @@ namespace BasicImagePluginCLI
         }
         Drawing::Bitmap^ GetImage()
         {
-            ComPtr<IWICFormatConverter> converter;
-            if (SUCCEEDED(s_WicFactory->CreateFormatConverter(converter.GetAddressOf())))
+			CComPtr<IWICFormatConverter> converter;
+            if (SUCCEEDED(s_WicFactory->CreateFormatConverter(&converter)))
             {
-                if (SUCCEEDED(converter->Initialize(frameDecoder_.Get(), GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
+                if (SUCCEEDED(converter->Initialize(frameDecoder_, GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
                 {
-                    ComPtr<IWICBitmap> bmp;
-                    if (SUCCEEDED(s_WicFactory->CreateBitmapFromSource(converter.Get(), WICBitmapCacheOnDemand, bmp.GetAddressOf())))
+					CComPtr<IWICBitmap> bmp;
+                    if (SUCCEEDED(s_WicFactory->CreateBitmapFromSource(converter, WICBitmapCacheOnDemand, &bmp)))
                     {
-                        return wicToGdiPlus(bmp.Get(), width_, height_, 0, 0);
+                        return wicToGdiPlus(bmp, width_, height_, 0, 0);
                     }
                 }
             }
@@ -260,12 +227,12 @@ namespace BasicImagePluginCLI
         HBITMAP GetThumbnailImageGdi(int rqWidth, int rqHeight, int destWidth, int destHeight, int destOffsetX, int destOffsetY)
         {
             auto bmp = getThumbanailBmp(rqWidth, rqHeight);
-            return wicToGdi(bmp.Get(), destWidth, destHeight, destOffsetX, destOffsetY);
+            return wicToGdi(bmp, destWidth, destHeight, destOffsetX, destOffsetY);
         }
         Drawing::Bitmap^ GetThumbnailImage(int rqWidth, int rqHeight, int destWidth, int destHeight, int destOffsetX, int destOffsetY)
         {
             auto bmp = getThumbanailBmp(rqWidth, rqHeight);
-			return wicToGdiPlus(bmp.Get(), destWidth, destHeight, destOffsetX, destOffsetY);
+			return wicToGdiPlus(bmp, destWidth, destHeight, destOffsetX, destOffsetY);
         }
         uint32_t width() const { return width_; }
         uint32_t height() const { return height_; }
@@ -276,29 +243,31 @@ namespace BasicImagePluginCLI
         /// </summary>
         /// <param name="rqWidth">要求されるサムネイル画像の幅（ピクセル単位）。</param>
         /// <param name="rqHeight">要求されるサムネイル画像の高さ（ピクセル単位）。</param>
-        /// <returns>指定されたサイズにスケーリングされた IWICBitmapSource の ComPtr オブジェクト。</returns>
-        ComPtr<IWICBitmapSource> getThumbanailBmp(int rqWidth, int rqHeight)
+        /// <returns>指定されたサイズにスケーリングされた IWICBitmapSource の CComPtr オブジェクト。</returns>
+		CComPtr<IWICBitmapSource> getThumbanailBmp(int rqWidth, int rqHeight)
         {
-            ComPtr<IWICBitmapSource> bmp;
+			CComPtr<IWICBitmapSource> bmp;
 
-			if (FAILED(frameDecoder_->GetThumbnail(bmp.GetAddressOf())))
+			if (FAILED(frameDecoder_->GetThumbnail(&bmp)))
 			{
-				bmp = frameDecoder_.Get();
+				bmp = frameDecoder_;
 			}
-			ComPtr<IWICFormatConverter> converter;
-			if (SUCCEEDED(s_WicFactory->CreateFormatConverter(converter.GetAddressOf())))
+			CComPtr<IWICFormatConverter> converter;
+			if (SUCCEEDED(s_WicFactory->CreateFormatConverter(&converter)))
 			{
-				if (SUCCEEDED(converter->Initialize(bmp.Get(), GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
+				if (SUCCEEDED(converter->Initialize(bmp, GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom)))
 				{
-					bmp = converter.Get();
+					bmp = converter;
 				}
 			}
 
-            ComPtr<IWICBitmapScaler> scaler;
-            s_WicFactory->CreateBitmapScaler(scaler.GetAddressOf());
-            scaler->Initialize(bmp.Get(), rqWidth, rqHeight, WICBitmapInterpolationModeLinear);
+			CComPtr<IWICBitmapScaler> scaler;
+			if (FAILED(s_WicFactory->CreateBitmapScaler(&scaler)))
+				return nullptr;
 
-            bmp = scaler.Get();
+            scaler->Initialize(bmp, rqWidth, rqHeight, WICBitmapInterpolationModeLinear);
+
+            bmp = scaler;
 
             return bmp;
         }
@@ -392,8 +361,8 @@ namespace BasicImagePluginCLI
         uint32_t width_ = 0;
         uint32_t height_ = 0;
 		const wchar_t* formatStr_ = nullptr;
-        ComPtr<IWICBitmapDecoder> decoder_ = nullptr;
-        ComPtr<IWICBitmapFrameDecode> frameDecoder_ = nullptr;
+		CComPtr<IWICBitmapDecoder> decoder_ = nullptr;
+		CComPtr<IWICBitmapFrameDecode> frameDecoder_ = nullptr;
         //IWICMetadataQueryReader* metadataQueryReader_ = nullptr;
     };
 }

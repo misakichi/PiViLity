@@ -27,7 +27,10 @@ namespace PiViLityCore.Util
             }
             return false;
         }
-
+        public static bool HasInterface(Type? type, Type interfaceType)
+        {
+            return type?.GetInterface(interfaceType.Name) != null;
+        }
         public static Array ConvertIListToTypedArray(IList list, Type elementType)
         {
             int count = list.Count;

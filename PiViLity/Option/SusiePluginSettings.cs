@@ -12,9 +12,10 @@ using System.Threading.Tasks;
 namespace PiViLity.Option
 {
     [Serializable, Option]
-    public class SusiePluginSettings : SettingBase
+    public class SusiePluginSettings : Setting<SusiePluginSettings>
     {
-        static public readonly SusiePluginSettings Instance = new();
+        public override void Dispose() { }
+
         public override string CategoryText => "Susie Plugin";
 
         public override string CategoryName => "Susie Plugin";

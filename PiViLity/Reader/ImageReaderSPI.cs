@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PiViLity.Option;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,9 +8,8 @@ using System.Threading.Tasks;
 namespace PiViLity.Reader
 {
 #if false
-    internal class ImageReaderSPI : PiViLityCore.Plugin.ImageReaderBase
+    internal class ImageReaderSPI : PiViLityPlugin.Difinition.ImageReaderBase
     {
-
         public override void Dispose()
         {
             throw new NotImplementedException();

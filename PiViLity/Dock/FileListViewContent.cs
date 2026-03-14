@@ -40,6 +40,7 @@ namespace PiViLity.Dock
             _toolStrip.Renderer = new ToolStripProfessionalRenderer();
 
             //ツールストリップボタンのイベント設定
+            //同一関数への利用が多いためにデザイナーを使わずここで登録している
             _fileListView.DirectoryNavigatorButtonStatusChanged += _fileListView_DirectoryNavigatorButtonStatusChanged;
             _parentDirectoryBtn.Click += (s, e) => _fileListView.MoveParentDirectory();
             _previousDirectoryBtn.Click += (s, e) => _fileListView.MovePreviousDirectory();

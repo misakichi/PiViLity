@@ -32,9 +32,9 @@ namespace PiViLity.Option
 
 
     [Serializable, Option]
-    public class AppSettings : SettingBase
+    public class AppSettings : Setting<AppSettings>
     {
-        static public readonly AppSettings Instance = new();
+        public override void Dispose() { }
 
         public override string CategoryText { get => SettingResource.GetString("Application") ?? ""; }
         public override string CategoryName { get => "PiViLity App"; }

@@ -8,6 +8,9 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace PiViLity.Dock
 {
+    /// <summary>
+    /// ディレクトリツリーDockウィンドウ
+    /// </summary>
     internal class DireectoryTreeViewContent : DockContent
     {
         public DireectoryTreeViewContent()

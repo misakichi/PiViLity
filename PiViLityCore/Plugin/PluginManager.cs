@@ -53,6 +53,12 @@ namespace PiViLityCore.Plugin
             return IntPtr.Zero;
         }
     }
+    public class SettingInstanceInfo
+    {
+        public required MethodInfo Create;
+        public required MethodInfo Release;
+        public required Type Type;
+    }
 
     /// <summary>
     /// プラグイン情報
@@ -63,18 +69,20 @@ namespace PiViLityCore.Plugin
         public required IModuleInformation information;
         public List<Type> imageReaders = new();
         public List<Type> propertyReaders = new();
-        public List<SettingBase> settings = new();
+        public List<ISetting> settings = new();
+        public List<SettingInstanceInfo> settingInstanceInfo = new();
         public string Name = "";
     }
     
     /// <summary>
     /// プラグイン管理クラス
     /// </summary>
-    public class PluginManager
+    public class PluginManager : PiViLityPlugin.Singleton<PluginManager>
     {
-        static public PluginManager Instance { get; private set; } = new();
-
-        PluginManager()
+        public PluginManager()
+        {
+        }
+        public override void Dispose()
         {
         }
 
@@ -229,8 +237,8 @@ namespace PiViLityCore.Plugin
                         continue;
 
                     var interfaces = type.GetInterfaces();
-                    if (interfaces.Where(t => t == typeof(IImageReader)).Count() > 0 ||
-                        interfaces.Where(t => t == typeof(IPropertyReader)).Count() > 0)
+                    if (interfaces.Any(t => t == typeof(IImageReader)) ||
+                        interfaces.Any(t => t == typeof(IPropertyReader)))
                     {
 
                         ///リーダーサポート状況
@@ -266,32 +274,54 @@ namespace PiViLityCore.Plugin
                     }
 
                     //画像ビューアー
-                    if (interfaces.Where(t => t == typeof(IImageViewer)).Count() > 0 && Activator.CreateInstance(type) is IImageViewer imageViewer)
+                    if (interfaces.Any(t => t == typeof(IImageViewer)) && Activator.CreateInstance(type) is IImageViewer imageViewer)
                     {
                         ImageViewers.Add(type);
                     }
                     //プレビュー
-                    if (interfaces.Where(t => t == typeof(IPreViewer)).Count() > 0 && Activator.CreateInstance(type) is IPreViewer previewer)
+                    if (interfaces.Any(t => t == typeof(IPreViewer)) && Activator.CreateInstance(type) is IPreViewer previewer)
                     {
                         PreViewers.Add(type);
                     }
 
                     //SettingBase継承のクラスはInstanceメソッドがあればそれで得られるインスタンスを取得する
-                    if (PiViLityCore.Util.Types.HasParentType(type, typeof(SettingBase)))
+                    if (interfaces.Any(t=>t==typeof(ISetting)))
                     {
-                        SettingBase? settingInstance = null;
-                        if (type.GetField("Instance", BindingFlags.Public | BindingFlags.Static) is FieldInfo getInstanceField)
+                        ISetting? settingInstance = null;
+                        MethodInfo? createMethod = null;
+                        MethodInfo? releaseMethod = null;
+                        PropertyInfo? instanceProp = null;
+                        var searchType = type;
+                        while (searchType != null && searchType!=typeof(object))
                         {
-                            if (getInstanceField.GetValue(null) is SettingBase setting)
-                                settingInstance = setting;
+                            if(createMethod==null)
+                                createMethod = searchType.GetMethod("Create", BindingFlags.Public | BindingFlags.Static);
+                            if (releaseMethod == null)
+                                releaseMethod = searchType.GetMethod("Release", BindingFlags.Public | BindingFlags.Static);
+                            if (instanceProp == null)
+                                instanceProp = searchType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+                            searchType = searchType.BaseType;
                         }
-                        if (settingInstance==null &&  type.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static) is PropertyInfo getInstanceProp)
+                        if (createMethod != null && releaseMethod != null  && instanceProp != null) 
                         {
-                            if (getInstanceProp.CanRead &&  getInstanceProp.GetValue(null) is SettingBase setting)
-                                settingInstance = setting;
+
+                            createMethod.Invoke(null, null);
+                            //if (type.GetField("Instance", BindingFlags.Public | BindingFlags.Static) is FieldInfo getInstanceField)
+                            //{
+                            //    if (getInstanceField.GetValue(null) is ISetting setting)
+                            //        settingInstance = setting;
+                            //}
+                            settingInstance = instanceProp.GetValue(null) as ISetting;
+
+                            if (settingInstance != null)
+                                information.settings.Add(settingInstance);
+                                information.settingInstanceInfo.Add(new()
+                                {
+                                    Create=createMethod,
+                                    Release = releaseMethod,
+                                    Type = type
+                                });
                         }
-                        if (settingInstance != null)
-                            information.settings.Add(settingInstance);
                     }
                 }
                 _plugins.Add(information);
@@ -364,7 +394,7 @@ namespace PiViLityCore.Plugin
             string jsonStr = reader.ReadToEnd();
             byte[] buffer = Encoding.UTF8.GetBytes(jsonStr);
             var settings = _plugins.SelectMany(p => p.settings);
-            IEnumerable<SettingBase> targetSettings = settings;
+            IEnumerable<ISetting> targetSettings = settings;
 
             Utf8JsonReader jsonReader = new(buffer, new JsonReaderOptions() { });
             {

@@ -106,7 +106,7 @@ namespace PiViLityCore.Controls
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             UpdateStyles();
             DoubleBuffered = true;
-            PiViLityCore.Event.Option.ApplySettings += OnApplySettings;
+            Option.ThumbnailSettings.Instance.Changed += OnApplySettings;
 
             Disposed += (o, e) =>
             {
@@ -195,11 +195,9 @@ namespace PiViLityCore.Controls
         protected override void DestroyHandle()
         {
             _fsw?.Dispose();
-            if (PiViLityCore.Event.Option.ApplySettings != null)
+            if (Option.ThumbnailSettings.Instance != null)
             {
-#pragma warning disable CS8601
-                PiViLityCore.Event.Option.ApplySettings -= OnApplySettings;
-#pragma warning restore CS8601
+                Option.ThumbnailSettings.Instance.Changed -= OnApplySettings;
             }
             base.DestroyHandle();
 

@@ -87,7 +87,7 @@ namespace PiViLity.Forms
                         {
                             if (optAttr.NoOption == false)
                             {
-                                var parentType = PiViLityCore.Util.Types.HasParentType(optAttr.ParentType, typeof(SettingBase)) ? optAttr.ParentType : null;
+                                var parentType = PiViLityCore.Util.Types.HasParentType(optAttr.ParentType, typeof(ISetting)) ? optAttr.ParentType : null;
                                 var key = (setting.CategoryName, setting.GetType(), optAttr.ParentType);
                                 string name = setting.CategoryName;
                                 string text = setting.CategoryText;
@@ -174,7 +174,13 @@ namespace PiViLity.Forms
         private void btnOk_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
-            PiViLityCore.Event.Option.UpdateSettings();
+
+            PluginManager.Instance.Plugins.ForEach(plugin =>
+                plugin.settings.ForEach(setting => { 
+                    setting.RaiseChanged(EventArgs.Empty);
+                }
+                )
+               );
             Close();
         }
 

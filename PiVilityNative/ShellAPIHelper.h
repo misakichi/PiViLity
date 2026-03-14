@@ -13,15 +13,53 @@ namespace PiVilityNative
 		bool isDefault = false;
 	};
 
+	/// <summary>
+	/// .Netでは実現の難しそうな機能を提供する
+	/// </summary>
 	public ref class ShellAPI
 	{
 	public:
+		/// <summary>
+		/// PC名
+		/// </summary>
+		/// <returns></returns>
 		static String^ GetMyCompute();
+
+		/// <summary>
+		/// シェルコンテキストメニューの表示
+		/// </summary>
+		/// <param name="paths"></param>
+		/// <param name="hwnd"></param>
 		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd);
+
+		/// <summary>
+		/// シェルコンテキストメニューの表示
+		/// （位置指定）
+		/// </summary>
+		/// <param name="paths"></param>
+		/// <param name="hwnd"></param>
 		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, int y);
+
+		/// <summary>
+		/// シェルコンテキストメニューの表示
+		/// （カスタムメニューあり）
+		/// </summary>
+		/// <param name="paths"></param>
+		/// <param name="hwnd"></param>
 		static void ShowShellContextMenu(array<String^>^ paths, IntPtr hwnd, int x, int y, array<CustomMenuItem^>^ customMenus);
 
+		/// <summary>
+		/// シェルのファイルコピー機能
+		/// </summary>
+		/// <param name="srcPath"></param>
+		/// <param name="destPath"></param>
 		static void FileOperationCopy(Collections::Generic::IEnumerable<String^>^ srcPath, String^ destPath);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="srcPath"></param>
+		/// <param name="destPath"></param>
 		static void FileOperationMove(Collections::Generic::IEnumerable<String^>^ srcPath, String^ destPath);
 		static void FileOperationDelete(Collections::Generic::IEnumerable<String^>^ paths);
 		static void CreateShortCut(String^ srcPath, String^ destPath, String^ description);
@@ -33,11 +71,6 @@ namespace PiVilityNative
 		static FileInfo() {
 			StaticConstruct();
 		}
-		//static IntPtr GetLargeImageList();
-		//static IntPtr GetSmallImageList();
-		//static int GetFileLargeIconIndex(String^ path);
-		//static int GetFileSmallIconIndex(String^ path);
-
 
 		static System::String^ GetFileTypeName(String^ pathOrExtension);
 		static int GetFileIconIndex(Environment::SpecialFolder specialFolder);
