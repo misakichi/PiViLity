@@ -34,6 +34,7 @@ namespace PiViLity
 
         public override void Dispose()
         {
+            Terminate();
             _appDb?.Dispose();
             _appDb = null;
             _mmfDbRef?.Dispose();
@@ -425,9 +426,9 @@ namespace PiViLity
                             cmd.Parameters.AddWithValue("@Thumbnail", ms.ToArray());
                             cmd.Parameters.AddWithValue("@ThumbnailSub", msa.ToArray());
                             cmd.Transaction = transaction;
-                            cmd.ExecuteNonQuery();
+                            cmd.ExecuteNonQueryAsync();
                         }
-                        transaction?.Commit();
+                        transaction?.CommitAsync();
                     }
                 }
                 );

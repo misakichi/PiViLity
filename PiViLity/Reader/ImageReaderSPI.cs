@@ -1,4 +1,6 @@
-﻿using PiViLity.Option;
+﻿using PiViLity.COM;
+using PiViLity.Option;
+using PiVilityNative;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +9,11 @@ using System.Threading.Tasks;
 
 namespace PiViLity.Reader
 {
-#if false
+#if true
     internal class ImageReaderSPI : PiViLityPlugin.Difinition.ImageReaderBase
     {
         public override void Dispose()
         {
-            throw new NotImplementedException();
         }
 
         public override Image? GetImage()
@@ -22,12 +23,17 @@ namespace PiViLity.Reader
 
         public override Size GetImageSize()
         {
-            throw new NotImplementedException();
+            SPIPictureInfo? info = _plugin?.GetFileInfo();
+            if (info  != null)
+            {
+                return new Size(info.width, info.height);
+            }
+            return new Size();
         }
 
         public override List<string> GetSupportedExtensions()
         {
-            throw new NotImplementedException();
+            return SusiePluginManager.Instance.Extensions.ToList();
         }
 
         public override Image? GetThumbnailImage(Size size)
@@ -37,13 +43,22 @@ namespace PiViLity.Reader
 
         public override bool IsSupported()
         {
-            throw new NotImplementedException();
+            return _plugin?.IsSupport() ?? false;
         }
 
         public override bool SetFilePath(string filePath)
         {
-            throw new NotImplementedException();
+            _plugin = SusiePluginManager.Instance.GetPluginInstanceForFile(filePath);
+            if (_plugin != null)
+            {
+                _path = filePath;
+                return true;
+            }
+            return false;
         }
+
+        private SusiePluginInstance? _plugin;
+        private string _path = "";
     }
 #endif
 }

@@ -19,5 +19,23 @@ namespace PiViLity.Forms
         {
             txtPluginDirectory.Text = PiViLity.Option.SusiePluginSettings.Instance.PluginPath;
         }
+
+        private void btnDirRef_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog dlg = new FolderBrowserDialog();
+            dlg.SelectedPath = PiViLity.Option.SusiePluginSettings.Instance.PluginPath;
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                txtPluginDirectory.Text = dlg.SelectedPath;
+            }
+        }
+
+        private void txtPluginDirectory_TextChanged(object sender, EventArgs e)
+        {
+            if (Directory.Exists(txtPluginDirectory.Text))
+            {
+                PiViLity.Option.SusiePluginSettings.Instance.PluginPath = txtPluginDirectory.Text;
+            }
+        }
     }
 }

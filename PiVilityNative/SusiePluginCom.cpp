@@ -82,13 +82,16 @@ bool SusiePluginCom::Load(System::String^ path)
 /// Retrieves an information string from the plugin. Converts BSTR returned by COM to System::String.
 /// 
 /// </summary>
-bool SusiePluginCom::GetPluginInfo(int infono, System::String^% buf)
+bool SusiePluginCom::GetPluginInfo(int infono, [Out] System::String^% buf)
 {
     // COMプラグインからBSTRを受け取り、System::Stringへ変換します。
 	BSTR str;
 	HRESULT hr;
-	if(FAILED(hr=impl_->com->GetPluginInfo(infono, &str)))
-		throw Marshal::GetExceptionForHR(hr);
+	if (FAILED(hr = impl_->com->GetPluginInfo(infono, &str)))
+	{
+		buf = String::Empty;
+		return false;
+	}
 
 	buf = gcnew System::String(str);
     SysFreeString(str); // COMから提供されたBSTRを解放します。
@@ -258,7 +261,7 @@ static bool s_GetPictureCommon(const CComPtr<ISharedMemory>& infoMem, const CCom
 /// Calls COM to get shared memory handles and opens them via s_GetPictureCommon.
 /// 
 /// </summary>
-bool SusiePluginCom::GetPictureFile(System::String^ filename, System::IO::MemoryMappedFiles::MemoryMappedFile^% info, System::IO::MemoryMappedFiles::MemoryMappedFile^% bmp)
+bool SusiePluginCom::GetPictureFile(System::String^ filename, [Out] System::IO::MemoryMappedFiles::MemoryMappedFile^% info, [Out] System::IO::MemoryMappedFiles::MemoryMappedFile^% bmp)
 {
 	auto intPtr = Marshal::StringToBSTR(filename);
 	BSTR bstrPath = (BSTR)(intPtr.ToPointer());
@@ -278,7 +281,7 @@ bool SusiePluginCom::GetPictureFile(System::String^ filename, System::IO::Memory
 /// Retrieves a preview image via COM and opens corresponding MemoryMappedFiles.
 /// 
 /// </summary>
-bool SusiePluginCom::GetPreviewFile(System::String^ filename, System::IO::MemoryMappedFiles::MemoryMappedFile^% info, System::IO::MemoryMappedFiles::MemoryMappedFile^% bmp)
+bool SusiePluginCom::GetPreviewFile(System::String^ filename, [Out] System::IO::MemoryMappedFiles::MemoryMappedFile^% info, [Out] System::IO::MemoryMappedFiles::MemoryMappedFile^% bmp)
 {
 	auto intPtr = Marshal::StringToBSTR(filename);
 	BSTR bstrPath = (BSTR)(intPtr.ToPointer());

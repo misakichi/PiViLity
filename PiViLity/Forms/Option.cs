@@ -76,7 +76,7 @@ namespace PiViLity.Forms
                 plugin.settings.ForEach(setting =>
                 {
                     var settingAsm = setting.GetType().Assembly;
-                    var settingGroup = settingAsm==typeof(PiViLityCore.Global).Assembly || settingAsm==typeof(App).Assembly
+                    var settingGroup = settingAsm == typeof(PiViLityCore.Global).Assembly || settingAsm == typeof(App).Assembly
                         ? appSettingGroup
                         : pluginSsettingGroup;
                     var attrs = Attribute.GetCustomAttributes(setting.GetType());
@@ -91,7 +91,7 @@ namespace PiViLity.Forms
                                 var key = (setting.CategoryName, setting.GetType(), optAttr.ParentType);
                                 string name = setting.CategoryName;
                                 string text = setting.CategoryText;
-                                if(!settingGroup.TryGetValue(key, out var optionGroup))
+                                if (!settingGroup.TryGetValue(key, out var optionGroup))
                                 {
                                     optionGroup = new OptionGroup(text);
                                     settingGroup[key] = optionGroup;
@@ -105,7 +105,7 @@ namespace PiViLity.Forms
                 void AddGroupToNode(Dictionary<(string Name, Type Type, Type? Parent), OptionGroup> _groups)
                 {
                     var groups = _groups.ToList();
-                    groups.Sort((a, b) => a.Value.GroupUIOrder- b.Value.GroupUIOrder);
+                    groups.Sort((a, b) => a.Value.GroupUIOrder - b.Value.GroupUIOrder);
                     foreach (var group in groups)
                     {
                         //パネル内を完成させる
@@ -114,7 +114,7 @@ namespace PiViLity.Forms
                         //親カテゴリがある場合は親カテゴリに追加
                         if (group.Key.Parent != null)
                         {
-                            if( groups.Find(g => g.Key.Type == group.Key.Parent) is var parentGroup)
+                            if (groups.Find(g => g.Key.Type == group.Key.Parent) is var parentGroup)
                             {
 
                                 parentGroup.Value.Nodes.Add(group.Value);
@@ -176,7 +176,8 @@ namespace PiViLity.Forms
             DialogResult = DialogResult.OK;
 
             PluginManager.Instance.Plugins.ForEach(plugin =>
-                plugin.settings.ForEach(setting => { 
+                plugin.settings.ForEach(setting =>
+                {
                     setting.RaiseChanged(EventArgs.Empty);
                 }
                 )
@@ -192,10 +193,11 @@ namespace PiViLity.Forms
 
         private void Option_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if(DialogResult == DialogResult.Cancel)
+            if (DialogResult == DialogResult.Cancel)
             {
                 CancelOption();
             }
         }
+
     }
 }

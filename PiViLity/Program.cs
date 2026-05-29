@@ -79,6 +79,7 @@ namespace PiViLity
                     Application.SetColorMode(SystemColorMode.Dark);
             }
 
+            //言語設定にょってリソースカルチャー指定
             switch (Option.AppSettings.Instance.AppLanguage)
             {
                 case Option.Language.SystemDefault:
@@ -101,11 +102,15 @@ namespace PiViLity
                     break;
             }
 
+            //サムネイルエンジン初期化
             ThumbnailCache.Create();
             ThumbnailCache.Instance.Initialize(Option.AppSettings.Instance.CacheDb);
 
+            //スレッドプール調整
             ThreadPool.SetMinThreads(32,32);
             ThreadPool.SetMaxThreads(64, 64);
+
+            /////テストコード start
             try
             {
                 using var com = new PiVilityNative.SusiePluginCom();
@@ -116,6 +121,10 @@ namespace PiViLity
             {
                     Debug.WriteLine(e.ToString());
             }
+            /////テストコード end
+
+            SusiePluginManager.Create();
+            SusiePluginManager.Instance.ReloadPlugins();
 
             try
             {
@@ -125,7 +134,7 @@ namespace PiViLity
                 MessageBox.Show(ex.ToString(), "Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            ThumbnailCache.Instance.Terminate();
+            SusiePluginManager.Release();
             ThumbnailCache.Release();
 
             if (appDir != null)
