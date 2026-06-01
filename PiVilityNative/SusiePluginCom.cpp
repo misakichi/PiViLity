@@ -4,6 +4,7 @@
 #include <atlcomcli.h>
 #include "COM/SusiePluginCom_i.h"
 #include "COM/SusiePluginCom_i.c"
+#pragma comment(lib, "Gdi32.lib")
 
 // マネージドラッパーが保持する実装構造体。COMインターフェイスのポインタを保持します。
 struct SusiePluginComImpl
@@ -256,6 +257,65 @@ static bool s_GetPictureCommon(const CComPtr<ISharedMemory>& infoMem, const CCom
 
 	return true;
 }
+
+#pragma unmanaged
+static HBITMAP s_GetPictureCommonCreateBmp(const CComPtr<ISharedMemory>& infoMem, const CComPtr<ISharedMemory>& bmpMem)
+{
+	// ISharedMemoryから名前を取得して、対応するメモリマップドファイルを開くヘルパーです。
+	HRESULT hr = S_OK;
+	BSTR infoNameBstr = NULL;
+	BSTR bmpNameBstr = NULL;
+	HANDLE infoFile = NULL;
+	HANDLE bmpFile = NULL;
+	void* infoMemPtr = nullptr;
+	void* bmpMemPtr = nullptr;
+	HBITMAP ret = NULL;
+	do
+	{
+		if (FAILED(hr = infoMem->GetPathName(&infoNameBstr)))
+			break;
+		if (FAILED(hr = bmpMem->GetPathName(&bmpNameBstr)))
+			break;
+
+		infoFile = OpenFileMappingW(FILE_MAP_READ, FALSE, infoNameBstr);
+		if(infoFile==nullptr)
+			break;
+		bmpFile = OpenFileMappingW(FILE_MAP_READ, FALSE, bmpNameBstr);
+		if(bmpFile==nullptr)
+			break;
+
+		infoMemPtr = MapViewOfFile(infoFile, FILE_MAP_READ, 0, 0, 0);
+		if(infoMemPtr ==nullptr)
+			break;
+		bmpMemPtr = MapViewOfFile(bmpFile, FILE_MAP_READ, 0, 0, 0);
+		if (bmpMemPtr == nullptr)
+			break;
+
+		BITMAPINFO* bmpInfo = (BITMAPINFO*)infoMemPtr;
+		
+		ret = CreateBitmap(bmpInfo->bmiHeader.biWidth, bmpInfo->bmiHeader.biHeight, bmpInfo->bmiHeader.biPlanes, bmpInfo->bmiHeader.biBitCount, bmpMemPtr);
+
+	} while (0);
+
+	if(infoMemPtr)
+		UnmapViewOfFile(infoMemPtr);
+	if (bmpMemPtr)
+		UnmapViewOfFile(bmpMemPtr);
+
+	if (infoFile)
+		CloseHandle(infoFile);
+	if(bmpFile)
+		CloseHandle(bmpFile);
+
+	if(infoNameBstr)
+		SysFreeString(infoNameBstr);
+	if(bmpNameBstr)
+		SysFreeString(bmpNameBstr);
+
+	return (ret);
+}
+#pragma managed
+
 /// <summary>
 /// ファイルから画像データを取得し、共有メモリの名前を元にMemoryMappedFileを開きます。
 /// Calls COM to get shared memory handles and opens them via s_GetPictureCommon.
@@ -274,6 +334,27 @@ bool SusiePluginCom::GetPictureFile(System::String^ filename, [Out] System::IO::
 		throw Marshal::GetExceptionForHR(hr);
 
 	return s_GetPictureCommon(infoMem, bmpMem, info, bmp);
+}
+
+#pragma warning(disable:4642)
+System::Drawing::Bitmap^ SusiePluginCom::GetPictureFileToBmp(System::String^ filename)
+{
+	auto intPtr = Marshal::StringToBSTR(filename);
+	BSTR bstrPath = (BSTR)(intPtr.ToPointer());
+	pin_ptr<BSTR> pin = &bstrPath;
+	CComPtr<ISharedMemory> infoMem;
+	CComPtr<ISharedMemory> bmpMem;
+	HRESULT hr = impl_->com->GetPictureFile(bstrPath, &infoMem, &bmpMem);
+	Marshal::FreeBSTR(intPtr);
+	if (FAILED(hr))
+		throw Marshal::GetExceptionForHR(hr);
+
+	if (auto bmp = s_GetPictureCommonCreateBmp(infoMem, bmpMem))
+	{
+		return System::Drawing::Bitmap::FromHbitmap(System::IntPtr(bmp));
+	}
+
+	return nullptr;
 }
 
 /// <summary>
@@ -295,6 +376,27 @@ bool SusiePluginCom::GetPreviewFile(System::String^ filename, [Out] System::IO::
 
 	return s_GetPictureCommon(infoMem, bmpMem, info, bmp);
 }
+
+System::Drawing::Bitmap^ SusiePluginCom::GetPreviewFileToBmp(System::String^ filename)
+{
+	auto intPtr = Marshal::StringToBSTR(filename);
+	BSTR bstrPath = (BSTR)(intPtr.ToPointer());
+	pin_ptr<BSTR> pin = &bstrPath;
+	CComPtr<ISharedMemory> infoMem;
+	CComPtr<ISharedMemory> bmpMem;
+	HRESULT hr = impl_->com->GetPreviewFile(bstrPath, &infoMem, &bmpMem);
+	Marshal::FreeBSTR(intPtr);
+	if (FAILED(hr))
+		throw Marshal::GetExceptionForHR(hr);
+
+	if (auto bmp = s_GetPictureCommonCreateBmp(infoMem, bmpMem))
+	{
+		return System::Drawing::Bitmap::FromHbitmap((System::IntPtr)(void*)bmp);
+	}
+
+	return nullptr;
+}
+
 
 
 /// <summary>

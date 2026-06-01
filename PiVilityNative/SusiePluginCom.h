@@ -60,9 +60,12 @@ namespace PiVilityNative
 		// Returns picture and info as memory-mapped files accessible by name. Comment: GitHub Copilot
 		bool GetPictureFile(String^ filename, [Out] System::IO::MemoryMappedFiles::MemoryMappedFile^% info, [Out] System::IO::MemoryMappedFiles::MemoryMappedFile^% bmp);
 
+		System::Drawing::Bitmap^ GetPictureFileToBmp(System::String^ filename);
+
 		// プレビュー画像とその情報を共有メモリ経由で取得します。
 		// Retrieves a preview image and its info via shared memory. Comment: GitHub Copilot
 		bool GetPreviewFile(String^ filename, [Out] System::IO::MemoryMappedFiles::MemoryMappedFile^% info, [Out] System::IO::MemoryMappedFiles::MemoryMappedFile^% bmp);
+		System::Drawing::Bitmap^ GetPreviewFileToBmp(System::String^ filename);
 
 		// 画像取得処理の完了をプラグインに通知します。
 		// Signals to the plugin that the caller has finished retrieving picture data. Comment: GitHub Copilot

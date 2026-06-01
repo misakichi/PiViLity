@@ -18,7 +18,7 @@ namespace PiViLity.Reader
 
         public override Image? GetImage()
         {
-            throw new NotImplementedException();
+            return _plugin?.GetImage();
         }
 
         public override Size GetImageSize()
@@ -38,7 +38,16 @@ namespace PiViLity.Reader
 
         public override Image? GetThumbnailImage(Size size)
         {
-            throw new NotImplementedException();
+            var img = _plugin?.GetPreviewImage();
+            if (img == null)
+                return null;
+            var thumbnailDrawRect = GetThumbnailDrawRect(img.Size, size);
+            var thumb = new Bitmap(size.Width, size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (var g = Graphics.FromImage(thumb))
+            {
+                g.DrawImage(img, thumbnailDrawRect);
+            }
+            return thumb;
         }
 
         public override bool IsSupported()

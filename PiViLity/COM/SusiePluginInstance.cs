@@ -39,7 +39,7 @@ namespace PiViLity.COM
                 return false;
 
             var length = new System.IO.FileInfo(Path).Length;
-            byte[] buffer = new byte[length];
+            byte[] buffer = new byte[Math.Min(512,length)];
             using var reader = new FileStream(Path, FileMode.Open, FileAccess.Read);
             Task t = reader.ReadExactlyAsync(buffer).AsTask();
             t.Wait();
@@ -53,7 +53,21 @@ namespace PiViLity.COM
 
         public Image? GetImage()
         {
-            throw new NotImplementedException();
+            if (File.Exists(Path) == false)
+                return null;
+
+            var length = new System.IO.FileInfo(Path).Length;
+
+            return _com.GetPictureFileToBmp(Path);
+        }
+        public Image? GetPreviewImage()
+        {
+            if (File.Exists(Path) == false)
+                return null;
+
+            var length = new System.IO.FileInfo(Path).Length;
+
+            return _com.GetPreviewFileToBmp(Path);
         }
     }
 }
