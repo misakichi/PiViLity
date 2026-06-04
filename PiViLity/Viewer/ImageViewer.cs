@@ -103,6 +103,7 @@ namespace PiViLity.Viewer
 
         }
 
+
         /// <summary>
         /// if directoryFilesDualterator detects file change, this event is called.
         /// reload file if it still exists.

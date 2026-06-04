@@ -43,14 +43,14 @@ namespace PiViLity.COM
 
             if (Path.GetExtension(filepath) is string ext)
             {
-                if (_extensionPluginsMap.TryGetValue(ext.ToLower(), out var plugins))
+                if (_extensionPluginsMap.TryGetValue(ext.ToLower().Replace(".",""), out var plugins))
                 {
                     foreach (var pluginInfo in plugins)
                     {
                         var plugin = new PiVilityNative.SusiePluginCom();
                         if (plugin.Load(pluginInfo.Path))
                         {
-                            return new SusiePluginInstance(plugin, pluginInfo.Path);
+                            return new SusiePluginInstance(plugin, filepath);
                         }
                         plugin.Dispose();
                     }
@@ -86,14 +86,14 @@ namespace PiViLity.COM
                             int infoIdx = 2;
                             while (plugin.GetPluginInfo(infoIdx, out var extStr))
                             {
-                                pluginInfo.extensions.Add(extStr.ToLower());
+                                pluginInfo.extensions.AddRange(extStr.ToLower().Split(';'));
                                 infoIdx += 2;
                             }
 
                             _plugins.Add(pluginInfo);
                             foreach (var ext in pluginInfo.extensions)
                             {
-                                var extOnly = ext.Replace("*","").Replace(".", "").Trim();
+                                var extOnly = ext.Replace("*","").Replace(".","").Trim();
                                 if (_extensionPluginsMap.TryGetValue(extOnly, out var extInfos))
                                 {
                                     extInfos.Add(pluginInfo);

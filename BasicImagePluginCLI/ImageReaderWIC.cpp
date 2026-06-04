@@ -400,6 +400,10 @@ Collections::Generic::List<String^>^ ImageReaderWIC::GetSupportedExtensions()
 	extensions->Add("jpeg");
 	extensions->Add("bmp");
 	extensions->Add("png");
+	//extensions->Add("tif");
+	//extensions->Add("tiff");
+	//extensions->Add("ico");
+	//extensions->Add("gif");
 
 	return extensions;
 }

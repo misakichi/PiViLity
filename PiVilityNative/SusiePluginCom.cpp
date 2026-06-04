@@ -293,7 +293,10 @@ static HBITMAP s_GetPictureCommonCreateBmp(const CComPtr<ISharedMemory>& infoMem
 
 		BITMAPINFO* bmpInfo = (BITMAPINFO*)infoMemPtr;
 		
-		ret = CreateBitmap(bmpInfo->bmiHeader.biWidth, bmpInfo->bmiHeader.biHeight, bmpInfo->bmiHeader.biPlanes, bmpInfo->bmiHeader.biBitCount, bmpMemPtr);
+		void* dstBits;
+		ret = CreateDIBSection(NULL, bmpInfo, DIB_RGB_COLORS, &dstBits, NULL, 0);
+		memcpy(dstBits, bmpMemPtr, bmpInfo->bmiHeader.biSizeImage);
+		//ret = CreateBitmap(bmpInfo->bmiHeader.biWidth, bmpInfo->bmiHeader.biHeight, bmpInfo->bmiHeader.biPlanes, bmpInfo->bmiHeader.biBitCount, bmpMemPtr);
 
 	} while (0);
 

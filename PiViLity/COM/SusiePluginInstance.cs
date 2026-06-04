@@ -58,7 +58,15 @@ namespace PiViLity.COM
 
             var length = new System.IO.FileInfo(Path).Length;
 
-            return _com.GetPictureFileToBmp(Path);
+            try
+            {
+                return _com.GetPictureFileToBmp(Path);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SusiePluginInstance.GetImage Error {ex}");
+                return null;
+            }
         }
         public Image? GetPreviewImage()
         {
@@ -67,7 +75,15 @@ namespace PiViLity.COM
 
             var length = new System.IO.FileInfo(Path).Length;
 
-            return _com.GetPreviewFileToBmp(Path);
+            try
+            {
+                return _com.GetPreviewFileToBmp(Path);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SusiePluginInstance.GetPreviewImage Error {ex}");
+                return null;
+            }
         }
     }
 }

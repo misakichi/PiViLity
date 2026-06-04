@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using Windows.Networking.Connectivity;
 
 namespace PiViLityCore.Plugin
 {
@@ -67,8 +68,8 @@ namespace PiViLityCore.Plugin
     {
         public required Assembly assembly;
         public required IModuleInformation information;
-        public List<Type> imageReaders = new();
-        public List<Type> propertyReaders = new();
+        public List<Type> readers = new();
+        //public List<Type> propertyReaders = new();
         public List<ISetting> settings = new();
         public List<SettingInstanceInfo> settingInstanceInfo = new();
         public string Name = "";
@@ -205,6 +206,47 @@ namespace PiViLityCore.Plugin
             }
         }
 
+        public void AnalyzeReader()
+        {
+            _imageReadersFromExtension.Clear();
+
+            foreach (var pluginInfomation in _plugins)
+            {
+                foreach (var readerType in pluginInfomation.readers)
+                {
+                    ///リーダーサポート状況
+                    var tmpInstance = Activator.CreateInstance(readerType);
+                    var reader = tmpInstance as IReader;
+                    ReaderType readerTypeFlag = ReaderType.None;
+                    readerTypeFlag |= tmpInstance is IImageReader ? ReaderType.Image : ReaderType.None;
+                    readerTypeFlag |= tmpInstance is IPropertyReader ? ReaderType.Property : ReaderType.None;
+                    if (reader != null)
+                    {
+
+                        ReaderInfo readerInfo = new()
+                        {
+                            ReaderClass = readerType,
+                            SupportRead = readerTypeFlag,
+                            Plugin = pluginInfomation
+                        };
+                        foreach (var ext in reader.GetSupportedExtensions())
+                        {
+                            var lowerExt = "." + ext.ToLower();
+                            if (_imageReadersFromExtension.TryGetValue(lowerExt, out List<ReaderInfo>? ReaderInformationList))
+                            {
+                                ReaderInformationList.Add(readerInfo);
+                            }
+                            else
+                            {
+                                _imageReadersFromExtension.Add(lowerExt, new List<ReaderInfo>() { readerInfo });
+                                supportImageExtensions.Add(lowerExt);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public void AnalyzeAssembly(Assembly assembly)
         {
             PluginInformation? information = null;
@@ -237,41 +279,9 @@ namespace PiViLityCore.Plugin
                         continue;
 
                     var interfaces = type.GetInterfaces();
-                    if (interfaces.Any(t => t == typeof(IImageReader)) ||
-                        interfaces.Any(t => t == typeof(IPropertyReader)))
-                    {
-
-                        ///リーダーサポート状況
-                        var tmpInstance = Activator.CreateInstance(type);
-                        var reader = tmpInstance as IReader;
-                        ReaderType readerType = ReaderType.None;
-                        readerType |= tmpInstance is IImageReader ? ReaderType.Image : ReaderType.None;
-                        readerType |= tmpInstance is IPropertyReader ? ReaderType.Property : ReaderType.None;
-                        if (reader != null)
-                        {
-                            information.imageReaders.Add(type);
-
-                            ReaderInfo readerInfo = new()
-                            {
-                                ReaderClass = type,
-                                SupportRead = readerType,
-                                Plugin = information
-                            };
-                            foreach (var ext in reader.GetSupportedExtensions())
-                            {
-                                var lowerExt = "." + ext.ToLower();
-                                if (_imageReadersFromExtension.TryGetValue(lowerExt, out List<ReaderInfo>? ReaderInformationList))
-                                {
-                                    ReaderInformationList.Add(readerInfo);
-                                }
-                                else
-                                {
-                                    _imageReadersFromExtension.Add(lowerExt, new List<ReaderInfo>() { readerInfo });
-                                    supportImageExtensions.Add(lowerExt);
-                                }
-                            }
-                        }
-                    }
+                    //readerはあとでね
+                    if (interfaces.Any(t => t == typeof(IImageReader)) || interfaces.Any(t => t == typeof(IPropertyReader)))
+                        information.readers.Add(type);
 
                     //画像ビューアー
                     if (interfaces.Any(t => t == typeof(IImageViewer)) && Activator.CreateInstance(type) is IImageViewer imageViewer)

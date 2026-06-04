@@ -9,7 +9,7 @@ namespace PiViLityCore.Shell
     /// <summary>
     /// 指定したディレクトリ内のファイルを列挙（移動）するクラス
     /// </summary>
-    public class DirectoryFilesDualterator
+    public class DirectoryFilesDualterator : IDisposable
     {
         private FileSystemWatcher? _fsw;
         private string _path = string.Empty;
@@ -19,6 +19,11 @@ namespace PiViLityCore.Shell
 
         public event EventHandler<FileChangeEventArgs>? FileChanged;
 
+
+        public void Dispose()
+        {
+            _fsw?.Dispose();
+        }
         /// <summary>
         /// 対象のディレクトリ
         /// </summary>
@@ -31,6 +36,9 @@ namespace PiViLityCore.Shell
                 if (_path != value)
                 {
                     _path = "";
+
+                    if (value == "")
+                        return;
 
                     var dirpath = File.Exists(value) ? System.IO.Path.GetDirectoryName(value) : value;
                     if (Directory.Exists(dirpath) == false)

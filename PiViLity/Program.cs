@@ -42,7 +42,7 @@ namespace PiViLity
             Application.SetCompatibleTextRenderingDefault(false);
             Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             System.Diagnostics.Debug.Assert(Application.RenderWithVisualStyles);
-            System.Diagnostics.Debug.WriteLine($"IsDark={PiVilityNative.SystemColor.IsDarkMode()} BackGround={PiVilityNative.SystemColor.BackGroundColor().ToString()}");
+            System.Diagnostics.Debug.WriteLine($"IsDark={PiViLityCore.Windows.SystemColor.IsDarkMode()} BackGround={PiViLityCore.Windows.SystemColor.BackGroundColor().ToString()}");
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
@@ -126,11 +126,16 @@ namespace PiViLity
             SusiePluginManager.Create();
             SusiePluginManager.Instance.ReloadPlugins();
 
+
+            //susieのことを思い、サポートチェックは後で行う
+            PluginManager.Instance.AnalyzeReader();
+
             try
             {
                 Application.Run(new Forms.MainForm());
             }catch (Exception ex)
             {
+                Debug.WriteLine(ex.ToString());
                 MessageBox.Show(ex.ToString(), "Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
