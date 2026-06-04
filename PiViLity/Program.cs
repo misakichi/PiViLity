@@ -42,7 +42,7 @@ namespace PiViLity
             Application.SetCompatibleTextRenderingDefault(false);
             Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             System.Diagnostics.Debug.Assert(Application.RenderWithVisualStyles);
-            System.Diagnostics.Debug.WriteLine($"IsDark={PiVilityNative.SystemColor.IsDarkMode()} BackGround={PiVilityNative.SystemColor.BackGroundColor().ToString()}");
+            System.Diagnostics.Debug.WriteLine($"IsDark={PiViLityCore.Windows.SystemColor.IsDarkMode()} BackGround={PiViLityCore.Windows.SystemColor.BackGroundColor().ToString()}");
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.

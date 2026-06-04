@@ -40,7 +40,10 @@ namespace PiViLity.Reader
         {
             var img = _plugin?.GetPreviewImage();
             if (img == null)
+                img = GetImage();
+            if (img == null)
                 return null;
+
             var thumbnailDrawRect = GetThumbnailDrawRect(img.Size, size);
             var thumb = new Bitmap(size.Width, size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             using (var g = Graphics.FromImage(thumb))
