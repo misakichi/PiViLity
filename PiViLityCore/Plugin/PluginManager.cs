@@ -406,28 +406,34 @@ namespace PiViLityCore.Plugin
             var settings = _plugins.SelectMany(p => p.settings);
             IEnumerable<ISetting> targetSettings = settings;
 
-            Utf8JsonReader jsonReader = new(buffer, new JsonReaderOptions() { });
+            try
             {
-                jsonReader.Read();
-                while (jsonReader.Read())
+                Utf8JsonReader jsonReader = new(buffer, new JsonReaderOptions() { });
                 {
-                    if (jsonReader.TokenType == JsonTokenType.StartObject)
+                    jsonReader.Read();
+                    while (jsonReader.Read())
                     {
-                        PiViLityCore.Option.SerializeHelper.readSettingValue(ref jsonReader, targetSettings);
-                    }
-                    else if (jsonReader.TokenType == JsonTokenType.EndObject)
-                    {
-                    }
-                    else if (jsonReader.TokenType == JsonTokenType.PropertyName)
-                    {
-                        var catName = jsonReader.GetString();
-                        targetSettings = settings.Where(s => s.CategoryName == catName);
-                    }
-                    else
-                    {
-                        
+                        if (jsonReader.TokenType == JsonTokenType.StartObject)
+                        {
+                            PiViLityCore.Option.SerializeHelper.readSettingValue(ref jsonReader, targetSettings);
+                        }
+                        else if (jsonReader.TokenType == JsonTokenType.EndObject)
+                        {
+                        }
+                        else if (jsonReader.TokenType == JsonTokenType.PropertyName)
+                        {
+                            var catName = jsonReader.GetString();
+                            targetSettings = settings.Where(s => s.CategoryName == catName);
+                        }
+                        else
+                        {
+
+                        }
                     }
                 }
+            }
+            catch (System.Exception)
+            {
             }
         }
 

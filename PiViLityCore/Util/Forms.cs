@@ -1,5 +1,6 @@
 ﻿using PiViLityCore.Plugin;
 using PiViLityCore.Shell;
+using PiViLityPlugin.Difinition;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -121,11 +122,11 @@ namespace PiViLityCore.Util
             });
         }
 
-        public static bool ShowFileOnView(string path, ContainerControl? parent)
+        public static Form? CreateFileOnView(string path)
         {
             if (string.IsNullOrEmpty(path))
-                return false;
-            bool ret = false;
+                return null;
+            Form? ret = null;
             var fileInfo = new System.IO.FileInfo(path);
             if (fileInfo.Exists)
             {
@@ -135,19 +136,27 @@ namespace PiViLityCore.Util
                     var viewer = new PiViLityCore.Forms.ViewerForm();
                     if (viewer.LoadFile(path))
                     {
-                        viewer.Owner = parent?.ParentForm;
-                        viewer.StartPosition = FormStartPosition.CenterParent;
-                        viewer.Show(parent?.ParentForm);
-                        ret = true;
+                        ret = viewer;
                     }
                     else
                     {
                         viewer.Dispose();
-
                     }
                 }
             }
             return ret;
         }
+        public static Form? ShowFileOnView(string path, ContainerControl? parent)
+        {
+            if (CreateFileOnView(path) is Form form)
+            {
+                form.Owner = parent?.ParentForm;
+                form.StartPosition = FormStartPosition.CenterParent;
+                form.Show(parent?.ParentForm);
+                return form;
+            }
+            return null;
+        }
+
     }
 }

@@ -1,7 +1,38 @@
 ﻿using PiViLity.Option;
+using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 
 namespace PiViLity.COM
 {
+    internal class SusiePluginThreadJob : IDisposable
+    {
+        public SusiePluginThreadJob(Action action, bool fromIsTask)
+        {
+            taskCompletionSource_ = new();
+            action_ = action;
+        }
+
+        public void Run()
+        {
+            action_();
+            taskCompletionSource_?.SetResult();
+            eventWaitHandle.Set();
+        }
+        public void Wait()
+        {
+            eventWaitHandle.WaitOne();
+        }
+        public Task? Task() => taskCompletionSource_?.Task;
+
+        public void Dispose()
+        {
+            eventWaitHandle.Dispose();
+        }
+
+        System.Threading.Tasks.TaskCompletionSource? taskCompletionSource_ = null;
+        Action action_;
+        EventWaitHandle eventWaitHandle = new(false,EventResetMode.ManualReset);
+    }
     internal class SusiePluginManager : PiViLityPlugin.Singleton<SusiePluginManager>
     {
         class SusiePluginInfo
@@ -22,12 +53,72 @@ namespace PiViLity.COM
 
         public EventHandler PluginLoaded = delegate { };
 
+
+        [DllImport("ole32.dll")]
+        private static extern int CoInitializeEx(IntPtr pvReserved, uint dwCoInit);
+
+        [DllImport("ole32.dll")]
+        private static extern void CoUninitialize();
+
+        private const uint COINIT_APARTMENTTHREADED = 0x2;   // STA
+        private const uint COINIT_MULTITHREADED = 0x0;   // MTA
+        public void ComThread()
+        {
+            CoInitializeEx(0, COINIT_MULTITHREADED);
+
+
+            while (!exitThread_)
+            {
+                if (!jobSemaphire_.Wait(TimeSpan.FromSeconds(10)))
+                    continue;
+
+                if (jobs_.TryDequeue(out var job))
+                {
+                    job.Run();
+                }
+            }
+
+            CoUninitialize();
+            jobShutdownSemaphire_.Release();
+        }
+
+        public void AddJob(SusiePluginThreadJob job)
+        {
+            jobs_.Enqueue(job);
+            jobSemaphire_.Release();
+        }
+        public SusiePluginThreadJob AddJobSync(Action action)
+        {
+            var job = new SusiePluginThreadJob(action, false);
+            AddJob(job);
+            return job;
+        }
+
+        ConcurrentQueue<SusiePluginThreadJob> jobs_ = new();
+        SemaphoreSlim jobSemaphire_ = new(0);
+        SemaphoreSlim jobShutdownSemaphire_ = new(0);
+        bool exitThread_ = false;
+        List<Thread> comThreads_ = new();
+
         public SusiePluginManager()
         {
             SusiePluginSettings.Instance.Changed += OptionChanged;
+
+            int logicalCores = Environment.ProcessorCount;
+            for (int i = 0; i < logicalCores; i++)
+            {
+                var thread = new Thread(ComThread);
+                thread.Start();
+                thread.Name = $"SusiePluginThread{i}";
+                comThreads_.Add(thread);
+            }
+
         }
         public override void Dispose()
         {
+            exitThread_ = true;
+            jobSemaphire_.Release(comThreads_.Count);
+            jobShutdownSemaphire_.Wait(comThreads_.Count);
             UnloadPlugins();
         }
 
@@ -110,8 +201,9 @@ namespace PiViLity.COM
                             plugin?.Dispose();
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        PiViLityCore.Global.WarningLog(e.ToString());
                     }
                 }
             }

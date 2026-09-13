@@ -2,6 +2,7 @@
 using PiViLityCore.Plugin;
 using PiViLityPlugin.Difinition;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
@@ -20,6 +21,8 @@ namespace PiViLity
         public bool Terminate() => true;
     }
 
+
+
     internal static class App
     {
         public static ResourceManager AppResource { get; } = new ResourceManager("PiViLity.Resource", Assembly.GetExecutingAssembly());
@@ -32,11 +35,9 @@ namespace PiViLity
             return isLight != 0;
         }
 
-        /// <summary lang="ja">
-        ///  The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+        static string? AppDir = null;
+
+        static void Initialize()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -53,14 +54,14 @@ namespace PiViLity
 
             PluginManager.Create();
 
-            var appDir = Path.GetDirectoryName(Application.ExecutablePath);
-            if (appDir != null)
+            AppDir = Path.GetDirectoryName(Application.ExecutablePath);
+            if (AppDir != null)
             {
                 var executingAssembly = Assembly.GetExecutingAssembly();
                 PluginManager.Instance.AnalyzeAssembly(executingAssembly);
                 PluginManager.Instance.AnalyzeAssembly(typeof(PiViLityCore.Global).Assembly);
-                PluginManager.Instance.LoadPlugins(appDir + "\\Plugins");
-                PluginManager.Instance.LoadSettings(appDir + "\\settings.json");
+                PluginManager.Instance.LoadPlugins(AppDir + "\\Plugins");
+                PluginManager.Instance.LoadSettings(AppDir + "\\settings.json");
             }
 
             var isSystemColor = Option.AppSettings.Instance.Theme == Option.ColorTheme.SystemDefault;
@@ -101,6 +102,39 @@ namespace PiViLity
                     }
                     break;
             }
+        }
+
+        /// <summary lang="ja">
+        ///  The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main(string[] _args)
+        {
+            Initialize();
+
+            List<string> openFiles = new(); ;
+            for (int i = 0; i < _args.Length; i++)
+            {
+                if (_args[i].Equals("/f", StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    if (i < _args.Length)
+                    {
+                        var path = _args[i];
+                        path = path.Trim([' ', '\t', '\"']);
+                        if (File.Exists(path))
+                        {
+                            openFiles.Add(path);
+                        }
+                        else
+                        {
+                            i--;
+                        }
+                    }
+                }
+            }
+
+
 
             //サムネイルエンジン初期化
             ThumbnailCache.Create();
@@ -110,19 +144,7 @@ namespace PiViLity
             ThreadPool.SetMinThreads(32,32);
             ThreadPool.SetMaxThreads(64, 64);
 
-            /////テストコード start
-            try
-            {
-                using var com = new PiVilityNative.SusiePluginCom();
-                com.Load(Path.GetDirectoryName(Application.ExecutablePath) + "\\ifjpeg.spi");
-                Debug.WriteLine(com.ToString());
-            }
-            catch(Exception e) 
-            {
-                    Debug.WriteLine(e.ToString());
-            }
-            /////テストコード end
-
+            //SusiePlugin関連の初期化
             SusiePluginManager.Create();
             SusiePluginManager.Instance.ReloadPlugins();
 
@@ -132,19 +154,28 @@ namespace PiViLity
 
             try
             {
-                Application.Run(new Forms.MainForm());
+                if (openFiles.Count == 0)
+                {
+                    Application.Run(new Forms.MainForm());
+                }
+                else
+                {
+                    Application.Run(new MultiVieweriFormApplicationContext(openFiles));
+                }
+
             }catch (Exception ex)
             {
                 Debug.WriteLine(ex.ToString());
                 MessageBox.Show(ex.ToString(), "Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
+            //SusiePlugin関連終了
             SusiePluginManager.Release();
             ThumbnailCache.Release();
 
-            if (appDir != null)
+            if (AppDir != null)
             {
-                PluginManager.Instance.SaveSettings(appDir + "\\settings.json");
+                PluginManager.Instance.SaveSettings(AppDir + "\\settings.json");
             }
 
             PluginManager.Release();

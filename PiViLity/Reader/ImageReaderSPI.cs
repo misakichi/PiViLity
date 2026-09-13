@@ -1,4 +1,5 @@
-﻿using PiViLity.COM;
+﻿using ABI.System;
+using PiViLity.COM;
 using PiViLity.Option;
 using PiVilityNative;
 using System;
@@ -18,59 +19,107 @@ namespace PiViLity.Reader
 
         public override Image? GetImage()
         {
-            return _plugin?.GetImage();
+            return CallSpiThreadProcClass(() => _plugin?.GetImage());
         }
 
         public override Size GetImageSize()
         {
-            SPIPictureInfo? info = _plugin?.GetFileInfo();
-            if (info  != null)
+            return CallSpiThreadProc(() =>
             {
-                return new Size(info.width, info.height);
-            }
-            return new Size();
+                SPIPictureInfo? info = _plugin?.GetFileInfo();
+                if (info != null)
+                {
+                    return new Size(info.width, info.height);
+                }
+                return new Size();
+            });
         }
 
         public override List<string> GetSupportedExtensions()
         {
-            return SusiePluginManager.Instance.Extensions.ToList();
+            return CallSpiThreadProcClass(()=>SusiePluginManager.Instance.Extensions.ToList()) ?? [];
         }
 
         public override Image? GetThumbnailImage(Size size)
         {
-            var img = _plugin?.GetPreviewImage();
-            if (img == null)
-                img = GetImage();
-            if (img == null)
-                return null;
-
-            var thumbnailDrawRect = GetThumbnailDrawRect(img.Size, size);
-            var thumb = new Bitmap(size.Width, size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            using (var g = Graphics.FromImage(thumb))
+            return CallSpiThreadProcClass(() =>
             {
-                g.DrawImage(img, thumbnailDrawRect);
-            }
-            return thumb;
+                var img = _plugin?.GetPreviewImage();
+                if (img == null)
+                    img = GetImage();
+                if (img == null)
+                    return (Image?)null;
+
+                var thumbnailDrawRect = GetThumbnailDrawRect(img.Size, size);
+                var thumb = new Bitmap(size.Width, size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                using (var g = Graphics.FromImage(thumb))
+                {
+                    g.DrawImage(img, thumbnailDrawRect);
+                }
+                return thumb;
+            });
         }
 
         public override bool IsSupported()
         {
-            return _plugin?.IsSupport() ?? false;
+            return CallSpiThreadProc(()=> _plugin?.IsSupport()) ?? false;
         }
 
         public override bool SetFilePath(string filePath)
+        {            
+            return CallSpiThreadProc(
+                () =>
+                {
+                    _plugin = SusiePluginManager.Instance.GetPluginInstanceForFile(filePath);
+                    if (_plugin != null)
+                    {
+                        _path = filePath;
+                        return true;
+                    }
+                    return false;
+                }
+                );;
+        }
+
+        private T CallSpiThreadProc<T>(Func<T> func) where T : struct
         {
-            _plugin = SusiePluginManager.Instance.GetPluginInstanceForFile(filePath);
-            if (_plugin != null)
-            {
-                _path = filePath;
-                return true;
-            }
-            return false;
+#if true
+            return func();
+#else
+            T ret = default;
+            using var job = SusiePluginManager.Instance.AddJobSync(() => ret = func());
+            job.Wait();
+            return ret;
+#endif
+        }
+        private T? CallSpiThreadProc<T>(Func<T?> func) where T : struct
+        {
+#if true
+            return func();
+#else
+          return func();
+            T? ret = null;
+            using var job = SusiePluginManager.Instance.AddJobSync(() => ret = func());
+            job.Wait();
+            return ret;
+#endif
+        }
+
+        private T? CallSpiThreadProcClass<T>(Func<T?> func) where T : class
+        {
+#if true
+            return func();
+#else
+        return func();
+            T? ret = null;
+            using var job = SusiePluginManager.Instance.AddJobSync(() => ret = func());
+            job.Wait();
+            return ret;
+#endif
         }
 
         private SusiePluginInstance? _plugin;
         private string _path = "";
     }
 #endif
-}
+        }

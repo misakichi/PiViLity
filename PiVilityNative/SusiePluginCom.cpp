@@ -28,7 +28,7 @@ SusiePluginCom::SusiePluginCom()
 {
 	impl_ = new SusiePluginComImpl();
     // COMラッパーのインスタンスを作成します。失敗時はマネージド例外を投げます。
-	auto ret = CoCreateInstance(CLSID_SusieWrapper, nullptr, CLCTX_SERVER_TYPE, IID_PPV_ARGS(&impl_->com));
+	auto ret = CoCreateInstance(CLSID_SusieWrapper, nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&impl_->com));
 	if (FAILED(ret))
 		throw Marshal::GetExceptionForHR(ret);
 }

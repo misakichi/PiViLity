@@ -242,7 +242,7 @@ namespace PiViLity.Forms
 
 
             //レイアウトファイルがあれば復元する
-            if (System.IO.File.Exists(AppSettings.Instance.DockLayoutFile))
+            if (AppSettings.Instance.TvLvTabPages.Count>0 && System.IO.File.Exists(AppSettings.Instance.DockLayoutFile))
             {
                 dockPanel.LoadFromXml(AppSettings.Instance.DockLayoutFile, new DeserializeDockContent(s =>
                 {
@@ -252,6 +252,10 @@ namespace PiViLity.Forms
                         if (tab != null)
                         {
                             return tab.Item2.FileListContent;
+                        }
+                        else
+                        {
+                            return null;
                         }
                     }
                     else if (s == "FileListAddContent")
@@ -494,7 +498,7 @@ namespace PiViLity.Forms
         {
             if (item.Item.IsFile)
             {
-                if (PiViLityCore.Util.Forms.ShowFileOnView(item.Item.Path, this))
+                if (PiViLityCore.Util.Forms.ShowFileOnView(item.Item.Path, this) != null)
                 {
                     item.Default = false;
                 }
