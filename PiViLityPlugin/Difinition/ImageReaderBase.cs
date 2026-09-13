@@ -19,8 +19,8 @@ namespace PiViLityPlugin.Difinition
         public virtual Image? GetPreviewImage()=> GetImage();
 
         public abstract Size GetImageSize();
-        public abstract List<string> GetSupportedExtensions();
-        public abstract Image? GetThumbnailImage(Size size);
+        public abstract IEnumerable<string> GetSupportedExtensions();
+        public virtual Image? GetThumbnailImage(Size size) => GetThumbnailImageHelper(size);
         public abstract bool IsSupported();
         public abstract bool SetFilePath(string filePath);
 
@@ -61,6 +61,23 @@ namespace PiViLityPlugin.Difinition
                 return new(x, y, newWidth, newHeight);
             }
             return new(new Point(0,0), thumbnailSize);
+        }
+
+        protected Image? GetThumbnailImageHelper(Size thumbnailSize)
+        {
+            var image = GetImage();
+            if (image is null)
+                return null;
+
+            var size = image.Size;
+            var thumbnailDrawRect = GetThumbnailDrawRect(size, thumbnailSize);
+            var thumb = new Bitmap(size.Width, size.Height, image.PixelFormat);
+            using (var g = Graphics.FromImage(thumb))
+            {
+                g.DrawImage(image, thumbnailDrawRect);
+            }
+            return thumb;
+
         }
     }
 }

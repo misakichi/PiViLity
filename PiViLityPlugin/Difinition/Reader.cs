@@ -12,7 +12,7 @@ namespace PiViLityPlugin.Difinition
         /// このプラグインがサポートする拡張子を返します。
         /// </summary>
         /// <returns></returns>
-        public List<string> GetSupportedExtensions();
+        public IEnumerable<string> GetSupportedExtensions();
 
         /// <summary>
         /// このプラグインが指定したファイルをサポートするかどうかを返します。

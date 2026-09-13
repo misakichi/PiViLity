@@ -8,6 +8,7 @@
     },
     "PiViLity with Native": {
       "commandName": "Project",
+      "commandLineArgs": "/F \"D:\\写真？\\Damask01_diffuse01.tga\"",
       "nativeDebugging": true
     }
   }

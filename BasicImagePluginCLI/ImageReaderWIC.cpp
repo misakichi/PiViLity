@@ -214,7 +214,9 @@ namespace BasicImagePluginCLI
                 }
             }
             return nullptr;
-        }       HBITMAP GetThumbnailImageGdi(int rqWidth, int rqHeight)
+        }
+		
+		HBITMAP GetThumbnailImageGdi(int rqWidth, int rqHeight)
         {
             return GetThumbnailImageGdi(rqWidth, rqHeight, rqWidth, rqHeight, 0, 0);
             //auto bmp = getThumbanailBmp(rqWidth, rqHeight);
@@ -393,7 +395,7 @@ ImageReaderWIC::!ImageReaderWIC()
 /// 当リーダークラスがサポートする画像ファイルの拡張子リストを取得します。
 /// </summary>
 /// <returns></returns>
-Collections::Generic::List<String^>^ ImageReaderWIC::GetSupportedExtensions()
+Collections::Generic::IEnumerable<String^>^ ImageReaderWIC::GetSupportedExtensions()
 {
 	auto extensions = gcnew System::Collections::Generic::List<System::String^>();
 	extensions->Add("jpg");

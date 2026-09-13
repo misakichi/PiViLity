@@ -3,19 +3,19 @@ using namespace PiViLityPlugin::Difinition;
 using namespace System;
 using namespace System::Collections::Generic;
 
+
 namespace BasicImagePluginCLI
 {
-	class ImageReaderWICNativeImpl;
-
-	public ref class ImageReaderWIC : public ImageReaderBase, public IPropertyReader
+	struct TgaImage;
+	public ref class ImageReaderTGA : public ImageReaderBase, public IPropertyReader
 	{
 	private:
 		String^ filePath_ = "";
 
 	public:
-		ImageReaderWIC();
-		~ImageReaderWIC() override;
-		!ImageReaderWIC();
+		ImageReaderTGA();
+		~ImageReaderTGA() override;
+		!ImageReaderTGA();
 
 
 		IEnumerable<String^>^ GetSupportedExtensions() override;
@@ -31,13 +31,14 @@ namespace BasicImagePluginCLI
 
 		Drawing::Image^ GetImage() override;
 
-		Drawing::Image^ GetThumbnailImage(Drawing::Size size) override;
-
 		System::Drawing::Size GetImageSize() override;
 
-		ImageReaderWICNativeImpl* nativeImpl_ = nullptr;
-
 		virtual List<PiViLityPlugin::Difinition::Property^>^ ReadProperties();
+
+
+	private:
+		void ReleaseTga();
+		TgaImage* tga_ = nullptr;
 
 	}; // class ImageReaderJpeg
 

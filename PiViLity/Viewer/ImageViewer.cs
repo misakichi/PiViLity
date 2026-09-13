@@ -204,12 +204,25 @@ namespace PiViLity.Viewer
             if (_selectRect != Rectangle.Empty)
             {
                 //選択範囲の描画
-                var rc = new Rectangle(
-                    (int)(_selectRect.X * _drawScale) + _drawOffset.X,
-                    (int)(_selectRect.Y * _drawScale) + _drawOffset.Y,
+                Rectangle rc;
+                if (ViewMode == ViewModeStyle.AutoScale)
+                {
+                    rc = new Rectangle(
+                    (int)((_selectRect.X * _drawScale + _drawOffset.X)),
+                    (int)((_selectRect.Y * _drawScale + _drawOffset.Y)),
                     (int)(_selectRect.Width * _drawScale),
                     (int)(_selectRect.Height * _drawScale)
                 );
+                }
+                else
+                {
+                    rc = new Rectangle(
+                    (int)((_selectRect.X - _drawOffset.X) * _drawScale),
+                    (int)((_selectRect.Y - _drawOffset.Y) * _drawScale),
+                    (int)(_selectRect.Width * _drawScale),
+                    (int)(_selectRect.Height * _drawScale)
+                );
+                }
 
                 //選択範囲以外を半透明で塗りつぶす
                 using (var path = new GraphicsPath())
@@ -423,21 +436,33 @@ namespace PiViLity.Viewer
                 var nowPt = _picImage.PointToScreen(e.Location);
                 var offsetX = nowPt.X - startScreen.X;
                 var offsetY = nowPt.Y - startScreen.Y;
-                var dx = _dragStartDrawOffset.X - offsetX;
-                var dy = _dragStartDrawOffset.Y - offsetY;
+                var dx = (int)(_dragStartDrawOffset.X - offsetX / _drawScale);
+                var dy = (int)(_dragStartDrawOffset.Y - offsetY / _drawScale);
                 _disableDraw = true;
                 SetScroll(_hscroll, dx);
                 SetScroll(_vscroll, dy);
                 _disableDraw = false;
+                _picImage.Invalidate();
 
             }
             else if (_dragMode == DragMode.Select)
             {
 #if true
-                var sx = (int)((Math.Min(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
-                var sy = (int)((Math.Min(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
-                var ex = (int)((Math.Max(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
-                var ey = (int)((Math.Max(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
+                int sx, sy, ex, ey;
+                if (ViewMode == ViewModeStyle.AutoScale)
+                {
+                    sx = (int)((Math.Min(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
+                    sy = (int)((Math.Min(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
+                    ex = (int)((Math.Max(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
+                    ey = (int)((Math.Max(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
+                }
+                else
+                {
+                    sx = (int)(Math.Min(_dragStartPosition.X, e.Location.X) / _drawScale) + _drawOffset.X;
+                    sy = (int)(Math.Min(_dragStartPosition.Y, e.Location.Y) / _drawScale) + _drawOffset.Y;
+                    ex = (int)(Math.Max(_dragStartPosition.X, e.Location.X) / _drawScale) + _drawOffset.X;
+                    ey = (int)(Math.Max(_dragStartPosition.Y, e.Location.Y) / _drawScale) + _drawOffset.Y;
+                }
                 sx = Math.Clamp(sx, 0, _viewImage?.Width - 1 ?? 0);
                 ex = Math.Clamp(ex, 0, _viewImage?.Width - 1 ?? 0);
                 sy = Math.Clamp(sy, 0, _viewImage?.Height - 1 ?? 0);

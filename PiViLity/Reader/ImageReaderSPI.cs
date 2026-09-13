@@ -35,7 +35,7 @@ namespace PiViLity.Reader
             });
         }
 
-        public override List<string> GetSupportedExtensions()
+        public override IEnumerable<string> GetSupportedExtensions()
         {
             return CallSpiThreadProcClass(()=>SusiePluginManager.Instance.Extensions.ToList()) ?? [];
         }
