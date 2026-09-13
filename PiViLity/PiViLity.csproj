@@ -10,7 +10,7 @@
     <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <SelfContained>false</SelfContained>
-    <VersionPrefix>0.0.6</VersionPrefix>
+    <VersionPrefix>0.0.7</VersionPrefix>
     <VersionSuffix>Dev</VersionSuffix>
     <AssemblyName>PiViLity</AssemblyName>
     <Authors>misakichi kaminagare(yu kitajima)</Authors>
@@ -94,10 +94,8 @@
   <ItemGroup>
     <PackageReference Include="DockPanelSuite" Version="3.1.1" />
     <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.1.1" />
-    <PackageReference Include="MetadataExtractor" Version="2.8.1" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.8" />
     <PackageReference Include="SQLitePCLRaw.bundle_winsqlite3" Version="2.1.11" />
-    <PackageReference Include="stdole" Version="17.14.40260" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

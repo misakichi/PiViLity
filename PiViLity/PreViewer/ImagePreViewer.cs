@@ -2,7 +2,6 @@
 using PiViLityCore.Plugin;
 using PiViLityCore.Shell;
 using PiViLityPlugin.Difinition;
-using Sharpen;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
