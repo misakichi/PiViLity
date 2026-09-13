@@ -2,7 +2,7 @@
   "profiles": {
     "PiViLity": {
       "commandName": "Project",
-      "commandLineArgs": "/F \"D:\\写真？\\DSC_0108.JPG\"\r\n/F \"D:\\写真？\\DSC_0108.JPG\"",
+      "commandLineArgs": "/F \"D:\\写真？\\DSC_0108.JPG\"",
       "hotReloadEnabled": true,
       "nativeDebugging": false
     },

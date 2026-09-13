@@ -25,7 +25,7 @@ namespace PiViLity.Viewer
     /// 画像ビューワー
     /// </summary>
     public partial class ImageViewer :
-        Panel,
+        UserControl,
         IImageViewer,
         IShortcutCommandSupport
     {
@@ -57,12 +57,26 @@ namespace PiViLity.Viewer
 
         Brush? _backGroundBrush = null;
 
+        int DrawWidth => (int?)(_viewImage?.Width * _drawScale) ?? 0;
+        int DrawHeight => (int?)(_viewImage?.Height * _drawScale) ?? 0;
+        int DrawSrcWidth => (int?)(_viewImage?.Width / _drawScale) ?? 0;
+        int DrawSrcHeight => (int?)(_viewImage?.Height / _drawScale) ?? 0;
+        bool EnableHScroll => DrawWidth > _picImage.Width && ViewMode != ViewModeStyle.AutoScale;
+        bool EnableVScroll => DrawHeight > _picImage.Height && ViewMode != ViewModeStyle.AutoScale;
+
+        System.Windows.Forms.Timer _visibleDisableTimer = new();
+        Point _previousMouseMoveLocation = new();
+        bool _disableDraw = false;
+        const int ScrollViewMargin = 16;
+
+
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public ImageViewer()
         {
+            _visibleDisableTimer.Tick += _visibleDisableTimer_Tick;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ImageViewer));
             byte[]? back = resources.GetObject("DefaultBackGround") as byte[];
             if (back != null)
@@ -86,8 +100,7 @@ namespace PiViLity.Viewer
             directoryFilesDualterator.FilterExtensions = PluginManager.Instance.SupportImageExtensions.ToArray();
             directoryFilesDualterator.FileChanged += DirectoryFilesDualterator_FileChanged;
 
-            picImage.Dock = DockStyle.Fill;
-            picImage.Paint += picImage_Paint;
+            _picImage.Paint += _picImage_Paint;
 
             //register shortcut keys
             ShortCutTriggers.Add(new ShortcutTrigger() { Key = Keys.Oemplus, MethodName = "ZoomIn" });
@@ -112,7 +125,7 @@ namespace PiViLity.Viewer
         /// <param name="e"></param>
         private void DirectoryFilesDualterator_FileChanged(object? sender, FileChangeEventArgs e)
         {
-            if(File.Exists(e.FullPath))
+            if (File.Exists(e.FullPath))
             {
                 LoadFile(e.FullPath);
             }
@@ -123,19 +136,23 @@ namespace PiViLity.Viewer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void picImage_Paint(object? sender, PaintEventArgs e)
+        private void _picImage_Paint(object? sender, PaintEventArgs e)
         {
-
-            //センタリング要求がある場合はスクロール量を中央に合わせる
-            if (_requestCentering)
+            if (_disableDraw)
             {
-                var pt = new Point(Math.Max(0, (picImage.Width - pnlContainer.Width) / 2), Math.Max(0, (picImage.Height - pnlContainer.Height) / 2));
-                pnlContainer.AutoScrollPosition = pt;
-                _requestCentering = false;
+                return;
             }
-           
+
             if (_viewImage != null)
             {
+                //センタリング要求がある場合はスクロール量を中央に合わせる
+                if (_requestCentering)
+                {
+                    var pt = new Point(Math.Max(0, (_viewImage.Width - _picImage.Width) / 2), Math.Max(0, (_viewImage.Height - _picImage.Height) / 2));
+                    _drawOffset = pt;
+                    _requestCentering = false;
+                }
+
                 Rectangle dst = Rectangle.Empty;
                 Rectangle src = Rectangle.Empty;
                 //自動スケールの場合ウィンドウに合わせる
@@ -154,12 +171,12 @@ namespace PiViLity.Viewer
                     e.Graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
                     e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
                     e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
-                    var x = e.ClipRectangle.Left - 8;
-                    var y = e.ClipRectangle.Top - 8;
-                    var w = e.ClipRectangle.Width + 16;
-                    var h = e.ClipRectangle.Height + 16;
-                    dst = new Rectangle(x,y,w,h);
-                    src = new Rectangle((int)(x / _drawScale), (int)(y / _drawScale), (int)(w / _drawScale), (int)(h / _drawScale));
+                    var x = _drawOffset.X;
+                    var y = _drawOffset.Y;
+                    var w = _picImage.Width / _drawScale;
+                    var h = _picImage.Height / _drawScale;
+                    dst = new Rectangle(0, 0, _picImage.Width, _picImage.Height);
+                    src = new Rectangle(x, y, (int)w, (int)h);
 
                 }
                 if (dst != Rectangle.Empty && src != Rectangle.Empty)
@@ -167,7 +184,7 @@ namespace PiViLity.Viewer
                     //範囲に合わせて背景色と画像を描画
                     int y = dst.Y - _drawOffset.Y;
                     int x = dst.X - _drawOffset.X;
-                    x = (x & (~31)) + _drawOffset.X; 
+                    x = (x & (~31)) + _drawOffset.X;
                     y = (y & (~31)) + _drawOffset.Y;
 
                     Rectangle baseRectangle = new Rectangle(x, y, dst.Width, dst.Height);
@@ -200,7 +217,7 @@ namespace PiViLity.Viewer
                     path.AddRectangle(e.ClipRectangle);
                     path.AddRectangle(rc);
                     path.FillMode = FillMode.Alternate;
-                    using(var brush = new SolidBrush(Color.FromArgb(128, Color.Black)))
+                    using (var brush = new SolidBrush(Color.FromArgb(128, Color.Black)))
                     {
                         e.Graphics.FillPath(brush, path);
                     }
@@ -251,23 +268,49 @@ namespace PiViLity.Viewer
             if (_viewImage == null)
                 return;
 
+            SetScrollVisible(1000);
+
+            if (EnableHScroll)
+            {
+                var viewPixels = _picImage.Width / _drawScale;
+                _hscroll.Minimum = 0;
+                _hscroll.Maximum = int.Max(0, _viewImage.Width);
+                _hscroll.SmallChange = 1;
+                _hscroll.LargeChange = (int)float.Ceiling(viewPixels);
+            }
+            else
+            {
+                _hscroll.Minimum = 0;
+                _hscroll.Maximum = 0;
+            }
+            if (EnableVScroll)
+            {
+                var viewPixels = _picImage.Height / _drawScale;
+                _vscroll.Minimum = 0;
+                _vscroll.Maximum = int.Max(0, _viewImage.Height);
+                _vscroll.SmallChange = 1;
+                _vscroll.LargeChange = (int)float.Ceiling(viewPixels);
+            }
+            else
+            {
+                _vscroll.Minimum = 0;
+                _vscroll.Maximum = 0;
+            }
+
             //自動スケールの場合はウィンドウに合わせてスケールを調整
             if (ViewMode == ViewModeStyle.AutoScale)
             {
                 tbtnFitSize.Checked = true;
-                pnlContainer.AutoScroll = false;
-                picImage.Dock = DockStyle.Fill;
-                pnlContainer.PerformLayout();
-                _drawScale = (float)picImage.Width / _viewImage.Width;
-                if (_viewImage.Height * _drawScale <= picImage.Height)
+                _drawScale = (float)_picImage.Width / _viewImage.Width;
+                if (_viewImage.Height * _drawScale <= _picImage.Height)
                 {
                     _drawOffset.X = 0;
-                    _drawOffset.Y = (int)((picImage.Height - _viewImage.Height * _drawScale) / 2);
+                    _drawOffset.Y = (int)((_picImage.Height - _viewImage.Height * _drawScale) / 2);
                 }
                 else
                 {
-                    _drawScale = (float)picImage.Height / _viewImage.Height;
-                    _drawOffset.X = (int)((picImage.Width - _viewImage.Width * _drawScale) / 2);
+                    _drawScale = (float)_picImage.Height / _viewImage.Height;
+                    _drawOffset.X = (int)((_picImage.Width - _viewImage.Width * _drawScale) / 2);
                     _drawOffset.Y = 0;
                 }
             }
@@ -275,20 +318,11 @@ namespace PiViLity.Viewer
             else
             {
                 tbtnFitSize.Checked = false;
-                if (picImage.Dock != DockStyle.None)
-                {
-                    picImage.Dock = DockStyle.None;
-                    picImage.Left = 0;
-                    picImage.Top = 0;
-                }
-                pnlContainer.AutoScroll = true;
-                picImage.Width = (int)(_drawScale * _viewImage.Width);
-                picImage.Height = (int)(_drawScale * _viewImage.Height);
                 _drawOffset.X = 0;
                 _drawOffset.Y = 0;
             }
             setStatus();
-            picImage.Refresh();
+            _picImage.Refresh();
         }
 
         /// <summary>
@@ -312,13 +346,13 @@ namespace PiViLity.Viewer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void picImage_SizeChanged(object? sender, EventArgs e)
+        private void _picImage_SizeChanged(object? sender, EventArgs e)
         {
             adjustAutoScale();
         }
 
         Point _dragStartPosition = Point.Empty;
-        Point _dragStartScrollPosition = Point.Empty;
+        Point _dragStartDrawOffset = Point.Empty;
         Rectangle _selectRect = Rectangle.Empty;
         enum DragMode
         {
@@ -335,15 +369,15 @@ namespace PiViLity.Viewer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void picImage_MouseDown(object? sender, MouseEventArgs e)
+        private void _picImage_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
                 if (ViewMode == ViewModeStyle.Fixed)
                 {
                     _dragStartPosition = e.Location;
-                    _dragStartScrollPosition = pnlContainer.AutoScrollPosition;
-                    picImage.Capture = true;
+                    _dragStartDrawOffset = new(_hscroll.Value, _vscroll.Value);
+                    _picImage.Capture = true;
                     _dragMode = DragMode.Scroll;
                 }
             }
@@ -353,52 +387,62 @@ namespace PiViLity.Viewer
                 if (_selectRect != Rectangle.Empty)
                 {
                     _selectRect = Rectangle.Empty;
-                    picImage.Refresh();
+                    _picImage.Refresh();
                 }
 
                 _dragStartPosition = e.Location;
-                picImage.Capture = true;
+                _picImage.Capture = true;
                 _dragMode = DragMode.Select;
             }
         }
 
-        private void picImage_MouseUp(object? sender, MouseEventArgs e)
-        {
-            if (_dragMode!=DragMode.None)
-            {
-                picImage.Capture = false;
-                _dragMode = DragMode.None;
-                _dragStartPosition = Point.Empty;
-                _dragStartScrollPosition = Point.Empty;
-            }
-        }
-        private void picImage_MouseMove(object? sender, MouseEventArgs e)
+        private void _picImage_MouseUp(object? sender, MouseEventArgs e)
         {
             if (_dragMode != DragMode.None)
             {
-                if(_dragMode == DragMode.Scroll)
-                {
-                    var startScreen = picImage.PointToScreen(_dragStartPosition);
-                    var nowPt = picImage.PointToScreen(e.Location);
-                    var offsetX = nowPt.X - startScreen.X;
-                    var offsetY = nowPt.Y - startScreen.Y;
-                    var dx = -_dragStartScrollPosition.X - offsetX;
-                    var dy = -_dragStartScrollPosition.Y - offsetY;
+                _picImage.Capture = false;
+                _dragMode = DragMode.None;
+                _dragStartPosition = Point.Empty;
+            }
+        }
+        private void _picImage_MouseMove(object? sender, MouseEventArgs e)
+        {
+            if (_previousMouseMoveLocation == e.Location)
+                return;
+            _previousMouseMoveLocation = e.Location;
 
-                    pnlContainer.AutoScrollPosition = new Point(dx, dy);
-                }
-                else if(_dragMode == DragMode.Select)
-                {
+            if (_dragMode == DragMode.None)
+            {
+                var vv = e.X + ScrollViewMargin + _vscrollPanel.Width > Width && EnableVScroll;
+                var hv = e.Y + ScrollViewMargin + _hscrollPanel.Height > Height && EnableHScroll;
+                SetScrollVisible(_hscrollPanel.Visible | hv, _vscrollPanel.Visible | vv, 1000);
+            }
+            else if (_dragMode == DragMode.Scroll)
+            {
+                var startScreen = _picImage.PointToScreen(_dragStartPosition);
+                var nowPt = _picImage.PointToScreen(e.Location);
+                var offsetX = nowPt.X - startScreen.X;
+                var offsetY = nowPt.Y - startScreen.Y;
+                var dx = _dragStartDrawOffset.X - offsetX;
+                var dy = _dragStartDrawOffset.Y - offsetY;
+                _disableDraw = true;
+                SetScroll(_hscroll, dx);
+                SetScroll(_vscroll, dy);
+                _disableDraw = false;
+
+            }
+            else if (_dragMode == DragMode.Select)
+            {
 #if true
-                    var sx = (int)((Math.Min(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
-                    var sy = (int)((Math.Min(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
-                    var ex = (int)((Math.Max(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
-                    var ey = (int)((Math.Max(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
-                    sx = Math.Clamp(sx, 0, _viewImage?.Width - 1 ?? 0);
-                    ex = Math.Clamp(ex, 0, _viewImage?.Width - 1 ?? 0);
-                    sy = Math.Clamp(sy, 0, _viewImage?.Height - 1 ?? 0);
-                    ey = Math.Clamp(ey, 0, _viewImage?.Height - 1 ?? 0);
-                    _selectRect = new Rectangle(sx, sy, ex-sx, ey-sy);
+                var sx = (int)((Math.Min(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
+                var sy = (int)((Math.Min(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
+                var ex = (int)((Math.Max(_dragStartPosition.X, e.Location.X) - _drawOffset.X) / _drawScale);
+                var ey = (int)((Math.Max(_dragStartPosition.Y, e.Location.Y) - _drawOffset.Y) / _drawScale);
+                sx = Math.Clamp(sx, 0, _viewImage?.Width - 1 ?? 0);
+                ex = Math.Clamp(ex, 0, _viewImage?.Width - 1 ?? 0);
+                sy = Math.Clamp(sy, 0, _viewImage?.Height - 1 ?? 0);
+                ey = Math.Clamp(ey, 0, _viewImage?.Height - 1 ?? 0);
+                _selectRect = new Rectangle(sx, sy, ex - sx, ey - sy);
 #else
                     var x = Math.Clamp((int)(Math.Min(_dragStartPosition.X, e.Location.X) / _drawScale) - _drawOffset.X, 0, _viewImage?.Width - 1 ?? 0);
                     var y = Math.Clamp((int)(Math.Min(_dragStartPosition.Y, e.Location.Y) / _drawScale) - _drawOffset.Y, 0, _viewImage?.Height - 1 ?? 0);
@@ -406,14 +450,13 @@ namespace PiViLity.Viewer
                     var h = Math.Clamp((int)(Math.Abs(_dragStartPosition.Y - e.Location.Y) / _drawScale), 0, Math.Max(0, (_viewImage?.Height ?? 1) - y));
                     _selectRect = new Rectangle(x,y,w,h);
 #endif
-                    picImage.Refresh();
-                }
+                _picImage.Refresh();
             }
 
             //マウスが動いたことによる情報更新
             var px = (int)(e.X / _drawScale - _drawOffset.X);
             var py = (int)(e.Y / _drawScale - _drawOffset.Y);
-            px = Math.Clamp(px, 0, _viewImage?.Width -1 ?? 0);
+            px = Math.Clamp(px, 0, _viewImage?.Width - 1 ?? 0);
             py = Math.Clamp(py, 0, _viewImage?.Height - 1 ?? 0);
             string pixelInfo;
             if (_viewImage is Bitmap bmp)
@@ -427,35 +470,82 @@ namespace PiViLity.Viewer
                 pixelInfo = $"({px}, {py})";
                 tlblPixelColor.ForeColor = Color.Black;
             }
-            if(_selectRect != Rectangle.Empty)
+            if (_selectRect != Rectangle.Empty)
             {
                 pixelInfo += $" Select:{_selectRect.Width}x{_selectRect.Height} ({_selectRect.X}, {_selectRect.Y})-({_selectRect.Right}, {_selectRect.Bottom})";
             }
             tlblPixelInfo.Text = pixelInfo;
         }
 
-        private void picImage_MouseHWheel(object? sender, MouseEventArgs e)
+        private void _picImage_MouseLeave(object sender, EventArgs e)
         {
-            var delta = e.Delta / 120;
-            pnlContainer.AutoScrollPosition = new Point(
-                -pnlContainer.AutoScrollPosition.X + delta * pnlContainer.Width / 10,
-                -pnlContainer.AutoScrollPosition.Y
-                );
         }
 
+        private void SetScrollVisible(int invisibleTimer) => SetScrollVisible(EnableHScroll, EnableVScroll, invisibleTimer);
+        private void SetScrollVisible(bool visible, int invisibleTimer) => SetScrollVisible(visible, visible, invisibleTimer);
+        private void SetScrollVisible(bool hvisible, bool vvisible, int invisibleTimer)
+        {
+
+            _visibleDisableTimer.Stop();
+            _vscrollPanel.Visible = vvisible;
+            _hscrollPanel.Visible = hvisible;
+            if (invisibleTimer > 0)
+            {
+                _visibleDisableTimer.Interval = invisibleTimer;
+                _visibleDisableTimer.Start();
+            }
+        }
+        private void _visibleDisableTimer_Tick(object? sender, EventArgs e)
+        {
+            _vscrollPanel.Visible = false;
+            _hscrollPanel.Visible = false;
+            _visibleDisableTimer.Stop();
+        }
+
+
+        private void SetScroll(System.Windows.Forms.ScrollBar scroll, int value)
+        {
+            int newValue = int.Clamp(value, scroll.Minimum, scroll.Maximum - scroll.LargeChange + 1);
+            if (newValue != scroll.Value)
+            {
+                scroll.Value = newValue;
+            }
+        }
+
+        private void AddScroll(System.Windows.Forms.ScrollBar scroll, int moveValue)
+        {
+            SetScroll(scroll, scroll.Value + moveValue);
+        }
+        private void _picImage_MouseHWheel(object? sender, MouseEventArgs e)
+        {
+            if (_viewImage is not null)
+            {
+                var delta = e.Delta / 120;
+                AddScroll(_hscroll, delta * DrawSrcWidth / 10);
+            }
+        }
+        private void _picImage_MouseVWheel(object? sender, MouseEventArgs e)
+        {
+            if (_viewImage is not null)
+            {
+                var delta = e.Delta / 120;
+                AddScroll(_vscroll, -delta * DrawSrcHeight / 10);
+            }
+        }
         private void tbtnFitSize_Click(object? sender, EventArgs e)
         {
             ViewMode = ViewModeStyle.AutoScale;
             adjustAutoScale();
         }
-        
+
         /// <summary>
         /// ズーム制御
         /// </summary>
         /// <param name="move"></param>
         private void zoomControl(int move)
         {
-            float[] zoomTable  = [0.1f, 0.333f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 4.0f, 8.0f];
+
+            float[] zoomTable = [0.1f, 0.333f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 4.0f, 8.0f];
             var scale = _drawScale;
             if (move < 0)
             {
@@ -463,7 +553,7 @@ namespace PiViLity.Viewer
                 {
                     if (zoomTable[i] >= _drawScale)
                     {
-                        scale = zoomTable[Math.Max(0,i+move)];
+                        scale = zoomTable[Math.Max(0, i + move)];
                         break;
                     }
                 }
@@ -474,19 +564,21 @@ namespace PiViLity.Viewer
                 {
                     if (zoomTable[i] <= _drawScale)
                     {
-                        scale = zoomTable[Math.Min(zoomTable.Length-1,i+move)];
+                        scale = zoomTable[Math.Min(zoomTable.Length - 1, i + move)];
                         break;
                     }
                 }
             }
-            if(scale != _drawScale)
+            if (scale != _drawScale)
             {
                 _drawScale = scale;
                 adjustAutoScale();
             }
+
+
         }
 
-        [ShortCutCommand(NameText="ZoomIn)")]
+        [ShortCutCommand(NameText = "ZoomIn)")]
         void ZoomIn()
         {
             ViewMode = ViewModeStyle.Fixed;
@@ -578,5 +670,31 @@ namespace PiViLity.Viewer
         /// </summary>
         /// <returns></returns>
         public bool LastFile() => directoryFilesDualterator.MoveLast();
+
+        private void _hscroll_ValueChanged(object sender, EventArgs e)
+        {
+            _drawOffset = new(_hscroll.Value, _drawOffset.Y);
+            if (!_disableDraw)
+                _picImage.Invalidate();
+            SetScrollVisible(true, _vscrollPanel.Visible, 1000);
+        }
+
+        private void _vscroll_ValueChanged(object sender, EventArgs e)
+        {
+            _drawOffset = new(_drawOffset.X, _vscroll.Value);
+            if (!_disableDraw)
+                _picImage.Invalidate();
+            SetScrollVisible(_hscrollPanel.Visible, true, 1000);
+        }
+
+        private void _scroll_MouseEnter(object sender, EventArgs e)
+        {
+            SetScrollVisible(_hscrollPanel.Visible, _vscrollPanel.Visible, 0);
+        }
+
+        private void _scroll_MouseLeave(object sender, EventArgs e)
+        {
+            SetScrollVisible(_hscrollPanel.Visible, _vscrollPanel.Visible, 1000);
+        }
     }
 }
